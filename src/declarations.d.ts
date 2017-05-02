@@ -1,3 +1,4 @@
+declare module "react-virtualized-select";
 declare module "react-toastify"
 declare module "react-spinjs"
 

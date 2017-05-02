@@ -4,9 +4,9 @@ export interface IBrainArea {
     structureId: number;
 }
 
-export function displayBrainArea(brainArea: IBrainArea, missing = "(none)") {
+export function displayBrainArea(brainArea: IBrainArea, missing = "(none)", append = "") {
     if (!brainArea || !brainArea.name) {
         return missing;
     }
-    return brainArea.name;
+    return brainArea.name + append;
 }

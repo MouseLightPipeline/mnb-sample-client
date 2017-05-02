@@ -8,11 +8,11 @@ function displayInjection(injection) {
     return brainArea_1.displayBrainArea(injection.brainArea, "(no brain area)");
 }
 exports.displayInjection = displayInjection;
-function displayInjections(injections, missing = "(none)") {
+function displayInjections(injections, separator = ", ", missing = "(none)") {
     if (!injections || injections.length === 0) {
         return missing;
     }
-    return injections.reduce((prev, curr) => prev + `${displayInjection(curr)}, `, "").slice(0, -2);
+    return injections.reduce((prev, curr) => prev + `${displayInjection(curr)}${separator}`, "").slice(0, -separator.length);
 }
 exports.displayInjections = displayInjections;
 //# sourceMappingURL=injection.js.map

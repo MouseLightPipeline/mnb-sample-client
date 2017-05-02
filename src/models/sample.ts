@@ -1,6 +1,8 @@
+import {IRegistrationTransform} from "./registrationTransform";
 const moment = require("moment");
 
 import {IInjection} from "./injection";
+
 import {displayMouseStrain, IMouseStrain} from "./mouseStrain";
 
 export interface ISample {
@@ -12,6 +14,31 @@ export interface ISample {
     sampleDate: Date;
     mouseStrain: IMouseStrain;
     injections: IInjection[];
+    activeRegistrationTransform: IRegistrationTransform;
+    registrationTransforms: IRegistrationTransform[];
+    createdAt: number;
+    updatedAt: number;
+}
+
+
+export interface ISampleInput {
+    id: string;
+    idNumber?: number;
+    animalId?: string;
+    tag?: string;
+    comment?: string;
+    sampleDate?: Date;
+    mouseStrainId?: string;
+    activeRegistrationTransformId?: string;
+}
+
+export interface IMutatedSample {
+    sample: ISample;
+    error: Error;
+}
+
+export interface IMutateSampleData {
+    updateSample: IMutatedSample
 }
 
 export function displaySample(sample: ISample) {
@@ -19,7 +46,7 @@ export function displaySample(sample: ISample) {
         return "(none)";
     }
 
-    return `${("000"+sample.idNumber).slice(-4)} (${moment(sample.sampleDate).format("YYYY-MM-DD")})`
+    return `${("000" + sample.idNumber).slice(-4)} (${moment(sample.sampleDate).format("YYYY-MM-DD")})`
 }
 
 export function displaySampleAnimal(sample: ISample) {

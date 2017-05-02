@@ -1,5 +1,7 @@
 import * as React from "react";
-import {Modal, Button, Checkbox} from "react-bootstrap";
+import {Modal, Button} from "react-bootstrap";
+import {Samples} from "./Samples";
+import {Neurons} from "./Neurons";
 
 interface ISettingsDialogProps {
     show: boolean
@@ -68,6 +70,8 @@ export class Content extends React.Component<IContentProps, IContentState> {
                                 shouldClearCreateContentsAfterUpload={this.state.shouldClearCreateContentsAfterUpload}
                                 onHide={() => this.props.onSettingsClose()}
                                 onChangeClearContents={(b: boolean) => this.onChangeClearContents(b)}/>
+                <Samples/>
+                <Neurons/>
             </div>
         );
     }

@@ -14,7 +14,7 @@ label {
 }
 
 th {
-    font-weight: 500;
+    font-weight: 700;
 }
 
 .panel-body {
@@ -77,23 +77,6 @@ button.list-group-item-menu.active:focus {
     border-color: #5bc0de;
 }
 
-a.active2 {
-    color: #fff;
-}
-.blue {
-    background-color: #5bc0de;
-    color: white;
-}
-
-.orange {
-    background-color: #e3ae43;
-    color: white;
-}
-
-.inset-group {
-    padding: 0px 60px;
-}
-
 .centered {
     text-align: center;
 }
@@ -113,3 +96,16 @@ hr.partial {
 }
 
 .Select.is-open { position: relative; z-index: 1000; }
+
+.react-datepicker__input-container {
+    width: 100%;
+}
+
+.react-datepicker__input-container .date-picker-input {
+    height: 36px;
+    padding: 8px 12px;
+    font-size: 12px;
+    line-height: 1.5;
+    border-radius: 0;
+    width: 100%;
+}

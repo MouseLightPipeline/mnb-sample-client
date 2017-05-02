@@ -19,10 +19,10 @@ export function displayInjection(injection: IInjection) {
     return displayBrainArea(injection.brainArea, "(no brain area)");
 }
 
-export function displayInjections(injections: IInjection[], missing: string = "(none)") {
+export function displayInjections(injections: IInjection[], separator: string = ", ", missing: string = "(none)") {
     if (!injections || injections.length === 0) {
         return missing;
     }
 
-    return injections.reduce((prev, curr) => prev + `${displayInjection(curr)}, `, "").slice(0, -2);
+    return injections.reduce((prev, curr) => prev + `${displayInjection(curr)}${separator}`, "").slice(0, -separator.length);
 }

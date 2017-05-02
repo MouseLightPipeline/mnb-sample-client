@@ -197,7 +197,7 @@ export class CreateTracing extends React.Component<ICreateSampleProps, ICreateSa
     }
 */
     public render() {
-        const tracingStructures = this.props.tracingStructuresQuery && !this.props.tracingStructuresQuery.loading ? this.props.tracingStructuresQuery.tracingStructures : [];
+        // const tracingStructures = this.props.tracingStructuresQuery && !this.props.tracingStructuresQuery.loading ? this.props.tracingStructuresQuery.tracingStructures : [];
         // const samples = this.props.samplesQuery && !this.props.samplesQuery.loading ? this.props.samplesQuery.samples : [];
 
         return (
@@ -289,6 +289,7 @@ export class CreateTracing extends React.Component<ICreateSampleProps, ICreateSa
             </Row>
         );
     }
+    */
 }
 /*
 const uploadSuccessContent = (output: ISwcUploadOutput) => {
