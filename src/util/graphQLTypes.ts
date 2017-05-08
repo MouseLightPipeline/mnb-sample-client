@@ -1,4 +1,4 @@
-export interface IQueryOuput<T> {
+export interface IQueryOutput<T> {
     totalCount: number;
     items: T[];
 }

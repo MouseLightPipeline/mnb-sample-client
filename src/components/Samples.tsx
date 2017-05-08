@@ -2,6 +2,7 @@ import * as React from "react";
 import {graphql} from 'react-apollo';
 import gql from "graphql-tag";
 import {GraphQLDataProps} from "react-apollo/lib/graphql";
+import {Grid, Row, Col} from "react-bootstrap";
 
 import {IMouseStrain} from "../models/mouseStrain";
 import {SamplesTable} from "./SamplesTable";
@@ -44,18 +45,27 @@ export class Samples extends React.Component<ICreateTracingProps, ICreateTracing
     }
 
     private onUpdateLimit(limit: number) {
-        this.setState({limit: limit}, null);
+        if (limit !== this.state.limit) {
+            this.setState({offset: 0, limit: limit}, null);
+        }
     }
 
     public render() {
         const mouseStrains = this.props.mouseStrainsQuery && !this.props.mouseStrainsQuery.loading ? this.props.mouseStrainsQuery.mouseStrains : [];
 
         return (
-            <SamplesTable mouseStrains={mouseStrains}
-                          offset={this.state.offset}
-                          limit={this.state.limit}
-                          onUpdateOffsetForPage={page => this.onUpdateOffsetForPage(page)}
-                          onUpdateLimit={limit => this.onUpdateLimit(limit)}/>
+            <Grid fluid>
+                <Row>
+                    <Col xs={12}>
+                        <SamplesTable mouseStrains={mouseStrains}
+                                      offset={this.state.offset}
+                                      limit={this.state.limit}
+                                      onUpdateOffsetForPage={page => this.onUpdateOffsetForPage(page)}
+                                      onUpdateLimit={limit => this.onUpdateLimit(limit)}/>
+                    </Col>
+                </Row>
+            </Grid>
+
         );
     }
 }

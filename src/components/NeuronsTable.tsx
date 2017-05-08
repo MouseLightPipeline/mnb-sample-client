@@ -4,7 +4,7 @@ import {graphql, InjectedGraphQLProps} from 'react-apollo';
 import gql from "graphql-tag";
 
 import {PaginationHeader} from "./util/PaginationHeader";
-import {IQueryOuput} from "../util/graphQLTypes";
+import {IQueryOutput} from "../util/graphQLTypes";
 import {displayNeuronBrainArea, formatSomaLocation, INeuron} from "../models/neuron";
 import {displaySample} from "../models/sample";
 import {truncate} from "../util/string";
@@ -44,7 +44,7 @@ const neuronsQuery = gql`query ($input: NeuronQueryInput) {
 }`;
 
 interface ISamplesGraphQLProps {
-    neurons: IQueryOuput<INeuron>;
+    neurons: IQueryOutput<INeuron>;
 }
 
 interface ISamplesProps extends InjectedGraphQLProps<ISamplesGraphQLProps> {
@@ -93,30 +93,36 @@ export class NeuronsTable extends React.Component<ISamplesProps, ISamplesState> 
         const activePage = rows ? (this.props.offset ? (Math.floor(this.props.offset / this.props.limit) + 1) : 1) : 0;
 
         return (
-            <Panel collapsible defaultExpanded header="Neurons" bsStyle="info"
-                   footer={totalCount >= 0 ? (totalCount > 0 ? `${totalCount} neurons` : "It's a clean slate - create the first neuron!") : ""}
-                   style={{border: "none", borderBottom: "1px solid #ddd", marginBottom: "0px"}}>
-                <PaginationHeader pageCount={pageCount}
-                                  activePage={activePage}
-                                  limit={this.props.limit}
-                                  onUpdateLimitForPage={limit => this.props.onUpdateLimit(limit)}
-                                  onUpdateOffsetForPage={page => this.props.onUpdateOffsetForPage(page)}/>
-                <Table style={{marginBottom: "0px"}}>
-                    <thead>
-                    <tr>
-                        <th>Id</th>
-                        <th>Tag</th>
-                        <th>Sample</th>
-                        <th>Soma Brain Area</th>
-                        <th>Soma Sample Location</th>
-                        <th>Keywords</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {rows}
-                    </tbody>
-                </Table>
-            </Panel>
+            <div className="card">
+                <div className="card-header">
+                    Neurons
+                </div>
+                <div className="card-block">
+                    <PaginationHeader pageCount={pageCount}
+                                      activePage={activePage}
+                                      limit={this.props.limit}
+                                      onUpdateLimitForPage={limit => this.props.onUpdateLimit(limit)}
+                                      onUpdateOffsetForPage={page => this.props.onUpdateOffsetForPage(page)}/>
+                    <Table style={{marginBottom: "0px"}}>
+                        <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Tag</th>
+                            <th>Sample</th>
+                            <th>Soma Brain Area</th>
+                            <th>Soma Sample Location</th>
+                            <th>Keywords</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {rows}
+                        </tbody>
+                    </Table>
+                    <div className="card-footer">
+                        {totalCount >= 0 ? (totalCount > 0 ? `${totalCount} neurons` : "It's a clean slate - create the first neuron!") : ""}
+                    </div>
+                </div>
+            </div>
         );
     }
 }

@@ -14,12 +14,13 @@ import {IMouseStrain} from "../models/mouseStrain";
 import {DynamicDatePicker} from "./util/DynamicDatePicker";
 import {RegistrationTransformSelectSelect} from "./editors/RegistrationTransformSelect";
 import {ICreateMouseStrainDelegate} from "./dialogs/CreateMouseStrain";
-import {ICreateRegistrationTransformDelegate} from "./dialogs/ManageRegistrationTransforms";
+import {ICreateRegistrationTransformDelegate} from "./dialogs/RegistrationTransform/ManageRegistrationTransforms";
+import {FindVisibilityOption, IShareVisibilityOption, ShareVisibilityOptions} from "../util/ShareVisibility";
+import {VisibilitySelect} from "./editors/VisibilitySelect";
 
 const tableRowStyle = {
-    minHeight: "54px",
-    height: "54px",
-    fontSize: "14px"
+    //   minHeight: "54px",
+//    height: "54px"
 };
 
 const tableCellStyle = {
@@ -39,6 +40,7 @@ const UpdateSampleMutation = gql`mutation UpdateSample($sample: SampleInput) {
         tag
         comment
         sampleDate
+        sharing
         mouseStrain {
           id
           name
@@ -69,7 +71,7 @@ const UpdateSampleMutation = gql`mutation UpdateSample($sample: SampleInput) {
 }`;
 
 
-interface ITracingsRowProps {
+interface ISampleRowProps {
     mouseStrains: IMouseStrain[];
     sample: ISample;
 
@@ -80,7 +82,7 @@ interface ITracingsRowProps {
     // deleteSwcTracingMutation?(id: string): Promise<any>;
 }
 
-interface ITracingRowState {
+interface ISampleRowState {
     isEditingId?: boolean;
     isInUpdate?: boolean;
     showConfirmDelete?: boolean;
@@ -93,11 +95,11 @@ interface ITracingRowState {
         })
     })
 })
-export class SampleRow extends React.Component<ITracingsRowProps, ITracingRowState> {
+export class SampleRow extends React.Component<ISampleRowProps, ISampleRowState> {
     private _mouseStrainSelect: MouseStrainSelect;
     private _registrationTransformSelect: RegistrationTransformSelectSelect;
 
-    public constructor(props: ITracingsRowProps) {
+    public constructor(props: ISampleRowProps) {
         super(props);
 
         this.state = {
@@ -153,6 +155,10 @@ export class SampleRow extends React.Component<ITracingsRowProps, ITracingRowSta
 
     private async onAcceptCommentEdit(value: string): Promise<boolean> {
         return this.performUpdate({id: this.props.sample.id, comment: value});
+    }
+
+    private async onAcceptVisibility(visibility: IShareVisibilityOption): Promise<boolean> {
+        return this.performUpdate({id: this.props.sample.id, sharing: visibility.id});
     }
 
     private async onAddRegistrationTransform() {
@@ -298,11 +304,6 @@ export class SampleRow extends React.Component<ITracingsRowProps, ITracingRowSta
              </Modal.Footer>
              </Modal>*/}
                 <td style={idTableCellStyle}>
-                    {!this.state.isEditingId ?
-                        <a style={{paddingRight: "20px"}} onClick={() => this.onShowDeleteConfirmation()}>
-                            <Glyphicon glyph="trash"/>
-                        </a> : null
-                    }
                     <DynamicEditField initialValue={s.idNumber} acceptFunction={v => this.onAcceptIdNumberEdit(v)}
                                       onEditModeChanged={(m: DynamicEditFieldMode) => this.onEditModeChanged(m)}/>
                 </td>
@@ -345,8 +346,21 @@ export class SampleRow extends React.Component<ITracingsRowProps, ITracingRowSta
                                       acceptFunction={v => this.onAcceptCommentEdit(v)}/>
                 </td>
                 <td style={tableCellStyle}>
-                    {moment(s.createdAt).format("YYYY-MM-DD")}<br/>
-                    {moment(s.createdAt).format("hh:mm:ss")}
+                    <VisibilitySelect idName="sample-visibility"
+                                      options={ShareVisibilityOptions}
+                                      selectedOption={FindVisibilityOption(s.sharing)}
+                                      isDeferredEditMode={true}
+                                      isExclusiveEditMode={false}
+                                      onSelect={s => this.onAcceptVisibility(s)}/>
+                </td>
+                <td style={tableCellStyle}>
+                    <div style={{display: "inline-block"}}>
+                        {moment(s.createdAt).format("YYYY-MM-DD")}<br/>
+                        {moment(s.createdAt).format("hh:mm:ss")}
+                    </div>
+                    <a style={{paddingRight: "20px"}} className="pull-right" onClick={() => this.onShowDeleteConfirmation()}>
+                        <Glyphicon glyph="trash"/>
+                    </a>
                 </td>
             </tr>
         );

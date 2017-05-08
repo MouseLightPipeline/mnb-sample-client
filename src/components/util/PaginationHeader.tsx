@@ -92,7 +92,7 @@ export class PaginationHeader extends React.Component<IPaginationHeaderProps, IP
                     <FormGroup bsSize="sm" validationState={this.validationState} style={{
                         display: "inline-block",
                         paddingTop: "20px",
-                        marginLeft: "0px",
+                        marginLeft: "20px",
                         width: "80px"
                     }}>
                         <FormControl type="text"

@@ -12,6 +12,7 @@ export interface ISample {
     tag: string;
     comment: string;
     sampleDate: Date;
+    sharing: number;
     mouseStrain: IMouseStrain;
     injections: IInjection[];
     activeRegistrationTransform: IRegistrationTransform;
@@ -28,6 +29,7 @@ export interface ISampleInput {
     tag?: string;
     comment?: string;
     sampleDate?: Date;
+    sharing?: number;
     mouseStrainId?: string;
     activeRegistrationTransformId?: string;
 }

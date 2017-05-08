@@ -1,4 +1,7 @@
 import * as React from "react";
+import {Grid, Row, Col} from "react-bootstrap";
+
+
 import {NeuronsTable} from "./NeuronsTable";
 
 interface ICreateTracingProps {
@@ -26,10 +29,16 @@ export class Neurons extends React.Component<ICreateTracingProps, ICreateTracing
 
     public render() {
         return (
-            <NeuronsTable offset={this.state.offset}
-                          limit={this.state.limit}
-                          onUpdateOffsetForPage={page => this.onUpdateOffsetForPage(page)}
-                          onUpdateLimit={limit => this.onUpdateLimit(limit)}/>
+            <Grid fluid>
+                <Row>
+                    <Col xs={12}>
+                        <NeuronsTable offset={this.state.offset}
+                                      limit={this.state.limit}
+                                      onUpdateOffsetForPage={page => this.onUpdateOffsetForPage(page)}
+                                      onUpdateLimit={limit => this.onUpdateLimit(limit)}/>
+                    </Col>
+                </Row>
+            </Grid>
         );
     }
 }

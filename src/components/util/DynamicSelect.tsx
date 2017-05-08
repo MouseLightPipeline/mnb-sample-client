@@ -8,7 +8,7 @@ import VirtualizedSelect from "react-virtualized-select"
 import {Option} from "react-select";
 
 interface IDynamicSelectOption {
-    id?: string;
+    id?: string | number;
 }
 
 interface IDynamicSelectProps<T, S> {
@@ -152,7 +152,7 @@ class DynamicSelect<T, S, P> extends React.Component<IDynamicSelectProps<T, S>, 
         }
         return (
             <InputGroup.Button>
-                <Button bsStyle="info" onClick={() => this.props.onRequestAdd()}>
+                <Button bsStyle="info" onClick={() => this.props.onRequestAdd()} style={{borderRadius: 0}}>
                     <Glyphicon glyph="plus"/>
                 </Button>
             </InputGroup.Button>
@@ -162,8 +162,7 @@ class DynamicSelect<T, S, P> extends React.Component<IDynamicSelectProps<T, S>, 
     public render() {
         const style = {
             margin: "0px",
-            display: "inline",
-            height: "100%"
+            display: "inline"
         };
 
         let selection: any = null;
@@ -214,7 +213,7 @@ export class DynamicSingleSelect<T extends IDynamicSelectOption> extends Dynamic
         return option ? this.props.options.filter(s => s.id === option.value)[0] : null;
     }
 
-    protected selectValueForOption(option: T): string {
+    protected selectValueForOption(option: T): string | number {
         return option.id;
     }
 
@@ -241,7 +240,7 @@ export class DynamicMultiSelect<T extends IDynamicSelectOption> extends DynamicS
         });
     }
 
-    protected selectValueForOption(option: T): string {
+    protected selectValueForOption(option: T): string | number {
         return option.id;
     }
 

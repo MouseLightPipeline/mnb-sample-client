@@ -5,7 +5,7 @@ import gql from "graphql-tag";
 import * as update from "immutability-helper";
 
 import {PaginationHeader} from "./util/PaginationHeader";
-import {IQueryOuput} from "../util/graphQLTypes";
+import {IQueryOutput} from "../util/graphQLTypes";
 import {ISample} from "../models/sample";
 import {SampleRow} from "./SampleRow";
 import {IMouseStrain} from "../models/mouseStrain";
@@ -13,7 +13,7 @@ import {CreateMouseStrainDialog, ICreateMouseStrainDelegate} from "./dialogs/Cre
 import {
     ManageRegistrationTransforms,
     ICreateRegistrationTransformDelegate
-} from "./dialogs/ManageRegistrationTransforms";
+} from "./dialogs/RegistrationTransform/ManageRegistrationTransforms";
 import {IRegistrationTransformInput} from "../models/registrationTransform";
 
 const samplesQuery = gql`query sampleTableQuery($input: SampleQueryInput) {
@@ -26,6 +26,7 @@ const samplesQuery = gql`query sampleTableQuery($input: SampleQueryInput) {
         tag
         comment
         sampleDate
+        sharing
         mouseStrain {
           id
           name
@@ -46,6 +47,7 @@ const samplesQuery = gql`query sampleTableQuery($input: SampleQueryInput) {
           id
           location
           name
+          notes
         }
         createdAt
         updatedAt
@@ -84,7 +86,7 @@ const CreateRegistrationTransformMutation = gql`mutation createRegistrationTrans
 }`;
 
 interface ISamplesGraphQLProps {
-    samples: IQueryOuput<ISample>;
+    samples: IQueryOutput<ISample>;
 }
 
 interface ISamplesProps extends InjectedGraphQLProps<ISamplesGraphQLProps> {
@@ -138,16 +140,7 @@ interface ISamplesState {
 @graphql(CreateRegistrationTransformMutation, {
     props: ({mutate}) => ({
         createRegistrationTransform: (registrationTransform: IRegistrationTransformInput) => mutate({
-            variables: {registrationTransform}, /*
-             updateQueries: {
-             MouseStrains: (prev: IMouseStrain[], {mutationResult}: any) => {
-             const response = mutationResult.data.createMouseStrain;
-
-             return update(prev, {
-             mouseStrains: {$push: [response.mouseStrain]}
-             });
-             }
-             }*/
+            variables: {registrationTransform}
         })
     })
 })
@@ -178,18 +171,20 @@ export class SamplesTable extends React.Component<ISamplesProps, ISamplesState> 
             const result = await this.props.createRegistrationTransform(registrationTransform);
 
             if (!result.data.createRegistrationTransform.registrationTransform) {
+                console.log(result.data.createRegistrationTransform.error);
                 // toast.error(updateErrorContent(result.data.updateSample.error), {autoClose: false});
             } else {
                 if (this.state.createRegistrationTransformDelegate) {
                     this.state.createRegistrationTransformDelegate(result.data.createRegistrationTransform.registrationTransform);
                 }
+                this.setState({isCreateRegistrationTransformDialogShown: false});
                 // toast.success(updateSuccessContent(), {autoClose: 3000});
             }
         } catch (error) {
+            console.log(error);
             // toast.error(updateErrorContent(error), {autoClose: false});
         }
 
-        this.setState({isCreateRegistrationTransformDialogShown: false});
     }
 
     private onRequestAddMouseStrain(delegate: ICreateMouseStrainDelegate) {
@@ -216,10 +211,12 @@ export class SamplesTable extends React.Component<ISamplesProps, ISamplesState> 
     }
 
     private renderPanelFooter(totalCount: number, activePage: number, pageCount: number) {
+        const start = this.props.offset + 1;
+        const end = Math.min(this.props.offset + this.props.limit, totalCount);
         return (
             <div>
                 <span>
-                    {totalCount >= 0 ? (totalCount > 0 ? `${totalCount} samples` : "It's a clean slate - create the first sample!") : ""}
+                    {totalCount >= 0 ? (totalCount > 0 ? `Showing ${start} to ${end} of ${totalCount} samples` : "It's a clean slate - create the first sample!") : ""}
                 </span>
                 <span className="pull-right">
                     {`Page ${activePage} of ${pageCount}`}
@@ -246,40 +243,48 @@ export class SamplesTable extends React.Component<ISamplesProps, ISamplesState> 
         const activePage = isDataAvailable ? (this.props.offset ? (Math.floor(this.props.offset / this.props.limit) + 1) : 1) : 0;
 
         return (
-            <Panel collapsible defaultExpanded header="Samples" bsStyle="info"
-                   footer={this.renderPanelFooter(totalCount, activePage, pageCount)}
-                   style={{border: "none", borderBottom: "1px solid #ddd", marginBottom: "0px"}}>
-                <PaginationHeader pageCount={pageCount}
-                                  activePage={activePage}
-                                  limit={this.props.limit}
-                                  onUpdateLimitForPage={limit => this.props.onUpdateLimit(limit)}
-                                  onUpdateOffsetForPage={page => this.props.onUpdateOffsetForPage(page)}/>
-                <Table style={{marginBottom: "0px"}}>
-                    <thead>
-                    <tr>
-                        <th>Id</th>
-                        <th>Tag</th>
-                        <th>Animal Id</th>
-                        <th>Acq. Date</th>
-                        <th>Strain</th>
-                        <th>Registration</th>
-                        <th>Injections</th>
-                        <th>Comment</th>
-                        <th>Created</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {rows}
-                    </tbody>
-                </Table>
-                <CreateMouseStrainDialog show={this.state.isCreateMouseDialogShown}
-                                         onCancel={() => this.setState({isCreateMouseDialogShown: false})}
-                                         onCreate={(m) => this.onMouseStrainCreated(m)}/>
-                <ManageRegistrationTransforms sample={this.state.manageRegistrationsSample}
-                                              show={this.state.isCreateRegistrationTransformDialogShown}
-                                              onCancel={() => this.setState({isCreateRegistrationTransformDialogShown: false})}
-                                              onCreate={(m) => this.onRegistrationTransformCreated(m)}/>
-            </Panel>
+            <div className="card">
+                <div className="card-header">
+                    Samples
+                </div>
+                <div className="card-block">
+                    <PaginationHeader pageCount={pageCount}
+                                      activePage={activePage}
+                                      limit={this.props.limit}
+                                      onUpdateLimitForPage={limit => this.props.onUpdateLimit(limit)}
+                                      onUpdateOffsetForPage={page => this.props.onUpdateOffsetForPage(page)}/>
+                    <Table style={{marginBottom: "0px"}}>
+                        <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Tag</th>
+                            <th>Animal Id</th>
+                            <th>Acq. Date</th>
+                            <th>Strain</th>
+                            <th>Registration</th>
+                            <th>Injections</th>
+                            <th>Comment</th>
+                            <th>Visibility</th>
+                            <th>Created</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {rows}
+                        </tbody>
+                    </Table>
+                    {this.state.isCreateMouseDialogShown ?
+                    <CreateMouseStrainDialog show={this.state.isCreateMouseDialogShown}
+                                             onCancel={() => this.setState({isCreateMouseDialogShown: false})}
+                                             onCreate={(m) => this.onMouseStrainCreated(m)}/> : null}
+                    <ManageRegistrationTransforms sample={this.state.manageRegistrationsSample}
+                                                  show={this.state.isCreateRegistrationTransformDialogShown}
+                                                  onClose={() => this.setState({isCreateRegistrationTransformDialogShown: false})}
+                                                  onCreate={(m) => this.onRegistrationTransformCreated(m)}/>
+                </div>
+                <div className="card-footer">
+                    {this.renderPanelFooter(totalCount, activePage, pageCount)}
+                </div>
+            </div>
         );
     }
 }
