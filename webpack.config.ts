@@ -27,7 +27,8 @@ module.exports = {
                 exclude: /node_modules/,
             },
             {test: /\.css$/, use: 'style-loader'},
-            {test: /\.css$/, use: 'css-loader'}
+            {test: /\.css$/, use: 'css-loader'},
+            {test: /\.(graphql|gql)$/, exclude: /node_modules/, loader: 'graphql-tag/loader'}
         ]
     },
     resolve: {

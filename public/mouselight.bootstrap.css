@@ -467,14 +467,6 @@ body {
     vertical-align: -0.25em
 }
 
-.button.close {
-    color: white;
-}
-
-.close {
-    color: white;
-}
-
 .nav-pills > li.active > a, .nav-pills > li.active > a:focus, .nav-pills > li.active > a:hover {
     outline: none;
 }

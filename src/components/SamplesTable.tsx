@@ -16,73 +16,73 @@ import {
 } from "./dialogs/RegistrationTransform/ManageRegistrationTransforms";
 import {IRegistrationTransformInput} from "../models/registrationTransform";
 
-const samplesQuery = gql`query sampleTableQuery($input: SampleQueryInput) {
-  samples(input: $input) {
-    totalCount
-    items {
-        id
-        idNumber
-        animalId
-        tag
-        comment
-        sampleDate
-        sharing
-        mouseStrain {
-          id
-          name
-        }
-        injections {
-          id
-          brainArea {
+const SamplesQuery = gql`query sampleTableQuery($input: SampleQueryInput) {
+    samples(input: $input) {
+        totalCount
+        items {
             id
-            name
-          }
+            idNumber
+            animalId
+            tag
+            comment
+            sampleDate
+            sharing
+            mouseStrain {
+                id
+                name
+            }
+            injections {
+                id
+                brainArea {
+                    id
+                    name
+                }
+            }
+            activeRegistrationTransform {
+                id
+                location
+                name
+            }
+            registrationTransforms {
+                id
+                location
+                name
+                notes
+            }
+            createdAt
+            updatedAt
         }
-        activeRegistrationTransform {
-          id
-          location
-          name
-        }
-        registrationTransforms {
-          id
-          location
-          name
-          notes
-        }
-        createdAt
-        updatedAt
     }
-  }
 }`;
 
 const CreateMouseStrainMutation = gql`mutation createMouseStrain($mouseStrain: MouseStrainInput) {
-  createMouseStrain(mouseStrain: $mouseStrain) {
-    mouseStrain {
-        id
-        name
-        updatedAt
-        createdAt
+    createMouseStrain(mouseStrain: $mouseStrain) {
+        mouseStrain {
+            id
+            name
+            updatedAt
+            createdAt
+        }
+        error {
+            message
+        }
     }
-    error {
-      message
-    }
-  }
 }`;
 
 const CreateRegistrationTransformMutation = gql`mutation createRegistrationTransform($registrationTransform: RegistrationTransformInput) {
-  createRegistrationTransform(registrationTransform: $registrationTransform) {
-    registrationTransform {
-        id
-        name
-        location
-        notes
-        updatedAt
-        createdAt
+    createRegistrationTransform(registrationTransform: $registrationTransform) {
+        registrationTransform {
+            id
+            name
+            location
+            notes
+            updatedAt
+            createdAt
+        }
+        error {
+            message
+        }
     }
-    error {
-      message
-    }
-  }
 }`;
 
 interface ISamplesGraphQLProps {
@@ -110,7 +110,7 @@ interface ISamplesState {
     createRegistrationTransformDelegate?: ICreateRegistrationTransformDelegate;
 }
 
-@graphql(samplesQuery, {
+@graphql(SamplesQuery, {
     options: ({offset, limit}) => ({
         pollInterval: 5000,
         variables: {
@@ -273,13 +273,14 @@ export class SamplesTable extends React.Component<ISamplesProps, ISamplesState> 
                         </tbody>
                     </Table>
                     {this.state.isCreateMouseDialogShown ?
-                    <CreateMouseStrainDialog show={this.state.isCreateMouseDialogShown}
-                                             onCancel={() => this.setState({isCreateMouseDialogShown: false})}
-                                             onCreate={(m) => this.onMouseStrainCreated(m)}/> : null}
-                    <ManageRegistrationTransforms sample={this.state.manageRegistrationsSample}
-                                                  show={this.state.isCreateRegistrationTransformDialogShown}
-                                                  onClose={() => this.setState({isCreateRegistrationTransformDialogShown: false})}
-                                                  onCreate={(m) => this.onRegistrationTransformCreated(m)}/>
+                        <CreateMouseStrainDialog show={this.state.isCreateMouseDialogShown}
+                                                 onCancel={() => this.setState({isCreateMouseDialogShown: false})}
+                                                 onCreate={(m) => this.onMouseStrainCreated(m)}/> : null}
+                    {this.state.manageRegistrationsSample && this.state.isCreateRegistrationTransformDialogShown ?
+                        <ManageRegistrationTransforms sampleId={this.state.manageRegistrationsSample.id}
+                                                      show={this.state.isCreateRegistrationTransformDialogShown}
+                                                      onClose={() => this.setState({isCreateRegistrationTransformDialogShown: false})}
+                                                      onCreate={(m) => this.onRegistrationTransformCreated(m)}/> : null}
                 </div>
                 <div className="card-footer">
                     {this.renderPanelFooter(totalCount, activePage, pageCount)}

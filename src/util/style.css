@@ -38,8 +38,10 @@
     vertical-align: middle;
 }
 
-.Select.is-open { position: relative; z-index: 1000; }
-
+.Select.is-open {
+    position: relative;
+    z-index: 1000;
+}
 
 .react-datepicker__input-container {
     width: 100%;
@@ -52,4 +54,14 @@
     line-height: 1.5;
     border-radius: 0;
     width: 100%;
+}
+
+.toastify {
+    z-index: 10000;
+}
+
+.toastify--bottom-center {
+    min-width: 600px;
+    margin-left: -300px;
+    margin-bottom: 40px;
 }

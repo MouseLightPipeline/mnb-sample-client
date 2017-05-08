@@ -16,7 +16,7 @@ import {RegistrationTransformSelectSelect} from "./editors/RegistrationTransform
 import {ICreateMouseStrainDelegate} from "./dialogs/CreateMouseStrain";
 import {ICreateRegistrationTransformDelegate} from "./dialogs/RegistrationTransform/ManageRegistrationTransforms";
 import {FindVisibilityOption, IShareVisibilityOption, ShareVisibilityOptions} from "../util/ShareVisibility";
-import {VisibilitySelect} from "./editors/VisibilitySelect";
+import {VisibilitySelect} from "./editors/VisibilitySelect"; import {toastUpdateError, toastUpdateSuccess} from "./util/Toasts";
 
 const tableRowStyle = {
     //   minHeight: "54px",
@@ -114,13 +114,13 @@ export class SampleRow extends React.Component<ISampleRowProps, ISampleRowState>
             const result = await this.props.updateSampleMutation(samplePartial);
 
             if (!result.data.updateSample.sample) {
-                toast.error(updateErrorContent(result.data.updateSample.error), {autoClose: false});
+                toast.error(toastUpdateError(result.data.updateSample.error), {autoClose: false});
             } else {
-                toast.success(updateSuccessContent(), {autoClose: 3000});
+                toast.success(toastUpdateSuccess(), {autoClose: 3000});
             }
             this.setState({isInUpdate: false});
         } catch (error) {
-            toast.error(updateErrorContent(error), {autoClose: false});
+            toast.error(toastUpdateError(error), {autoClose: false});
 
             this.setState({isInUpdate: false});
 
@@ -366,11 +366,3 @@ export class SampleRow extends React.Component<ISampleRowProps, ISampleRowState>
         );
     }
 }
-
-const updateSuccessContent = () => {
-    return (<div><h3>Update successful</h3></div>);
-};
-
-const updateErrorContent = (error: Error) => {
-    return (<div><h3>Update failed</h3>{error ? error.message : "(no additional details available)"}</div>);
-};

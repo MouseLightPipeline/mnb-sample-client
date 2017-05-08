@@ -5,35 +5,18 @@ import {
     Alert
 } from "react-bootstrap";
 import {graphql} from 'react-apollo';
-import gql from "graphql-tag";
 import {InjectedGraphQLProps} from "react-apollo/lib/graphql";
+import {toast} from "react-toastify";
 
 import {IRegistrationTransform, IRegistrationTransformInput} from "../../../models/registrationTransform";
 import {ISample} from "../../../models/sample";
 import {DynamicEditField} from "../../util/DynamicEditField";
-
-const TracingCountQuery = gql`query TracingCounts {
-    tracingCountsForRegistrations {
-      counts {
-        transformId
-        count
-      }
-      error {
-        message
-      }
-    }
-}`;
-
-const DeleteRegistrationTransformMutation = gql`mutation deleteRegistrationTransform($registrationTransform: RegistrationTransformInput) {
-  deleteRegistrationTransform(registrationTransform: $registrationTransform) {
-    registrationTransform {
-        id
-    }
-    error {
-      message
-    }
-  }
-}`;
+import {
+    DeleteRegistrationMutation, SampleForRegistrationsQuery,
+    TracingCountQuery, UpdateRegistrationMutation
+} from "../../../graphql/registrationTransform";
+import {ModalAlert} from "../../util/ModalAlert";
+import {toastUpdateError, toastUpdateSuccess} from "../../util/Toasts";
 
 interface ITracingCountQueryProps {
     tracingCountsForRegistrations: any;
@@ -44,10 +27,16 @@ interface IRemoveTransformProps extends InjectedGraphQLProps<ITracingCountQueryP
 
     onCreate(registrationTransform: IRegistrationTransformInput): void;
     onSelectAddTab(): void;
+
+    updateRegistrationTransform?(registrationTransform: IRegistrationTransformInput, sample: ISample): any;
+    deleteRegistrationTransform?(registrationTransform: IRegistrationTransformInput, sample: ISample): any;
 }
 
 interface IRemoveRegistrationTransformState {
-    registrationTransform?: IRegistrationTransformInput;
+    isDeleteConfirmationShowing?: boolean;
+    transformToDelete?: IRegistrationTransform;
+    lastDeleteError?: string;
+    isInUpdate?: boolean;
 }
 
 @graphql(TracingCountQuery, {
@@ -59,27 +48,108 @@ interface IRemoveRegistrationTransformState {
     }),
     skip: (ownProps) => !ownProps.sample || !ownProps.sample.registrationTransforms
 })
+@graphql(UpdateRegistrationMutation, {
+    props: ({mutate}) => ({
+        updateRegistrationTransform: (registrationTransform: IRegistrationTransformInput, sample: ISample) => mutate({
+            variables: {registrationTransform},
+            refetchQueries: [{
+                query: SampleForRegistrationsQuery,
+                variables: {
+                    id: sample.id
+                }
+            }]
+        })
+    })
+})
+@graphql(DeleteRegistrationMutation, {
+    props: ({mutate}) => ({
+        deleteRegistrationTransform: (registrationTransform: IRegistrationTransformInput, sample: ISample) => mutate({
+            variables: {registrationTransform},
+            refetchQueries: [{
+                query: SampleForRegistrationsQuery,
+                variables: {
+                    id: sample.id
+                }
+            }]
+        })
+    })
+})
 export class EditTransformsPanel extends React.Component<IRemoveTransformProps, IRemoveRegistrationTransformState> {
-    private async onAcceptLocationEdit(value: string): Promise<boolean> {
-        return true;
+    public constructor(props: IRemoveTransformProps) {
+        super(props);
+
+        this.state = {
+            isDeleteConfirmationShowing: false,
+            transformToDelete: null,
+            lastDeleteError: null,
+            isInUpdate: false
+        }
     }
 
-    private async onAcceptNameEdit(value: string): Promise<boolean> {
-        return true;
+    private async onAcceptLocationEdit(transform: IRegistrationTransform, value: string): Promise<boolean> {
+        return this.performUpdate({id: transform.id, location: value});
     }
 
-    private async onAcceptNotesEdit(value: string): Promise<boolean> {
-        return true;
+    private async onAcceptNameEdit(transform: IRegistrationTransform, value: string): Promise<boolean> {
+        return this.performUpdate({id: transform.id, name: value});
     }
 
-    private onShowDeleteConfirmation() {
+    private async onAcceptNotesEdit(transform: IRegistrationTransform, value: string): Promise<boolean> {
+        return this.performUpdate({id: transform.id, notes: value});
+    }
+
+    private async performUpdate(transformPartial: IRegistrationTransformInput): Promise<boolean> {
+        try {
+            this.setState({isInUpdate: true});
+
+            const result = await this.props.updateRegistrationTransform(transformPartial, this.props.sample);
+
+            if (result.data.updateRegistrationTransform.error) {
+                toast.error(toastUpdateError(result.data.updateRegistrationTransform.error), {autoClose: false});
+            } else {
+                toast.success(toastUpdateSuccess(), {autoClose: 3000});
+                return true;
+            }
+        } catch (error) {
+            toast.error(toastUpdateError(error), {autoClose: false});
+        }
+
+        this.setState({isInUpdate: false});
+
+        return false;
+    }
+
+    private async onDeleteRegistration() {
+        if (!this.state.transformToDelete) {
+            console.log("Failed to find transform to delete after confirmation.");
+            return;
+        }
+
+        let deleteError = null;
+
+        try {
+            const out = await this.props.deleteRegistrationTransform({id: this.state.transformToDelete.id}, this.props.sample);
+
+            deleteError = out.data.deleteRegistrationTransform.error ? out.data.deleteRegistrationTransform.error.message : null;
+        } catch (err) {
+            deleteError = err.message;
+        }
+
+        this.onClearDeleteConfirmation(deleteError);
+    }
+
+    private async onShowDeleteConfirmation(transformToDelete: IRegistrationTransform) {
+        this.setState({isDeleteConfirmationShowing: true, transformToDelete});
+    }
+
+    private onClearDeleteConfirmation(deleteError: string = null) {
+        this.setState({isDeleteConfirmationShowing: false, transformToDelete: null, lastDeleteError: deleteError});
     }
 
     private renderAlert() {
-        const haveError = !this.props.data.loading && this.props.data.tracingCountsForRegistrations.error !== null;
+        const haveTransformError = !this.props.data.loading && this.props.data.tracingCountsForRegistrations.error !== null;
 
-        if (haveError) {
-
+        if (haveTransformError) {
             return (
                 <Alert bsStyle="danger">
                     <div>
@@ -88,9 +158,32 @@ export class EditTransformsPanel extends React.Component<IRemoveTransformProps, 
                     </div>
                 </Alert>
             );
-        } else {
+        }
+
+        const haveDeleteError = this.state.lastDeleteError !== null;
+
+        if (haveDeleteError) {
+            return (
+                <Alert bsStyle="danger">
+                    <div>
+                        <h4>Delete Error</h4>
+                        {this.state.lastDeleteError}
+                    </div>
+                </Alert>
+            );
+        }    }
+
+    private renderModalAlert() {
+        if (!this.state.transformToDelete) {
             return null;
         }
+
+        return (
+            <ModalAlert show={this.state.isDeleteConfirmationShowing} style="danger" header="Delete Transform"
+                        message={`Are you sure you want to delete ${this.state.transformToDelete.location} as a transform entry?`}
+                        acknowledgeContent="Delete" canCancel={true} onCancel={() => this.onClearDeleteConfirmation()}
+                        onAcknowledge={() => this.onDeleteRegistration()}/>
+        )
     }
 
     private renderTransforms() {
@@ -106,29 +199,35 @@ export class EditTransformsPanel extends React.Component<IRemoveTransformProps, 
             }, {});
         }
 
+        const activeSampleId = this.props.sample.activeRegistrationTransform ? this.props.sample.activeRegistrationTransform.id : "";
+
         const rows = this.props.sample.registrationTransforms.map(t => {
             const count = counts[t.id] ? counts[t.id] : 0;
+
+            const canDelete = count === 0 && haveData && (activeSampleId !== t.id);
 
             return (
                 <tr key={t.id}>
                     <td>
+                        {t.id === activeSampleId ? <Glyphicon glyph="ok" style={{paddingRight: "10px"}}/> : null}
                         <DynamicEditField initialValue={t.location} placeHolder="(none)"
-                                          acceptFunction={v => this.onAcceptLocationEdit(v)}/>
+                                          canAcceptFunction={v => v.length > 0}
+                                          acceptFunction={v => this.onAcceptLocationEdit(t, v)}/>
                     </td>
                     <td>
                         <DynamicEditField initialValue={t.name} placeHolder="(none)"
-                                          acceptFunction={v => this.onAcceptNameEdit(v)}/>
+                                          acceptFunction={v => this.onAcceptNameEdit(t, v)}/>
 
                     </td>
                     <td>
                         <DynamicEditField initialValue={t.notes} placeHolder="(none)"
-                                          acceptFunction={v => this.onAcceptNotesEdit(v)}/>
+                                          acceptFunction={v => this.onAcceptNotesEdit(t, v)}/>
                     </td>
                     <td>
                         {haveData ? count || 0 : "?"}
-                        {count === 0 && haveData ?
+                        {canDelete ?
                             <a style={{paddingRight: "20px"}} className="pull-right"
-                               onClick={() => this.onShowDeleteConfirmation()}>
+                               onClick={() => this.onShowDeleteConfirmation(t)}>
                                 <Glyphicon glyph="trash"/>
                             </a>
                             : null}
@@ -140,7 +239,12 @@ export class EditTransformsPanel extends React.Component<IRemoveTransformProps, 
         return (
             <div>
                 <p>
-                    Registrations can only be removed if they are not associated with any transformed tracings.
+                    You may not remove registrations that are associated with any transformed tracings (see Tracings
+                    column).
+                </p>
+                <p>
+                    You may not remove the active registration (choose another as active, or clear the active altogether
+                    first).
                 </p>
                 <p>Modifying the transform location should <span style={emp}>only</span> be done if the original
                     transform was moved or renamed. It should not be used change the transform as existing transformed
@@ -161,6 +265,7 @@ export class EditTransformsPanel extends React.Component<IRemoveTransformProps, 
                     {rows}
                     </tbody>
                 </Table>
+                {this.renderModalAlert()}
                 {this.renderAlert()}
             </div>
         );
@@ -169,10 +274,10 @@ export class EditTransformsPanel extends React.Component<IRemoveTransformProps, 
     private renderNoTransforms() {
         return (
             <span>
-                There are no transforms for this sample.  You can
-                <a onClick={() => this.props.onSelectAddTab()}> Add </a>
-                new registration transforms here.
-            </span>
+        There are no transforms for this sample.  You can
+        <a onClick={() => this.props.onSelectAddTab()}> Add </a>
+        new registration transforms here.
+        </span>
         )
     }
 

@@ -45,8 +45,7 @@ const Footer = () => (
 );
 
 const toastStyleOverride = {
-    minWidth: "600px",
-    marginBottom: "40px"
+
 };
 
 interface IAppProps {
