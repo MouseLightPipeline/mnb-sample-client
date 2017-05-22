@@ -10,7 +10,11 @@ interface IContentState {
 }
 
 export class Content extends React.Component<IContentProps, IContentState> {
-    render() {
+    public constructor(props: IContentProps) {
+        super(props);
+    }
+
+    public render() {
         return (
             <div>
                 <Samples/>

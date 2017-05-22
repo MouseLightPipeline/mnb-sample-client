@@ -4,7 +4,7 @@ import {Configuration} from "./src/configuration";
 
 module.exports = {
     entry: [
-        `webpack-dev-server/client?http://localhost:${Configuration.port}/`,
+        `webpack-dev-server/client?http://${Configuration.host}:${Configuration.port}/`,
         "./src/index"
     ],
     devServer: {
@@ -12,7 +12,8 @@ module.exports = {
             "/graphql": {
                 target: `http://${Configuration.graphQLHostname}:${Configuration.graphQLPort}`
             }
-        }
+        },
+        disableHostCheck: true
     },
     output: {
         filename: 'bundle.js',

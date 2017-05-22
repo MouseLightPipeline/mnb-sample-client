@@ -2,6 +2,11 @@ import * as React from "react";
 import {Navbar, Nav, Glyphicon, NavItem, Modal, Button} from "react-bootstrap";
 import {ToastContainer} from "react-toastify";
 import {Link} from "react-router";
+import {graphql, InjectedGraphQLProps} from 'react-apollo';
+
+import {IBrainArea} from "../models/brainArea";
+import {ImmutableQuery} from "../graphql/immutableTypes";
+import {isNullOrUndefined} from "util";
 
 const linkStyle = {
     color: "white"
@@ -44,11 +49,11 @@ const Footer = () => (
     </div>
 );
 
-const toastStyleOverride = {
+interface IAppDataProps {
+    brainAreas: IBrainArea[];
+}
 
-};
-
-interface IAppProps {
+interface IAppProps extends InjectedGraphQLProps<IAppDataProps>{
 }
 
 interface IAppState {
@@ -56,10 +61,12 @@ interface IAppState {
     shouldClearCreateContentsAfterUpload?: boolean;
 }
 
+@graphql(ImmutableQuery, {
+    options: {}
+})
 export class App extends React.Component<IAppProps, IAppState> {
     public constructor(props: IAppProps) {
         super(props);
-
 
         let shouldClearCreateContentsAfterUpload = true;
 
@@ -69,6 +76,16 @@ export class App extends React.Component<IAppProps, IAppState> {
         this.state = {
             isSettingsOpen: false,
             shouldClearCreateContentsAfterUpload
+        }
+
+        if (props.data && !props.data.loading) {
+            makeBrainAreaMap(props.data.brainAreas);
+        }
+    }
+
+    public componentWillReceiveProps(nextProps: IAppProps) {
+        if (nextProps.data && !nextProps.data.loading) {
+            makeBrainAreaMap(nextProps.data.brainAreas);
         }
     }
 
@@ -91,7 +108,7 @@ export class App extends React.Component<IAppProps, IAppState> {
     public render() {
         return (
             <div>
-                <ToastContainer autoClose={6000} position="bottom-center" style={toastStyleOverride}/>
+                <ToastContainer autoClose={6000} position="bottom-center"/>
                 <SettingsDialog show={this.state.isSettingsOpen}
                                 shouldClearCreateContentsAfterUpload={this.state.shouldClearCreateContentsAfterUpload}
                                 onHide={() => this.onSettingsClose()}
@@ -133,4 +150,25 @@ class SettingsDialog extends React.Component<ISettingsDialogProps, ISettingsDial
             </Modal>
         );
     }
+}
+
+
+// Need a map of id -> area for fast lookup.  The current Select control does not make it easy/possible to carry the
+// actual BrainArea object around with the select.  See filterOption function for brain area Select control, primarily.
+const BrainAreaMap = new Map<string, IBrainArea>();
+
+export let BrainAreas: IBrainArea[] = [];
+
+function makeBrainAreaMap(brainAreas: IBrainArea[]) {
+    if (BrainAreaMap.size > 0 || isNullOrUndefined(brainAreas)) {
+        return;
+    }
+
+    BrainAreas = brainAreas;
+
+    brainAreas.map(b => BrainAreaMap.set(b.id, b));
+}
+
+export function lookupBrainArea(id: string): IBrainArea {
+    return BrainAreaMap.get(id);
 }

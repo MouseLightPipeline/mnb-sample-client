@@ -1,5 +1,21 @@
 import gql from "graphql-tag";
 
+export const CreateTransformMutation = gql`mutation CreateTransform($registrationTransform: RegistrationTransformInput, $makeActive: Boolean) {
+    createRegistrationTransform(registrationTransform: $registrationTransform, makeActive: $makeActive) {
+        registrationTransform {
+            id
+            name
+            location
+            notes
+            updatedAt
+            createdAt
+        }
+        error {
+            message
+        }
+    }
+}`;
+
 export const UpdateRegistrationMutation = gql`mutation UpdateRegistrationMutation($registrationTransform: RegistrationTransformInput) {
     updateRegistrationTransform(registrationTransform: $registrationTransform) {
         registrationTransform {
@@ -15,7 +31,7 @@ export const UpdateRegistrationMutation = gql`mutation UpdateRegistrationMutatio
     }
 }`;
 
-export const DeleteRegistrationMutation = gql`mutation deleteRegistrationTransform($registrationTransform: RegistrationTransformInput) {
+export const DeleteRegistrationMutation = gql`mutation DeleteRegistrationTransform($registrationTransform: RegistrationTransformInput) {
     deleteRegistrationTransform(registrationTransform: $registrationTransform) {
         registrationTransform {
             id
@@ -38,7 +54,7 @@ export const TracingCountQuery = gql`query TracingCountQuery {
     }
 }`;
 
-export const SampleForRegistrationsQuery = gql`query SampleQuery($id: String) {
+export const SampleForRegistrationQuery = gql`query SampleForRegistrationQuery($id: String) {
     sample(id: $id) {
         id
         idNumber

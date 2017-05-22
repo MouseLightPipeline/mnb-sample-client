@@ -1,6 +1,6 @@
 import * as React from "react";
-import {Pagination, FormGroup, FormControl, InputGroup} from "react-bootstrap";
-import * as RcSliderClass from "rc-slider";
+import {Pagination, FormGroup, FormControl} from "react-bootstrap";
+const Slider = require("rc-slider").default;
 
 interface IPaginationHeaderProps {
     pageCount: number;
@@ -71,7 +71,7 @@ export class PaginationHeader extends React.Component<IPaginationHeaderProps, IP
                             paddingTop: paddingTop,
                             paddingBottom: "10px"
                         }}>
-                            <RcSliderClass min={10} max={50} step={5} value={this.state.limit}
+                            <Slider min={10} max={50} step={5} value={this.state.limit}
                                            marks={{10: "10", 20: "20", 30: "30", 40: "40", 50: "50"}}
                                            onChange={(value: number) => this.setState({limit: value}, null)}
                                            onAfterChange={(value: number) => this.props.onUpdateLimitForPage(value)}/>

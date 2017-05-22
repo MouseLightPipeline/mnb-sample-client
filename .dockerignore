@@ -1,3 +1,7 @@
+.dockerignore
+.gitignore
 node_modules
 Dockerfile
-.dockerignore
+README.md
+graphql.config.json
+

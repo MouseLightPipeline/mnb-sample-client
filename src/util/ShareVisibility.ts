@@ -1,7 +1,8 @@
 export enum ShareVisibility {
     DoNotShare = 0,
-    ShareAllInternal = 0x01,
-    ShareAllExternal = 0x02
+    Inherited = 0x01,
+    ShareAllInternal = 0x02,
+    ShareAllExternal = 0x04
 }
 
 export interface IShareVisibilityOption {
@@ -13,7 +14,7 @@ export const ShareVisibilityOptions: IShareVisibilityOption[] = [
     {
         id: ShareVisibility.DoNotShare,
         label: "Not shared"
-    } ,
+    },
     {
         id: ShareVisibility.ShareAllInternal,
         label: "Internal"

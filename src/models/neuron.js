@@ -4,8 +4,7 @@ const brainArea_1 = require("./brainArea");
 const util_1 = require("util");
 function displayNeuron(neuron) {
     const name = neuron ? neuron.idString : "(none)";
-    const brainArea = displayNeuronBrainArea(neuron);
-    return `${name} (${brainArea})`;
+    return name || displayNeuronBrainArea(neuron);
 }
 exports.displayNeuron = displayNeuron;
 function displayNeuronBrainArea(neuron) {

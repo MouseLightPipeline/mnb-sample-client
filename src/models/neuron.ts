@@ -13,14 +13,35 @@ export interface INeuron {
     z: number;
     injection: IInjection;
     brainArea: IBrainArea;
+    createdAt: number;
+    updatedAt: number;
+}
+
+export interface INeuronInput {
+    id: string;
+    idNumber?: number;
+    idString?: string;
+    tag?: string;
+    keywords?: string;
+    x?: number;
+    y?: number;
+    z?: number;
+    brainAreaId?: IBrainArea;
+}
+
+export interface IMutatedNeuron {
+    sample: INeuron;
+    error: Error;
+}
+
+export interface IMutateNeuronData {
+    updateSample: IMutatedNeuron
 }
 
 export function displayNeuron(neuron: INeuron): string {
     const name = neuron ? neuron.idString : "(none)";
 
-    const brainArea = displayNeuronBrainArea(neuron);
-
-    return `${name} (${brainArea})`;
+    return name || displayNeuronBrainArea(neuron);
 }
 
 export function displayNeuronBrainArea(neuron: INeuron): string {

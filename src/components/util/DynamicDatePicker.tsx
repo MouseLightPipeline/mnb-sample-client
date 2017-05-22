@@ -11,21 +11,21 @@ export enum DynamicDatePickerMode {
     Edit
 }
 
-interface IDynamicEditFieldProps {
-    initialValue: any;
+interface IDynamicDatePickerProps {
+    initialValue: Date;
     isDeferredEditMode?: boolean;
 
-    onChangeDate?(date: any): void;
+    onChangeDate?(date: Date): void;
 }
 
-interface IDynamicTableEditFieldState {
+interface IDynamicDatePickerState {
     initialPropValue?: any;
-    value?: any
+    value?: Date;
     mode?: DynamicDatePickerMode;
 }
 
-export class DynamicDatePicker extends React.Component<IDynamicEditFieldProps, IDynamicTableEditFieldState> {
-    constructor(props: IDynamicEditFieldProps) {
+export class DynamicDatePicker extends React.Component<IDynamicDatePickerProps, IDynamicDatePickerState> {
+    constructor(props: IDynamicDatePickerProps) {
         super(props);
 
         this.state = {
@@ -59,14 +59,17 @@ export class DynamicDatePicker extends React.Component<IDynamicEditFieldProps, I
         this.setState({mode: DynamicDatePickerMode.Static, value: this.props.initialValue}, null);
     }
 
-    handleChange(date: any) {
-        console.log(date);
-        //this.setState({
-        //    startDate: date
-        //});
+    private handleChange(date: any) {
+        this.setState({
+            value: date.toDate()
+        });
+
+        if (this.isInEditMode && !this.isDeferredEditMode) {
+            this.onAcceptEdit();
+        }
     }
 
-    public componentWillReceiveProps(props: IDynamicEditFieldProps) {
+    public componentWillReceiveProps(props: IDynamicDatePickerProps) {
         this.setState({
             initialPropValue: props.initialValue,
             value: props.initialValue
@@ -87,7 +90,7 @@ export class DynamicDatePicker extends React.Component<IDynamicEditFieldProps, I
                 className="date-picker-input"
                 dateFormat="YYYY-MM-DD"
                 selected={moment(this.state.value)}
-                onChange={this.handleChange}
+                onChange={(d) => this.handleChange(d)}
             />
         );
     }

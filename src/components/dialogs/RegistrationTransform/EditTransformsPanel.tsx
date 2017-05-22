@@ -9,30 +9,31 @@ import {InjectedGraphQLProps} from "react-apollo/lib/graphql";
 import {toast} from "react-toastify";
 
 import {IRegistrationTransform, IRegistrationTransformInput} from "../../../models/registrationTransform";
-import {ISample} from "../../../models/sample";
+import {ISample, ISampleInput} from "../../../models/sample";
 import {DynamicEditField} from "../../util/DynamicEditField";
 import {
-    DeleteRegistrationMutation, SampleForRegistrationsQuery,
+    DeleteRegistrationMutation, SampleForRegistrationQuery,
     TracingCountQuery, UpdateRegistrationMutation
 } from "../../../graphql/registrationTransform";
 import {ModalAlert} from "../../util/ModalAlert";
 import {toastUpdateError, toastUpdateSuccess} from "../../util/Toasts";
+import {UpdateSampleMutation} from "../../../graphql/sample";
 
 interface ITracingCountQueryProps {
     tracingCountsForRegistrations: any;
 }
 
-interface IRemoveTransformProps extends InjectedGraphQLProps<ITracingCountQueryProps> {
+interface IEditTransformsProps extends InjectedGraphQLProps<ITracingCountQueryProps> {
     sample: ISample;
 
-    onCreate(registrationTransform: IRegistrationTransformInput): void;
     onSelectAddTab(): void;
 
+    updateSample?(sample: ISampleInput): any;
     updateRegistrationTransform?(registrationTransform: IRegistrationTransformInput, sample: ISample): any;
     deleteRegistrationTransform?(registrationTransform: IRegistrationTransformInput, sample: ISample): any;
 }
 
-interface IRemoveRegistrationTransformState {
+interface IEditTransformsState {
     isDeleteConfirmationShowing?: boolean;
     transformToDelete?: IRegistrationTransform;
     lastDeleteError?: string;
@@ -53,7 +54,7 @@ interface IRemoveRegistrationTransformState {
         updateRegistrationTransform: (registrationTransform: IRegistrationTransformInput, sample: ISample) => mutate({
             variables: {registrationTransform},
             refetchQueries: [{
-                query: SampleForRegistrationsQuery,
+                query: SampleForRegistrationQuery,
                 variables: {
                     id: sample.id
                 }
@@ -66,7 +67,7 @@ interface IRemoveRegistrationTransformState {
         deleteRegistrationTransform: (registrationTransform: IRegistrationTransformInput, sample: ISample) => mutate({
             variables: {registrationTransform},
             refetchQueries: [{
-                query: SampleForRegistrationsQuery,
+                query: SampleForRegistrationQuery,
                 variables: {
                     id: sample.id
                 }
@@ -74,8 +75,15 @@ interface IRemoveRegistrationTransformState {
         })
     })
 })
-export class EditTransformsPanel extends React.Component<IRemoveTransformProps, IRemoveRegistrationTransformState> {
-    public constructor(props: IRemoveTransformProps) {
+@graphql(UpdateSampleMutation, {
+    props: ({mutate}) => ({
+        updateSample: (sample: ISampleInput) => mutate({
+            variables: {sample}
+        })
+    })
+})
+export class EditTransformsPanel extends React.Component<IEditTransformsProps, IEditTransformsState> {
+    public constructor(props: IEditTransformsProps) {
         super(props);
 
         this.state = {
@@ -106,6 +114,30 @@ export class EditTransformsPanel extends React.Component<IRemoveTransformProps, 
 
             if (result.data.updateRegistrationTransform.error) {
                 toast.error(toastUpdateError(result.data.updateRegistrationTransform.error), {autoClose: false});
+            } else {
+                toast.success(toastUpdateSuccess(), {autoClose: 3000});
+                return true;
+            }
+        } catch (error) {
+            toast.error(toastUpdateError(error), {autoClose: false});
+        }
+
+        this.setState({isInUpdate: false});
+
+        return false;
+    }
+
+    private async onUpdateActiveTransform(transform: IRegistrationTransform) {
+        try {
+            this.setState({isInUpdate: true});
+
+            const result = await this.props.updateSample({
+                id: this.props.sample.id,
+                activeRegistrationTransformId: transform.id
+            });
+
+            if (result.data.updateSample.error) {
+                toast.error(toastUpdateError(result.data.updateSample.error), {autoClose: false});
             } else {
                 toast.success(toastUpdateSuccess(), {autoClose: 3000});
                 return true;
@@ -171,7 +203,8 @@ export class EditTransformsPanel extends React.Component<IRemoveTransformProps, 
                     </div>
                 </Alert>
             );
-        }    }
+        }
+    }
 
     private renderModalAlert() {
         if (!this.state.transformToDelete) {
@@ -209,7 +242,11 @@ export class EditTransformsPanel extends React.Component<IRemoveTransformProps, 
             return (
                 <tr key={t.id}>
                     <td>
-                        {t.id === activeSampleId ? <Glyphicon glyph="ok" style={{paddingRight: "10px"}}/> : null}
+                        {t.id === activeSampleId ? <Glyphicon glyph="star" style={{paddingRight: "10px"}}/> :
+                            <a onClick={() => this.onUpdateActiveTransform(t)}>
+                                <Glyphicon glyph="star-empty" style={{paddingRight: "10px"}}/>
+                            </a>
+                        }
                         <DynamicEditField initialValue={t.location} placeHolder="(none)"
                                           canAcceptFunction={v => v.length > 0}
                                           acceptFunction={v => this.onAcceptLocationEdit(t, v)}/>
@@ -247,10 +284,17 @@ export class EditTransformsPanel extends React.Component<IRemoveTransformProps, 
                     first).
                 </p>
                 <p>Modifying the transform location should <span style={emp}>only</span> be done if the original
-                    transform was moved or renamed. It should not be used change the transform as existing transformed
-                    tracings linked to the transform will <span style={emp}>not</span> be rerun. You can <a
-                        onClick={() => this.props.onSelectAddTab()}>Add</a> a new transform if the sample registration
+                    transform file was moved or renamed. It should not be used change the transform as existing
+                    transformed
+                    tracings linked to the transform will <span style={emp}>not</span> be reapplied. You can <span
+                        style={emp}><a
+                        onClick={() => this.props.onSelectAddTab()}>Add</a></span> a new transform if the sample
+                    registration
                     data has been updated.
+                </p>
+                <p><
+                    Glyphicon glyph="star" style={{paddingRight: "0px"}}/> indicates the active transform.<br/>
+                    Click <Glyphicon glyph="star-empty" style={{paddingRight: "0px"}}/> to select a different transform.
                 </p>
                 <Table>
                     <thead>

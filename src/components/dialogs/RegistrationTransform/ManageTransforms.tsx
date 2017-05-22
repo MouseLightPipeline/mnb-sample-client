@@ -6,30 +6,24 @@ import {toast} from "react-toastify";
 
 import {AddTransformPanel} from "./AddTransformPanel";
 import {EditTransformsPanel} from "./EditTransformsPanel";
-import {SampleForRegistrationsQuery} from "../../../graphql/registrationTransform";
-import {IRegistrationTransform, IRegistrationTransformInput} from "../../../models/registrationTransform";
+import {SampleForRegistrationQuery} from "../../../graphql/registrationTransform";
 
-export interface ICreateRegistrationTransformDelegate {
-    (registrationTransform: IRegistrationTransform): void;
-}
-
-interface IManageTransforms {
+interface IManageTransformsQueryProps {
     sample: ISample;
 }
 
-interface ICreateRegistrationTransformDialogProps extends InjectedGraphQLProps<IManageTransforms> {
+interface IManageTransformsProps extends InjectedGraphQLProps<IManageTransformsQueryProps> {
     show: boolean;
     sampleId: string;
 
-    onCreate(registrationTransform: IRegistrationTransformInput): void;
     onClose(): void;
 }
 
-interface ICreateRegistrationTransformDialogState {
+interface IManageTransformsState {
     activeKey: any;
 }
 
-@graphql(SampleForRegistrationsQuery, {
+@graphql(SampleForRegistrationQuery, {
     options: ({sampleId}) => ({
         pollInterval: 5000,
         variables: {
@@ -37,8 +31,8 @@ interface ICreateRegistrationTransformDialogState {
         }
     })
 })
-export class ManageRegistrationTransforms extends React.Component<ICreateRegistrationTransformDialogProps, ICreateRegistrationTransformDialogState> {
-    public constructor(props: ICreateRegistrationTransformDialogProps) {
+export class ManageTransforms extends React.Component<IManageTransformsProps, IManageTransformsState> {
+    public constructor(props: IManageTransformsProps) {
         super(props);
 
         this.state = {
@@ -53,8 +47,6 @@ export class ManageRegistrationTransforms extends React.Component<ICreateRegistr
     public render() {
         const sample = this.props.data && !this.props.data.loading ? this.props.data.sample : null;
 
-        console.log(sample);
-
         return (
             <Modal bsSize="large" show={this.props.show} onHide={this.props.onClose}
                    aria-labelledby="create-registration-dialog">
@@ -67,12 +59,13 @@ export class ManageRegistrationTransforms extends React.Component<ICreateRegistr
                           onSelect={(eventKey: any) => this.onSelectTab(eventKey)}>
                         <Tab eventKey={1} title="Add">
                             {sample ?
-                                <AddTransformPanel onCreate={this.props.onCreate} sample={sample}
+                                <AddTransformPanel sample={sample}
+                                                   onCloseAfterCreate={() => this.props.onClose()}
                                                    onSelectManageTab={() => this.onSelectTab(2)}/> : null }
                         </Tab>
                         <Tab eventKey={2} title="Manage">
                             {sample ?
-                                <EditTransformsPanel sample={sample} onCreate={this.props.onCreate}
+                                <EditTransformsPanel sample={sample}
                                                      onSelectAddTab={() => this.onSelectTab(1)}/> : null }
                         </Tab>
                     </Tabs>

@@ -1,64 +1,41 @@
 import * as React from "react";
-import {Panel, Table} from "react-bootstrap";
+import {Table, Glyphicon, Modal, Button} from "react-bootstrap";
 import {graphql, InjectedGraphQLProps} from 'react-apollo';
-import gql from "graphql-tag";
+import {toast} from "react-toastify";
+import * as moment from "moment";
 
 import {PaginationHeader} from "./util/PaginationHeader";
 import {IQueryOutput} from "../util/graphQLTypes";
-import {displayNeuronBrainArea, formatSomaLocation, INeuron} from "../models/neuron";
+import {
+    displayNeuron, displayNeuronBrainArea, formatSomaLocation, IMutateNeuronData, INeuron,
+    INeuronInput
+} from "../models/neuron";
 import {displaySample} from "../models/sample";
 import {truncate} from "../util/string";
+import {toastDeleteError, toastDeleteSuccess} from "./util/Toasts";
+import {DeleteNeuronMutation, NeuronsQuery} from "../graphql/neuron";
 
-const neuronsQuery = gql`query ($input: NeuronQueryInput) {
-  neurons(input: $input) {
-    totalCount
-    items {
-        id
-        idNumber
-        idString
-        tag
-        keywords
-        x
-        y
-        z
-        brainArea {
-          id
-          name
-        }
-        injection {
-          id
-          brainArea {
-            id
-            name
-          }
-          sample {
-            id
-            idNumber
-            sampleDate
-           }
-        }
-        createdAt
-        updatedAt
-    }
-  }
-}`;
-
-interface ISamplesGraphQLProps {
+interface INeuronsGraphQLProps {
     neurons: IQueryOutput<INeuron>;
 }
 
-interface ISamplesProps extends InjectedGraphQLProps<ISamplesGraphQLProps> {
+interface INeuronsProps extends InjectedGraphQLProps<INeuronsGraphQLProps> {
     offset: number;
     limit: number;
 
     onUpdateOffsetForPage(page: number): void;
     onUpdateLimit(limit: number): void;
+
+    updateNeuron?(neuron: INeuronInput): Promise<InjectedGraphQLProps<IMutateNeuronData>>;
+    deleteNeuron?(neuron: INeuronInput): any;
 }
 
-interface ISamplesState {
+interface INeuronState {
+    showConfirmDelete?: boolean;
+    neuronToDelete?: INeuron;
 }
 
-@graphql(neuronsQuery, {
+@graphql(NeuronsQuery, {
     options: ({offset, limit}) => ({
         pollInterval: 5000,
         variables: {
@@ -69,8 +46,67 @@ interface ISamplesState {
         }
     })
 })
-export class NeuronsTable extends React.Component<ISamplesProps, ISamplesState> {
-    render() {
+@graphql(DeleteNeuronMutation, {
+    props: ({mutate}) => ({
+        deleteNeuron: (neuron: INeuronInput) => mutate({
+            variables: {neuron}
+        })
+    })
+})
+export class NeuronsTable extends React.Component<INeuronsProps, INeuronState> {
+    public constructor(props: INeuronsProps) {
+        super(props);
+
+        this.state = {showConfirmDelete: false, neuronToDelete: null};
+    }
+
+    private async onShowDeleteConfirmation(neuron: INeuron) {
+        this.setState({showConfirmDelete: true, neuronToDelete: neuron}, null);
+    }
+
+
+    private async onCloseConfirmation(shouldDelete = false) {
+        this.setState({showConfirmDelete: false}, null);
+
+        if (shouldDelete) {
+            await this.deleteNeuron();
+        }
+    }
+
+    private async deleteNeuron() {
+        try {
+            const result = await this.props.deleteNeuron({id: this.state.neuronToDelete.id});
+
+            console.log(result);
+            if (result.data.deleteNeuron.error) {
+                toast.error(toastDeleteError(result.data.deleteNeuron.error), {autoClose: false});
+            } else {
+                toast.success(toastDeleteSuccess(), {autoClose: 3000});
+                // this.setState({isDeleted: true});
+            }
+        } catch (error) {
+            toast.error(toastDeleteError(error), {autoClose: false});
+        }
+    }
+
+    private renderDeleteConfirmationModal() {
+        return (
+            <Modal show={this.state.showConfirmDelete} onHide={() => this.onCloseConfirmation()}>
+                <Modal.Header closeButton>
+                    <h4>Delete Neuron?</h4>
+                </Modal.Header>
+                <Modal.Body>
+                    Are you sure you want to delete neuron {displayNeuron(this.state.neuronToDelete)}?
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button onClick={() => this.onCloseConfirmation()} style={{marginRight: "20px"}}>Cancel</Button>
+                    <Button onClick={() => this.onCloseConfirmation(true)} bsStyle="danger">Delete</Button>
+                </Modal.Footer>
+            </Modal>
+        );
+    }
+
+    public render() {
         const isDataAvailable = this.props.data && !this.props.data.loading;
 
         const neurons = isDataAvailable ? this.props.data.neurons.items : [];
@@ -83,6 +119,16 @@ export class NeuronsTable extends React.Component<ISamplesProps, ISamplesState> 
                 <td>{displayNeuronBrainArea(n)}</td>
                 <td>{formatSomaLocation(n)}</td>
                 <td>{truncate(n.keywords)}</td>
+                <td>
+                    <div style={{display: "inline-block"}}>
+                        {moment(n.createdAt).format("YYYY-MM-DD")}<br/>
+                        {moment(n.createdAt).format("hh:mm:ss")}
+                    </div>
+                    <a style={{paddingRight: "20px"}} className="pull-right"
+                       onClick={() => this.onShowDeleteConfirmation(n)}>
+                        <Glyphicon glyph="trash"/>
+                    </a>
+                </td>
             </tr>)
         });
 
@@ -94,6 +140,7 @@ export class NeuronsTable extends React.Component<ISamplesProps, ISamplesState> 
 
         return (
             <div className="card">
+                {this.state.showConfirmDelete ? this.renderDeleteConfirmationModal() : null}
                 <div className="card-header">
                     Neurons
                 </div>
@@ -112,6 +159,7 @@ export class NeuronsTable extends React.Component<ISamplesProps, ISamplesState> 
                             <th>Soma Brain Area</th>
                             <th>Soma Sample Location</th>
                             <th>Keywords</th>
+                            <th>Created</th>
                         </tr>
                         </thead>
                         <tbody>

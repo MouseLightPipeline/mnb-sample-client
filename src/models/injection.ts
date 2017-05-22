@@ -11,6 +11,16 @@ export interface IInjection {
     sample: ISample;
 }
 
+export interface IInjectionInput {
+    id: string;
+    brainAreaId?: string;
+    injectionVirusId?: string;
+    injectionVirusName?: string;
+    fluorophoreId?: string;
+    fluorophoreName?: string;
+    sampleId?: string;
+}
+
 export function displayInjection(injection: IInjection) {
     if (!injection) {
         return "(none)";

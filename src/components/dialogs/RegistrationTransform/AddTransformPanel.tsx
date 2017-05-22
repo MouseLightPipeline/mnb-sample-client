@@ -1,23 +1,43 @@
 import * as React from "react";
 import {Button, FormGroup, FormControl, ControlLabel, HelpBlock,} from "react-bootstrap";
+import {graphql} from 'react-apollo';
+import {toast} from "react-toastify";
 
 import * as update from "immutability-helper";
 
 import {IRegistrationTransformInput} from "../../../models/registrationTransform";
 import {ISample} from "../../../models/sample";
+import {CreateTransformMutation, SampleForRegistrationQuery} from "../../../graphql/registrationTransform";
+import {toastUpdateError, toastUpdateSuccess} from "../../util/Toasts";
 
 type ValidationState = "success" | "warning" | "error";
+
 interface IAddTransformProps {
     sample: ISample;
 
-    onCreate(registrationTransform: IRegistrationTransformInput): void;
+    createTransform?(registrationTransform: IRegistrationTransformInput, makeActive: boolean, sample: ISample): any;
+
     onSelectManageTab(): void;
+    onCloseAfterCreate?(): void;
 }
 
 interface IAddRegistrationTransformState {
     registrationTransform?: IRegistrationTransformInput;
 }
 
+@graphql(CreateTransformMutation, {
+    props: ({mutate}) => ({
+        createTransform: (registrationTransform: IRegistrationTransformInput, makeActive: boolean, sample: ISample) => mutate({
+            variables: {registrationTransform, makeActive},
+            refetchQueries: [{
+                query: SampleForRegistrationQuery,
+                variables: {
+                    id: sample.id
+                }
+            }]
+        })
+    })
+})
 export class AddTransformPanel extends React.Component<IAddTransformProps, IAddRegistrationTransformState> {
     public constructor(props: IAddTransformProps) {
         super(props);
@@ -53,6 +73,24 @@ export class AddTransformPanel extends React.Component<IAddTransformProps, IAddR
 
     private onNotesChange(evt: any) {
         this.setState({registrationTransform: Object.assign(this.state.registrationTransform, {notes: evt.target.value})})
+    }
+
+    private async onCreateTransform() {
+        try {
+            const result = await this.props.createTransform(this.state.registrationTransform, true, this.props.sample);
+
+            if (!result.data.createRegistrationTransform.registrationTransform) {
+                toast.error(toastUpdateError(result.data.createRegistrationTransform.error), {autoClose: false});
+            } else {
+                toast.success(toastUpdateSuccess(), {autoClose: 3000});
+
+                if (this.props.onCloseAfterCreate) {
+                    this.props.onCloseAfterCreate();
+                }
+            }
+        } catch (error) {
+            toast.error(toastUpdateError(error), {autoClose: false});
+        }
     }
 
     private renderHelpBlock() {
@@ -118,7 +156,7 @@ export class AddTransformPanel extends React.Component<IAddTransformProps, IAddR
                                  onChange={(e: any) => this.onNotesChange(e)}/>
                 </FormGroup>
                 <Button bsStyle="success" disabled={!this.isValidCreateState}
-                        onClick={() => this.props.onCreate(this.state.registrationTransform)}>Add</Button>
+                        onClick={() => this.onCreateTransform()}>Add and Make Active</Button>
             </div>
         );
     }

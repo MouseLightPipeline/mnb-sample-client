@@ -4,7 +4,7 @@ const path = require("path");
 const configuration_1 = require("./src/configuration");
 module.exports = {
     entry: [
-        `webpack-dev-server/client?http://localhost:${configuration_1.Configuration.port}/`,
+        `webpack-dev-server/client?http://${configuration_1.Configuration.host}:${configuration_1.Configuration.port}/`,
         "./src/index"
     ],
     devServer: {
@@ -12,7 +12,8 @@ module.exports = {
             "/graphql": {
                 target: `http://${configuration_1.Configuration.graphQLHostname}:${configuration_1.Configuration.graphQLPort}`
             }
-        }
+        },
+        disableHostCheck: true
     },
     output: {
         filename: 'bundle.js',

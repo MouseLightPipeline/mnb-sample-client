@@ -11,7 +11,7 @@ interface IDynamicSelectOption {
     id?: string | number;
 }
 
-interface IDynamicSelectProps<T, S> {
+export interface IDynamicSelectProps<T, S> {
     idName: string;
     isExclusiveEditMode?: boolean;
     isDeferredEditMode?: boolean;
@@ -29,7 +29,7 @@ interface IDynamicSelectProps<T, S> {
     onRequestAdd?(): void;
 }
 
-interface IDynamicSelectState<T> {
+export interface IDynamicSelectState<T> {
     isInEditMode?: boolean;
     selectedOption?: T;
 }
@@ -92,7 +92,7 @@ class DynamicSelect<T, S, P> extends React.Component<IDynamicSelectProps<T, S>, 
 
     public componentWillReceiveProps(props: IDynamicSelectProps<T, S>) {
         // if (this.isExclusiveEditMode || !this.isInEditMode) {
-            this.setState({selectedOption: props.selectedOption});
+        this.setState({selectedOption: props.selectedOption});
         // }
     }
 
@@ -115,7 +115,25 @@ class DynamicSelect<T, S, P> extends React.Component<IDynamicSelectProps<T, S>, 
     protected addToSelection(option: any, selection: any): any {
     }
 
-    protected renderSelect(selected: Option, options: Option[]) {
+    protected filterOptions?(options: Option[], filterValue: string, currentValues: Option[]): Option[] {
+        if (this.props.filterOptions) {
+            return this.props.filterOptions(options, filterValue, currentValues);
+        }
+
+        return options;
+    }
+
+    protected filterOption?(option: string, filter: string): boolean {
+        if (this.props.filterOption) {
+            return this.props.filterOption(option, filter);
+        }
+
+        return true;
+    }
+
+
+    protected renderSelect(selected: Option, options: Option[], isInputGroup: boolean = false) {
+        const style = isInputGroup ? {borderRadius: 0} : {};
         return this.props.useVirtualized ? (
             <VirtualizedSelect
                 name={`${this.props.idName}-select`}
@@ -125,8 +143,9 @@ class DynamicSelect<T, S, P> extends React.Component<IDynamicSelectProps<T, S>, 
                 clearable={this.props.clearable}
                 disabled={this.props.disabled}
                 multi={this.props.multiSelect}
-                style={{borderRadius: "0"}}
-                filterOption={this.props.filterOption}
+                style={style}
+                filterOption={(option: string, filter: string) => this.filterOption(option, filter)}
+                filterOptions={(options: Option[], filterValue: string, currentValues: Option[]) => this.filterOptions(options, filterValue, currentValues)}
                 onChange={(option: P) => this.onSelectChange(option)}
             />
         ) : (
@@ -138,9 +157,9 @@ class DynamicSelect<T, S, P> extends React.Component<IDynamicSelectProps<T, S>, 
                 clearable={this.props.clearable}
                 disabled={this.props.disabled}
                 multi={this.props.multiSelect}
-                style={{borderRadius: "0"}}
-                filterOption={this.props.filterOption}
-                filterOptions={this.props.filterOptions}
+                style={style}
+                filterOption={(option: string, filter: string) => this.filterOption(option, filter)}
+                filterOptions={(options: Option[], filterValue: string, currentValues: Option[]) => this.filterOptions(options, filterValue, currentValues)}
                 onChange={(option: P) => this.onSelectChange(option)}
             />
         );
@@ -189,7 +208,7 @@ class DynamicSelect<T, S, P> extends React.Component<IDynamicSelectProps<T, S>, 
                                     <Glyphicon glyph="remove"/>
                                 </Button>
                             </InputGroup.Button>
-                            {this.renderSelect(selection, options)}
+                            {this.renderSelect(selection, options, true)}
                             {this.renderAddButton()}
                             <InputGroup.Button>
                                 <Button bsStyle="success" onClick={() => this.onAcceptEdit()}>

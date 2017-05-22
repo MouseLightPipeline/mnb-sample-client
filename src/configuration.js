@@ -2,21 +2,24 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const configurations = {
     development: {
+        host: "localhost",
         port: 9673,
         graphQLEndpoint: "/graphQL",
         graphQLHostname: "localhost",
         graphQLPort: 9671
     },
     test: {
+        host: "sample-client-test",
         port: 9673,
         graphQLEndpoint: "/graphQL",
-        graphQLHostname: "sample-api",
+        graphQLHostname: "sample-api-test",
         graphQLPort: 9671
     },
     production: {
+        host: "sample-client-test",
         port: 9673,
         graphQLEndpoint: "/graphQL",
-        graphQLHostname: "sample-api",
+        graphQLHostname: "sample-api-test",
         graphQLPort: 9671
     }
 };

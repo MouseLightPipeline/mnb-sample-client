@@ -11,7 +11,7 @@ export interface ISample {
     animalId: string;
     tag: string;
     comment: string;
-    sampleDate: Date;
+    sampleDate: number;
     sharing: number;
     mouseStrain: IMouseStrain;
     injections: IInjection[];
@@ -28,9 +28,10 @@ export interface ISampleInput {
     animalId?: string;
     tag?: string;
     comment?: string;
-    sampleDate?: Date;
+    sampleDate?: number;
     sharing?: number;
     mouseStrainId?: string;
+    mouseStrainName?: string;
     activeRegistrationTransformId?: string;
 }
 

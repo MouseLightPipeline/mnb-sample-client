@@ -1,92 +1,25 @@
 import * as React from "react";
-import {Panel, Table} from "react-bootstrap";
+import {Table, Button, Glyphicon} from "react-bootstrap";
 import {graphql, InjectedGraphQLProps} from 'react-apollo';
-import gql from "graphql-tag";
-import * as update from "immutability-helper";
+import {toast} from "react-toastify";
+import {GraphQLDataProps} from "react-apollo/lib/graphql";
 
 import {PaginationHeader} from "./util/PaginationHeader";
 import {IQueryOutput} from "../util/graphQLTypes";
-import {ISample} from "../models/sample";
+import {ISample, ISampleInput} from "../models/sample";
 import {SampleRow} from "./SampleRow";
 import {IMouseStrain} from "../models/mouseStrain";
-import {CreateMouseStrainDialog, ICreateMouseStrainDelegate} from "./dialogs/CreateMouseStrain";
-import {
-    ManageRegistrationTransforms,
-    ICreateRegistrationTransformDelegate
-} from "./dialogs/RegistrationTransform/ManageRegistrationTransforms";
-import {IRegistrationTransformInput} from "../models/registrationTransform";
-
-const SamplesQuery = gql`query sampleTableQuery($input: SampleQueryInput) {
-    samples(input: $input) {
-        totalCount
-        items {
-            id
-            idNumber
-            animalId
-            tag
-            comment
-            sampleDate
-            sharing
-            mouseStrain {
-                id
-                name
-            }
-            injections {
-                id
-                brainArea {
-                    id
-                    name
-                }
-            }
-            activeRegistrationTransform {
-                id
-                location
-                name
-            }
-            registrationTransforms {
-                id
-                location
-                name
-                notes
-            }
-            createdAt
-            updatedAt
-        }
-    }
-}`;
-
-const CreateMouseStrainMutation = gql`mutation createMouseStrain($mouseStrain: MouseStrainInput) {
-    createMouseStrain(mouseStrain: $mouseStrain) {
-        mouseStrain {
-            id
-            name
-            updatedAt
-            createdAt
-        }
-        error {
-            message
-        }
-    }
-}`;
-
-const CreateRegistrationTransformMutation = gql`mutation createRegistrationTransform($registrationTransform: RegistrationTransformInput) {
-    createRegistrationTransform(registrationTransform: $registrationTransform) {
-        registrationTransform {
-            id
-            name
-            location
-            notes
-            updatedAt
-            createdAt
-        }
-        error {
-            message
-        }
-    }
-}`;
+import {ManageTransforms} from "./dialogs/RegistrationTransform/ManageTransforms";
+import {ManageInjections} from "./dialogs/Injection/ManageInjections";
+import {CreateSampleMutation, NeuronCountsForSamplesQuery, SamplesQuery} from "../graphql/sample";
+import {toastUpdateError, toastUpdateSuccess} from "./util/Toasts";
 
 interface ISamplesGraphQLProps {
     samples: IQueryOutput<ISample>;
+}
+
+interface INeuronsForSamplesQueryProps {
+    neuronCountsForSamples: any;
 }
 
 interface ISamplesProps extends InjectedGraphQLProps<ISamplesGraphQLProps> {
@@ -95,19 +28,19 @@ interface ISamplesProps extends InjectedGraphQLProps<ISamplesGraphQLProps> {
     offset: number;
     limit: number;
 
+    neuronCountsForSamplesQuery?: INeuronsForSamplesQueryProps & GraphQLDataProps;
+
     onUpdateOffsetForPage(page: number): void;
     onUpdateLimit(limit: number): void;
 
-    createMouseStrain?(mouseStrain: IMouseStrain): any;
-    createRegistrationTransform?(registrationTransform: IRegistrationTransformInput): any;
+    createSample?(sample: ISampleInput): any;
 }
 
 interface ISamplesState {
-    isCreateMouseDialogShown?: boolean;
-    createMouseStrainDelegate?: ICreateMouseStrainDelegate;
-    isCreateRegistrationTransformDialogShown?: boolean;
-    manageRegistrationsSample?: ISample;
-    createRegistrationTransformDelegate?: ICreateRegistrationTransformDelegate;
+    isTransformDialogShown?: boolean;
+    manageTransformsSample?: ISample;
+    isInjectionDialogShown?: boolean;
+    manageInjectionsSample?: ISample;
 }
 
 @graphql(SamplesQuery, {
@@ -121,27 +54,21 @@ interface ISamplesState {
         }
     })
 })
-@graphql(CreateMouseStrainMutation, {
+@graphql(CreateSampleMutation, {
     props: ({mutate}) => ({
-        createMouseStrain: (mouseStrain: IMouseStrain) => mutate({
-            variables: {mouseStrain},
-            updateQueries: {
-                MouseStrains: (prev: IMouseStrain[], {mutationResult}: any) => {
-                    const response = mutationResult.data.createMouseStrain;
-
-                    return update(prev, {
-                        mouseStrains: {$push: [response.mouseStrain]}
-                    });
-                }
-            }
+        createSample: (sample: ISampleInput) => mutate({
+            variables: {sample},
+            refetchQueries:["Samples"]
         })
     })
 })
-@graphql(CreateRegistrationTransformMutation, {
-    props: ({mutate}) => ({
-        createRegistrationTransform: (registrationTransform: IRegistrationTransformInput) => mutate({
-            variables: {registrationTransform}
-        })
+@graphql(NeuronCountsForSamplesQuery, {
+    name: "neuronCountsForSamplesQuery",
+    options: ({sample}) => ({
+        pollInterval: 5000,
+        variables: {
+            ids: []
+        }
     })
 })
 export class SamplesTable extends React.Component<ISamplesProps, ISamplesState> {
@@ -149,65 +76,63 @@ export class SamplesTable extends React.Component<ISamplesProps, ISamplesState> 
         super(props);
 
         this.state = {
-            isCreateMouseDialogShown: false,
-            createMouseStrainDelegate: null,
-            isCreateRegistrationTransformDialogShown: false,
-            manageRegistrationsSample: null,
-            createRegistrationTransformDelegate: null
+            isTransformDialogShown: false,
+            manageTransformsSample: null,
+            isInjectionDialogShown: false,
+            manageInjectionsSample: null
         }
     }
 
-    private onRequestAddRegistrationTransform(forSample: ISample, delegate: ICreateRegistrationTransformDelegate) {
+    private async onCreateSample() {
+        try {
+            const result = await this.props.createSample({id: null});
+
+            if (!result.data.createSample.sample) {
+                toast.error(toastUpdateError(result.data.createSample.error), {autoClose: false});
+            } else {
+                toast.success(toastUpdateSuccess(), {autoClose: 3000});
+            }
+        } catch (error) {
+            toast.error(toastUpdateError(error), {autoClose: false});
+        }
+    }
+
+    private onRequestAddRegistrationTransform(forSample: ISample) {
         this.setState({
-            isCreateRegistrationTransformDialogShown: true,
-            manageRegistrationsSample: forSample,
-            createRegistrationTransformDelegate: delegate
+            isTransformDialogShown: true,
+            manageTransformsSample: forSample,
         });
     }
 
-    private async onRegistrationTransformCreated(registrationTransform: IRegistrationTransformInput) {
-        try {
-            console.log(registrationTransform);
-            const result = await this.props.createRegistrationTransform(registrationTransform);
-
-            if (!result.data.createRegistrationTransform.registrationTransform) {
-                console.log(result.data.createRegistrationTransform.error);
-                // toast.error(updateErrorContent(result.data.updateSample.error), {autoClose: false});
-            } else {
-                if (this.state.createRegistrationTransformDelegate) {
-                    this.state.createRegistrationTransformDelegate(result.data.createRegistrationTransform.registrationTransform);
-                }
-                this.setState({isCreateRegistrationTransformDialogShown: false});
-                // toast.success(updateSuccessContent(), {autoClose: 3000});
-            }
-        } catch (error) {
-            console.log(error);
-            // toast.error(updateErrorContent(error), {autoClose: false});
-        }
-
+    private onRequestManageInjections(forSample: ISample) {
+        this.setState({
+            isInjectionDialogShown: true,
+            manageInjectionsSample: forSample
+        });
     }
 
-    private onRequestAddMouseStrain(delegate: ICreateMouseStrainDelegate) {
-        this.setState({isCreateMouseDialogShown: true, createMouseStrainDelegate: delegate});
+    private renderTransformsDialog() {
+        if (this.state.manageTransformsSample && this.state.isTransformDialogShown) {
+            return (
+                <ManageTransforms sampleId={this.state.manageTransformsSample.id}
+                                  show={this.state.isTransformDialogShown}
+                                  onClose={() => this.setState({isTransformDialogShown: false})}/>
+            );
+        } else {
+            return null;
+        }
     }
 
-    private async onMouseStrainCreated(mouseStrain: IMouseStrain) {
-        try {
-            const result = await this.props.createMouseStrain(mouseStrain);
-
-            if (!result.data.createMouseStrain.mouseStrain) {
-                // toast.error(updateErrorContent(result.data.updateSample.error), {autoClose: false});
-            } else {
-                if (this.state.createMouseStrainDelegate) {
-                    this.state.createMouseStrainDelegate(result.data.createMouseStrain.mouseStrain);
-                }
-                // toast.success(updateSuccessContent(), {autoClose: 3000});
-            }
-        } catch (error) {
-            // toast.error(updateErrorContent(error), {autoClose: false});
+    private renderInjectionsDialog() {
+        if (this.state.manageInjectionsSample && this.state.isInjectionDialogShown) {
+            return (
+                <ManageInjections sampleId={this.state.manageInjectionsSample.id}
+                                  show={this.state.isInjectionDialogShown}
+                                  onClose={() => this.setState({isInjectionDialogShown: false})}/>
+            );
+        } else {
+            return null;
         }
-
-        this.setState({isCreateMouseDialogShown: false});
     }
 
     private renderPanelFooter(totalCount: number, activePage: number, pageCount: number) {
@@ -230,22 +155,38 @@ export class SamplesTable extends React.Component<ISamplesProps, ISamplesState> 
 
         const samples = isDataAvailable ? this.props.data.samples.items : [];
 
-        const rows = samples.map(s => {
-            return <SampleRow key={`sl_${s.id}`} sample={s} mouseStrains={this.props.mouseStrains}
-                              onRequestAddRegistrationTransform={(s, d) => this.onRequestAddRegistrationTransform(s, d)}
-                              onRequestAddMouseStrain={(d) => this.onRequestAddMouseStrain(d)}/>
-        });
-
         const totalCount = isDataAvailable ? this.props.data.samples.totalCount : -1;
 
         const pageCount = isDataAvailable ? Math.ceil(totalCount / this.props.limit) : 1;
 
         const activePage = isDataAvailable ? (this.props.offset ? (Math.floor(this.props.offset / this.props.limit) + 1) : 1) : 0;
 
+        let counts = this.props.neuronCountsForSamplesQuery && !this.props.neuronCountsForSamplesQuery.loading ? this.props.neuronCountsForSamplesQuery.neuronCountsForSamples.counts : [];
+
+        counts = counts.reduce((prev: any, curr: any) => {
+            prev[curr.sampleId] = curr.count;
+
+            return prev;
+        }, {});
+
+        const rows = samples.map(s => {
+            return <SampleRow key={`sl_${s.id}`} sample={s} mouseStrains={this.props.mouseStrains}
+                              neuronCount={counts[s.id]}
+                              onRequestAddRegistrationTransform={(s) => this.onRequestAddRegistrationTransform(s)}
+                              onRequestManageInjections={(s) => this.onRequestManageInjections(s)}/>
+        });
+
         return (
             <div className="card">
                 <div className="card-header">
-                    Samples
+                    <div style={{display: "inline-block"}}>
+                        <h5>Samples</h5>
+                    </div>
+                    <div className="pull-right">
+                        <Button bsSize="sm" bsStyle="primary" onClick={() => this.onCreateSample()}>
+                            <Glyphicon glyph="plus"/>
+                        </Button>
+                    </div>
                 </div>
                 <div className="card-block">
                     <PaginationHeader pageCount={pageCount}
@@ -261,10 +202,11 @@ export class SamplesTable extends React.Component<ISamplesProps, ISamplesState> 
                             <th>Animal Id</th>
                             <th>Acq. Date</th>
                             <th>Strain</th>
-                            <th>Registration</th>
+                            <th>Registrations</th>
                             <th>Injections</th>
                             <th>Comment</th>
                             <th>Visibility</th>
+                            <th>Neurons</th>
                             <th>Created</th>
                         </tr>
                         </thead>
@@ -272,15 +214,8 @@ export class SamplesTable extends React.Component<ISamplesProps, ISamplesState> 
                         {rows}
                         </tbody>
                     </Table>
-                    {this.state.isCreateMouseDialogShown ?
-                        <CreateMouseStrainDialog show={this.state.isCreateMouseDialogShown}
-                                                 onCancel={() => this.setState({isCreateMouseDialogShown: false})}
-                                                 onCreate={(m) => this.onMouseStrainCreated(m)}/> : null}
-                    {this.state.manageRegistrationsSample && this.state.isCreateRegistrationTransformDialogShown ?
-                        <ManageRegistrationTransforms sampleId={this.state.manageRegistrationsSample.id}
-                                                      show={this.state.isCreateRegistrationTransformDialogShown}
-                                                      onClose={() => this.setState({isCreateRegistrationTransformDialogShown: false})}
-                                                      onCreate={(m) => this.onRegistrationTransformCreated(m)}/> : null}
+                    {this.renderTransformsDialog()}
+                    {this.renderInjectionsDialog()}
                 </div>
                 <div className="card-footer">
                     {this.renderPanelFooter(totalCount, activePage, pageCount)}
