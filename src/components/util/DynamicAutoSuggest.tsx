@@ -15,6 +15,7 @@ interface IObjectAutoSuggestProps<T> {
     initialValue: string;
     isDeferredEditMode?: boolean;
     isEditOnly?: boolean;
+    placeHolder?: string;
 
     onChange?(value: string): void;
 }
@@ -98,9 +99,17 @@ export class DynamicAutoSuggest<T extends any> extends React.Component<IObjectAu
     private renderClickableValue() {
         return (
             <a onClick={() => this.onRequestEditMode()}>
-                {`${this.state.value}`}
+                {this.renderValue(this.state.value)}
             </a>
         )
+    }
+
+    protected renderValue(value: string) {
+        if (isNullOrUndefined(value) || value.length === 0) {
+            return (<span style={{color: "#AAA"}}>{this.props.placeHolder || "(none)"}</span>)
+        }
+
+        return value;
     }
 
     private renderAutoSuggest(isInputGroup: boolean = false) {

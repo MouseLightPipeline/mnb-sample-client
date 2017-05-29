@@ -104,7 +104,7 @@ export class SampleRow extends React.Component<ISampleRowProps, ISampleRowState>
     }
 
     private async onAcceptMouseStrainChange(name: string) {
-        return this.performUpdate({id: this.props.sample.id, mouseStrainName: name});
+        return this.performUpdate({id: this.props.sample.id, mouseStrainName: name || null});
     }
 
     private async onAcceptCommentEdit(value: string): Promise<boolean> {
