@@ -45,7 +45,7 @@ export class AddTransformPanel extends React.Component<IAddTransformProps, IAddR
         this.state = {
             registrationTransform: {
                 id: null,
-                location: "/groups/mousebrainmicro/",
+                location: "/groups/mousebrainmicro/mousebrainmicro",
                 name: "",
                 notes: "",
                 sampleId: props.sample.id

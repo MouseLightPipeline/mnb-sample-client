@@ -13,6 +13,7 @@ export interface INeuron {
     z: number;
     injection: IInjection;
     brainArea: IBrainArea;
+    sharing: number;
     createdAt: number;
     updatedAt: number;
 }
@@ -26,16 +27,17 @@ export interface INeuronInput {
     x?: number;
     y?: number;
     z?: number;
+    sharing?: number;
     brainAreaId?: IBrainArea;
 }
 
 export interface IMutatedNeuron {
-    sample: INeuron;
+    neuron: INeuron;
     error: Error;
 }
 
 export interface IMutateNeuronData {
-    updateSample: IMutatedNeuron
+    updateNeuron: IMutatedNeuron
 }
 
 export function displayNeuron(neuron: INeuron): string {

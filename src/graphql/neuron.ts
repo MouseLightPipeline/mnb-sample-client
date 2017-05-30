@@ -12,6 +12,7 @@ export const NeuronsQuery = gql`query NeuronsQuery($input: NeuronQueryInput) {
             x
             y
             z
+            sharing
             brainArea {
                 id
                 name
@@ -30,6 +31,43 @@ export const NeuronsQuery = gql`query NeuronsQuery($input: NeuronQueryInput) {
             }
             createdAt
             updatedAt
+        }
+    }
+}`;
+
+export const UpdateNeuronMutation = gql`mutation UpdateNeuron($neuron: NeuronInput) {
+    updateNeuron(neuron: $neuron) {
+        neuron {
+            id
+            idNumber
+            idString
+            tag
+            keywords
+            x
+            y
+            z
+            sharing
+            brainArea {
+                id
+                name
+            }
+            injection {
+                id
+                brainArea {
+                    id
+                    name
+                }
+                sample {
+                    id
+                    idNumber
+                    sampleDate
+                }
+            }
+            createdAt
+            updatedAt
+        }
+        error {
+            message
         }
     }
 }`;

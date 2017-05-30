@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Navbar, Nav, Glyphicon, NavItem, Modal, Button} from "react-bootstrap";
+import {Navbar, Nav, Glyphicon, NavItem, Modal, Button, Label, Badge} from "react-bootstrap";
 import {ToastContainer} from "react-toastify";
 import {Link} from "react-router";
 import {graphql, InjectedGraphQLProps} from 'react-apollo';
@@ -7,18 +7,28 @@ import {graphql, InjectedGraphQLProps} from 'react-apollo';
 import {IBrainArea} from "../models/brainArea";
 import {ImmutableQuery} from "../graphql/immutableTypes";
 import {isNullOrUndefined} from "util";
+import {SystemMessageQuery} from "../graphql/systemMessage";
 
 const linkStyle = {
     color: "white"
 };
 
-interface IHeadingProps {
+interface ISystemMessageQuery {
+    systemMessage: string;
+}
+
+interface IHeadingProps extends InjectedGraphQLProps<ISystemMessageQuery> {
     onSettingsClick(): void;
 }
 
 interface IHeadingState {
 }
 
+@graphql(SystemMessageQuery, {
+    options: {
+        pollInterval: 5000
+    }
+})
 class Heading extends React.Component<IHeadingProps, IHeadingState> {
     public render() {
         return (
@@ -30,14 +40,15 @@ class Heading extends React.Component<IHeadingProps, IHeadingState> {
                         </Link>
                     </Navbar.Brand>
                 </Navbar.Header>
+                <Navbar.Text><Link to="/samples" style={linkStyle}>Samples</Link></Navbar.Text>
+                <Navbar.Text><Link to="/neurons" style={linkStyle}>Neurons</Link></Navbar.Text>
                 <Navbar.Collapse>
-                        <Navbar.Text> <Link to="/samples" style={linkStyle}>Samples</Link></Navbar.Text>
-                        <Navbar.Text> <Link to="/neurons" style={linkStyle}>Neurons</Link></Navbar.Text>
                     <Nav pullRight style={{marginRight: "15px"}}>
                         <NavItem onSelect={() => this.props.onSettingsClick()}>
                             <Glyphicon glyph="cog"/>
                         </NavItem>
                     </Nav>
+                    <Navbar.Text pullRight><Badge>{this.props.data.systemMessage}</Badge></Navbar.Text>
                 </Navbar.Collapse>
             </Navbar>);
     }
@@ -53,7 +64,7 @@ interface IAppDataProps {
     brainAreas: IBrainArea[];
 }
 
-interface IAppProps extends InjectedGraphQLProps<IAppDataProps>{
+interface IAppProps extends InjectedGraphQLProps<IAppDataProps> {
 }
 
 interface IAppState {

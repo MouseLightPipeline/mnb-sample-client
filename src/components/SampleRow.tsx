@@ -10,16 +10,18 @@ import {displayRegistrationTransform, IRegistrationTransform} from "../models/re
 import {displayInjection, IInjection} from "../models/injection";
 import {IMouseStrain} from "../models/mouseStrain";
 import {DynamicDatePicker} from "./util/DynamicDatePicker";
-import {FindVisibilityOption, IShareVisibilityOption, ShareVisibilityOptions} from "../util/ShareVisibility";
+import {FindVisibilityOption, IShareVisibilityOption, SampleVisibilityOptions} from "../util/ShareVisibility";
 import {VisibilitySelect} from "./editors/VisibilitySelect";
 import {toastDeleteError, toastDeleteSuccess, toastUpdateError, toastUpdateSuccess} from "./util/Toasts";
-import {DeleteSampleMutation, SamplesQuery, UpdateSampleMutation} from "../graphql/sample";
+import {DeleteSampleMutation, UpdateSampleMutation} from "../graphql/sample";
 import {MouseStrainAutoSuggest} from "./editors/MouseStrainAutoSuggest";
 
 const tableCellStyle = {verticalAlign: "middle"};
 const idTableCellStyle = Object.assign({}, tableCellStyle, {maxWidth: "80px"});
 const editTableCellStyle = Object.assign({}, tableCellStyle, {maxWidth: "150px"});
 const dateTableCellStyle = Object.assign({}, tableCellStyle, {maxWidth: "100px"});
+
+const ShareVisibilityOptions = SampleVisibilityOptions();
 
 interface ISampleRowProps {
     mouseStrains: IMouseStrain[];

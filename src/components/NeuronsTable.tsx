@@ -12,8 +12,12 @@ import {
 } from "../models/neuron";
 import {displaySample} from "../models/sample";
 import {truncate} from "../util/string";
-import {toastDeleteError, toastDeleteSuccess} from "./util/Toasts";
-import {DeleteNeuronMutation, NeuronsQuery} from "../graphql/neuron";
+import {toastDeleteError, toastDeleteSuccess, toastUpdateError, toastUpdateSuccess} from "./util/Toasts";
+import {DeleteNeuronMutation, NeuronsQuery, UpdateNeuronMutation} from "../graphql/neuron";
+import {FindVisibilityOption, IShareVisibilityOption, NeuronVisibilityOptions} from "../util/ShareVisibility";
+import {VisibilitySelect} from "./editors/VisibilitySelect";
+
+const ShareVisibilityOptions = NeuronVisibilityOptions();
 
 interface INeuronsGraphQLProps {
     neurons: IQueryOutput<INeuron>;
@@ -33,6 +37,7 @@ interface INeuronsProps extends InjectedGraphQLProps<INeuronsGraphQLProps> {
 interface INeuronState {
     showConfirmDelete?: boolean;
     neuronToDelete?: INeuron;
+    isInUpdate?: boolean;
 }
 
 @graphql(NeuronsQuery, {
@@ -46,7 +51,13 @@ interface INeuronState {
         }
     })
 })
-@graphql(DeleteNeuronMutation, {
+@graphql(UpdateNeuronMutation, {
+    props: ({mutate}) => ({
+        updateNeuron: (neuron: INeuronInput) => mutate({
+            variables: {neuron}
+        })
+    })
+})@graphql(DeleteNeuronMutation, {
     props: ({mutate}) => ({
         deleteNeuron: (neuron: INeuronInput) => mutate({
             variables: {neuron}
@@ -57,7 +68,35 @@ export class NeuronsTable extends React.Component<INeuronsProps, INeuronState> {
     public constructor(props: INeuronsProps) {
         super(props);
 
-        this.state = {showConfirmDelete: false, neuronToDelete: null};
+        this.state = {
+            showConfirmDelete: false, neuronToDelete: null,
+            isInUpdate: false
+        };
+    }
+
+    private async performUpdate(neuronPartial: INeuronInput) {
+        try {
+            const result = await this.props.updateNeuron(neuronPartial);
+
+            if (!result.data.updateNeuron.neuron) {
+                toast.error(toastUpdateError(result.data.updateNeuron.error), {autoClose: false});
+            } else {
+                toast.success(toastUpdateSuccess(), {autoClose: 3000});
+            }
+            this.setState({isInUpdate: false});
+        } catch (error) {
+            toast.error(toastUpdateError(error), {autoClose: false});
+
+            this.setState({isInUpdate: false});
+
+            return false;
+        }
+
+        return true;
+    }
+
+    private async onAcceptVisibility(neuron: INeuron, visibility: IShareVisibilityOption): Promise<boolean> {
+        return this.performUpdate({id: neuron.id, sharing: visibility.id});
     }
 
     private async onShowDeleteConfirmation(neuron: INeuron) {
@@ -120,6 +159,14 @@ export class NeuronsTable extends React.Component<INeuronsProps, INeuronState> {
                 <td>{formatSomaLocation(n)}</td>
                 <td>{truncate(n.keywords)}</td>
                 <td>
+                    <VisibilitySelect idName="sample-visibility"
+                                      options={ShareVisibilityOptions}
+                                      selectedOption={FindVisibilityOption(n.sharing)}
+                                      isDeferredEditMode={true}
+                                      isExclusiveEditMode={false}
+                                      onSelect={v => this.onAcceptVisibility(n, v)}/>
+                </td>
+                <td>
                     <div style={{display: "inline-block"}}>
                         {moment(n.createdAt).format("YYYY-MM-DD")}<br/>
                         {moment(n.createdAt).format("hh:mm:ss")}
@@ -159,6 +206,7 @@ export class NeuronsTable extends React.Component<INeuronsProps, INeuronState> {
                             <th>Soma Brain Area</th>
                             <th>Soma Sample Location</th>
                             <th>Keywords</th>
+                            <th>Visibility</th>
                             <th>Created</th>
                         </tr>
                         </thead>
