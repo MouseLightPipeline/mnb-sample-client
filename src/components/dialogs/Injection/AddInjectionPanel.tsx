@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Button, FormGroup, ControlLabel, HelpBlock} from "react-bootstrap";
+import {Button, FormGroup, ControlLabel} from "react-bootstrap";
 import {graphql} from 'react-apollo';
 import {toast} from "react-toastify";
 import * as update from "immutability-helper";
@@ -16,8 +16,6 @@ import {BrainAreas, lookupBrainArea} from "../../App";
 import {IBrainArea} from "../../../models/brainArea";
 import {FluorophoreAutoSuggest} from "../../editors/FluorophoreAutoSuggest";
 import {toastUpdateError, toastUpdateSuccess} from "../../util/Toasts";
-
-type ValidationState = "success" | "warning" | "error";
 
 interface IAddInjectionProps {
     sample: ISample;
@@ -81,16 +79,8 @@ export class AddInjectionPanel extends React.Component<IAddInjectionProps, IAddI
         this.props.createInjection(this.state.injection);
     }
 
-    private get brainAreaValidationState(): ValidationState {
-        return this.isDuplicateBrainAreaId ? "error" : null;
-    }
-
-    private get isDuplicateBrainAreaId(): boolean {
-        return this.props.sample.injections.map(o => o.brainArea.id).indexOf(this.state.injection.brainAreaId) > -1
-    }
-
     private get isValidBrainAreaId(): boolean {
-        return !isNullOrUndefined(this.state.injection.brainAreaId) && !this.isDuplicateBrainAreaId;
+        return !isNullOrUndefined(this.state.injection.brainAreaId);
     }
 
     private get isValidCreateState(): boolean {
@@ -133,14 +123,6 @@ export class AddInjectionPanel extends React.Component<IAddInjectionProps, IAddI
                                         onChange={(v: string) => this.onFluorophoreChange(v)}/>);
     }
 
-    private renderHelpBlock() {
-        if (this.isDuplicateBrainAreaId) {
-            return "An injection already exists for this compartment"
-        }
-
-        return null;
-    }
-
     public render() {
         return (
             <div>
@@ -149,10 +131,7 @@ export class AddInjectionPanel extends React.Component<IAddInjectionProps, IAddI
                     Injections are defined per sample. They are the link between samples and the set of neurons and
                     their associated tracings.
                 </p>
-                <p>
-                    There can only be one injection per brain area (per sample).
-                </p>
-                <FormGroup bsSize="sm" controlId="brain-area-group" validationState={this.brainAreaValidationState}>
+                <FormGroup bsSize="sm" controlId="brain-area-group">
                     <ControlLabel>Brain Area</ControlLabel>
                     <BrainAreaSelect idName="brain-area"
                                      options={BrainAreas}
@@ -160,7 +139,6 @@ export class AddInjectionPanel extends React.Component<IAddInjectionProps, IAddI
                                      multiSelect={false}
                                      placeholder="select..."
                                      onSelect={(brainArea: IBrainArea) => this.onBrainAreaChange(brainArea)}/>
-                    <HelpBlock>{this.renderHelpBlock()}</HelpBlock>
                 </FormGroup>
                 <FormGroup bsSize="sm">
                     <ControlLabel>Virus</ControlLabel>

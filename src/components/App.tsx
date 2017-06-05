@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Navbar, Nav, Glyphicon, NavItem, Modal, Button, Label, Badge} from "react-bootstrap";
+import {Navbar, Nav, Glyphicon, NavItem, Modal, Button, Badge} from "react-bootstrap";
 import {ToastContainer} from "react-toastify";
 import {Link} from "react-router";
 import {graphql, InjectedGraphQLProps} from 'react-apollo';
@@ -125,7 +125,7 @@ export class App extends React.Component<IAppProps, IAppState> {
                                 onHide={() => this.onSettingsClose()}
                                 onChangeClearContents={(b: boolean) => this.onChangeClearContents(b)}/>
                 <Heading onSettingsClick={() => this.onSettingsClick()}/>
-                <div style={{marginTop: "50px", marginBottom: "55px"}}>
+                <div style={{marginTop: "50px", marginBottom: "50px"}}>
                     {this.props.children}
                 </div>
                 <Footer/>
@@ -162,7 +162,6 @@ class SettingsDialog extends React.Component<ISettingsDialogProps, ISettingsDial
         );
     }
 }
-
 
 // Need a map of id -> area for fast lookup.  The current Select control does not make it easy/possible to carry the
 // actual BrainArea object around with the select.  See filterOption function for brain area Select control, primarily.
