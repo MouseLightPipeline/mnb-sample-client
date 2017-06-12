@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import {Glyphicon, FormControl, FormGroup, InputGroup, Overlay, Tooltip, Button} from "react-bootstrap";
+import {Glyphicon, FormControl, FormGroup, InputGroup, Overlay, Tooltip, Button, HelpBlock} from "react-bootstrap";
 import {isNullOrUndefined} from "util";
 
 export enum DynamicEditFieldMode {
@@ -18,6 +18,7 @@ interface IDynamicEditFieldProps {
     canAcceptFunction?(value: string): boolean;
     acceptFunction?(value: string): Promise<boolean>;
     filterFunction?(proposedValue: string): any;
+    feedbackFunction?(proposedValue: string): any;
     formatFunction?(value: any, mode: DynamicEditFieldMode): string;
 
     onEditModeChanged?(mode: DynamicEditFieldMode): void;
@@ -28,6 +29,7 @@ interface IDynamicTableEditFieldState {
     value?: any
     mode?: DynamicEditFieldMode;
     showEditFail?: boolean;
+    feedback?: string;
 }
 
 export class DynamicEditField extends React.Component<IDynamicEditFieldProps, IDynamicTableEditFieldState> {
@@ -38,7 +40,8 @@ export class DynamicEditField extends React.Component<IDynamicEditFieldProps, ID
             initialPropValue: props.initialValue,
             value: props.initialValue,
             mode: DynamicEditFieldMode.Static,
-            showEditFail: false
+            showEditFail: false,
+            feedback: null
         };
     }
 
@@ -68,8 +71,10 @@ export class DynamicEditField extends React.Component<IDynamicEditFieldProps, ID
         return true;
     }
 
-    private onAcceptEdit = () => {
-        if (!this.props.acceptFunction || this.props.acceptFunction(this.state.value)) {
+    private async onAcceptEdit() {
+        const result = !this.props.acceptFunction || await this.props.acceptFunction(this.state.value);
+
+        if (result) {
             this.setState({mode: DynamicEditFieldMode.Static}, null);
             if (this.props.onEditModeChanged) {
                 this.props.onEditModeChanged(DynamicEditFieldMode.Static);
@@ -80,12 +85,20 @@ export class DynamicEditField extends React.Component<IDynamicEditFieldProps, ID
     private onValueChanged = (event: any) => {
         let value = event.target.value;
 
+        let feedback = this.state.feedback;
+
+        if (this.props.feedbackFunction) {
+            feedback = this.props.feedbackFunction(value);
+        }
+
         if (this.props.filterFunction) {
             value = this.props.filterFunction(value);
         }
 
         if (value !== null) {
-            this.setState({value: value}, null);
+            this.setState({value, feedback}, null);
+        } else {
+            this.setState({feedback}, null);
         }
     };
 
@@ -140,18 +153,19 @@ export class DynamicEditField extends React.Component<IDynamicEditFieldProps, ID
                                 <Glyphicon glyph="remove"/>
                             </Button>
                         </InputGroup.Button>
-                        <FormControl type="text"
+                        <FormControl type="text" style={this.state.feedback ? {color: "red"} : {}}
                                      value={this.format(this.state.value)}
                                      placeholder={this.props.placeHolder}
                                      onChange={this.onValueChanged}/>
                         <InputGroup.Button>
                             <Button bsStyle="success"
                                     disabled={!this.onCanAcceptEdit()}
-                                    onClick={this.onAcceptEdit}>
+                                    onClick={() => this.onAcceptEdit()}>
                                 <Glyphicon glyph="ok"/>
                             </Button>
                         </InputGroup.Button>
                     </InputGroup>
+                    {this.state.feedback ? <HelpBlock>{this.state.feedback}</HelpBlock> : null}
                 </FormGroup>);
         } else {
             return (

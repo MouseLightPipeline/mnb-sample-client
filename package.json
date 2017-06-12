@@ -1,6 +1,6 @@
 {
   "name": "sample-client-test",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "main": "src/sampleClientApp.js",
   "repository": "https://github.com/MouseLightDataBrowser/sample-client.git",
   "author": "Patrick Edson <pedson@leapscientific.com>",

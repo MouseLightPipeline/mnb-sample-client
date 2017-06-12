@@ -11,7 +11,7 @@ interface IDynamicSelectOption {
     id?: string | number;
 }
 
-export interface IDynamicSelectProps<T, S> {
+export interface IDynamicSelectProps<T, S, U> {
     idName: string;
     isExclusiveEditMode?: boolean;
     isDeferredEditMode?: boolean;
@@ -22,6 +22,7 @@ export interface IDynamicSelectProps<T, S> {
     multiSelect?: boolean;
     clearable?: boolean;
     useVirtualized?: boolean;
+    userData?: U;
 
     filterOptions?(options: Option[], filterValue: string, currentValues: Option[]): Option[];
     filterOption?(option: string, filter: string): boolean;
@@ -33,10 +34,13 @@ export interface IDynamicSelectState<T> {
     isInEditMode?: boolean;
     selectedOption?: T;
 }
+// T Defines individual options (e.g., ISample)
+// S Defines selected options (e.g., ISample for single select, ISample[] for multi-select)
+// P Defines expected deliverable on select (Option for single select, Option[] for multi-select)
+// U Defines type of optional user-defined prop data
+class DynamicSelect<T, S, P, U> extends React.Component<IDynamicSelectProps<T, S, U>, IDynamicSelectState<S>> {
 
-class DynamicSelect<T, S, P> extends React.Component<IDynamicSelectProps<T, S>, IDynamicSelectState<S>> {
-
-    public constructor(props: IDynamicSelectProps<T, S>) {
+    public constructor(props: IDynamicSelectProps<T, S, U>) {
         super(props);
 
         this.state = {isInEditMode: false, selectedOption: props.selectedOption};
@@ -90,7 +94,7 @@ class DynamicSelect<T, S, P> extends React.Component<IDynamicSelectProps<T, S>, 
         return !isNullOrUndefined(this.props.isDeferredEditMode) && this.props.isDeferredEditMode;
     }
 
-    public componentWillReceiveProps(props: IDynamicSelectProps<T, S>) {
+    public componentWillReceiveProps(props: IDynamicSelectProps<T, S, U>) {
         // if (this.isExclusiveEditMode || !this.isInEditMode) {
         this.setState({selectedOption: props.selectedOption});
         // }
@@ -227,7 +231,7 @@ class DynamicSelect<T, S, P> extends React.Component<IDynamicSelectProps<T, S>, 
     }
 }
 
-export class DynamicSingleSelect<T extends IDynamicSelectOption> extends DynamicSelect<T, T, Option> {
+export class DynamicSingleSelect<T extends IDynamicSelectOption, U> extends DynamicSelect<T, T, Option, U> {
     protected findSelectedObject(option: Option): T {
         return option ? this.props.options.filter(s => s.id === option.value)[0] : null;
     }
@@ -237,7 +241,7 @@ export class DynamicSingleSelect<T extends IDynamicSelectOption> extends Dynamic
     }
 
     protected staticDisplayForOption(option: T): any {
-        if (isNullOrUndefined(option)) {
+        if (isNullOrUndefined(option) && isNullOrUndefined(this.props.userData)) {
             return (<span style={{color: "#AAA"}}>{this.props.placeholder}</span>)
         }
         return this.selectLabelForOption(option);
@@ -252,7 +256,10 @@ export class DynamicSingleSelect<T extends IDynamicSelectOption> extends Dynamic
     }
 }
 
-export class DynamicMultiSelect<T extends IDynamicSelectOption> extends DynamicSelect<T, T[], Option[]> {
+export class DynamicSimpleSelect<T extends IDynamicSelectOption> extends DynamicSingleSelect<T, any> {
+}
+
+export class DynamicMultiSelect<T extends IDynamicSelectOption, U> extends DynamicSelect<T, T[], Option[], U> {
     protected findSelectedObject(option: Option[]): T[] {
         return option.map(o => {
             return this.props.options.find(s => s.id === o.value);
@@ -279,4 +286,7 @@ export class DynamicMultiSelect<T extends IDynamicSelectOption> extends DynamicS
         }
         return selection;
     }
+}
+
+export class DynamicSimpleMultiSelect<T extends IDynamicSelectOption> extends DynamicMultiSelect<T, any> {
 }

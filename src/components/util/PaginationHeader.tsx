@@ -58,8 +58,8 @@ export class PaginationHeader extends React.Component<IPaginationHeaderProps, IP
             <div style={{
                 padding: "0px",
                 backgroundColor: "#fff",
-                borderBottom: "1px solid #ddd",
-                height: "71px"
+                height: "71px",
+                display: "inline-block"
             }}>
                 <table >
                     <tbody>

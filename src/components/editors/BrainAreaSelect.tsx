@@ -5,13 +5,17 @@ import {displayBrainArea, IBrainArea} from "../../models/brainArea";
 import {Option} from "react-select";
 import {lookupBrainArea} from "../App";
 
-export class BrainAreaSelect extends DynamicSingleSelect<IBrainArea> {
-    public constructor(props: IDynamicSelectProps<IBrainArea, IBrainArea>) {
+export class BrainAreaSelect extends DynamicSingleSelect<IBrainArea, IBrainArea> {
+    public constructor(props: IDynamicSelectProps<IBrainArea, IBrainArea, IBrainArea>) {
         super(props);
     }
 
     protected selectLabelForOption(option: IBrainArea): any {
-        return displayBrainArea(option);
+        if (option) {
+            return displayBrainArea(option);
+        } else {
+            return `${displayBrainArea(this.props.userData)} (inherited)`;
+        }
     }
 
     protected filterOptions?(options: Option[], filterValue: string, currentValues: Option[]): Option[] {
@@ -53,7 +57,14 @@ export class BrainAreaSelect extends DynamicSingleSelect<IBrainArea> {
             const partsB = labelB.split(/\s+/);
 
             const areaA = lookupBrainArea(a["value"] as string);
+            if (!areaA) {
+                return -1;
+            }
+
             const areaB = lookupBrainArea(b["value"] as string);
+            if (!areaB) {
+                return 1;
+            }
 
             if (partsA.length > 1 && partsB.length > 1) {
                 const countA = partsA.reduce((p, c) => {

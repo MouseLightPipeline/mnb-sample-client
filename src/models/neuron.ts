@@ -28,7 +28,8 @@ export interface INeuronInput {
     y?: number;
     z?: number;
     sharing?: number;
-    brainAreaId?: IBrainArea;
+    injectionId?: string;
+    brainAreaId?: string;
 }
 
 export interface IMutatedNeuron {
@@ -38,6 +39,13 @@ export interface IMutatedNeuron {
 
 export interface IMutateNeuronData {
     updateNeuron: IMutatedNeuron
+}
+
+export interface IParseSomaResult {
+    x: number;
+    y: number;
+    z: number;
+    error: string;
 }
 
 export function displayNeuron(neuron: INeuron): string {
@@ -51,9 +59,9 @@ export function displayNeuronBrainArea(neuron: INeuron): string {
 }
 
 export function formatSomaCoords(x: number, y: number, z: number) {
-    const nx = x ? x.toFixed(4) : "n/a";
-    const ny = y ? y.toFixed(4) : "n/a";
-    const nz = z ? z.toFixed(4) : "n/a";
+    const nx = !isNullOrUndefined(x) ? x.toFixed(4) : "n/a";
+    const ny = !isNullOrUndefined(y) ? y.toFixed(4) : "n/a";
+    const nz = !isNullOrUndefined(z) ? z.toFixed(4) : "n/a";
 
     return `(${nx}, ${ny}, ${nz})`;
 }
@@ -64,4 +72,46 @@ export function formatSomaLocation(neuron: INeuron) {
     } else {
         return "(n/a)";
     }
+}
+
+export function parseSomaLocation(location: string): IParseSomaResult {
+    location = location.trim();
+
+    if (location.length > 2 && location[0] === "(" && location[location.length - 1] === ")") {
+        location = location.slice(1, location.length - 1).trim();
+    }
+
+    let parts = location.split(",");
+
+    let somaParse = {
+        x: NaN,
+        y: NaN,
+        z: NaN,
+        error: ""
+    };
+
+    if (parts.length === 3) {
+        somaParse.x = parseFloat(parts[0].trim());
+        if (isNaN(somaParse.x)) {
+            somaParse.error = "Can not parse soma x location";
+            return somaParse;
+        }
+
+        somaParse.y = parseFloat(parts[1].trim());
+        if (isNaN(somaParse.y)) {
+            somaParse.error = "Can not parse soma y location";
+            return somaParse;
+        }
+
+        somaParse.z = parseFloat(parts[2].trim());
+        if (isNaN(somaParse.z)) {
+            somaParse.error = "Can not parse soma z location";
+            return somaParse;
+        }
+    } else {
+        somaParse.error = "Can not parse soma location";
+        return somaParse;
+    }
+
+    return somaParse;
 }

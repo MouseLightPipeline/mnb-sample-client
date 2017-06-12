@@ -35,6 +35,11 @@ export interface ISampleInput {
     activeRegistrationTransformId?: string;
 }
 
+export interface ISamplesQueryOutput {
+    totalCount: number;
+    items: ISample[];
+}
+
 export interface IMutatedSample {
     sample: ISample;
     error: Error;

@@ -36,3 +36,14 @@ export function displayInjections(injections: IInjection[], separator: string = 
 
     return injections.reduce((prev, curr) => prev + `${displayInjection(curr)}${separator}`, "").slice(0, -separator.length);
 }
+
+export function displayInjectionWithVirus(injection: IInjection) {
+    if (!injection) {
+        return "(none)";
+    }
+
+    const b = displayBrainArea(injection.brainArea, "(no brain area)")
+    const i = injection.injectionVirus ? ` (${injection.injectionVirus.name})` : "";
+
+    return b + i;
+}

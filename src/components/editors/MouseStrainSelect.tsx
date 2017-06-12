@@ -1,9 +1,9 @@
 import * as React from "react";
 
-import {DynamicSingleSelect} from "../util/DynamicSelect";
+import {DynamicSimpleSelect} from "../util/DynamicSelect";
 import {displayMouseStrain, IMouseStrain} from "../../models/mouseStrain";
 
-export class MouseStrainSelect extends DynamicSingleSelect<IMouseStrain> {
+export class MouseStrainSelect extends DynamicSimpleSelect<IMouseStrain> {
     protected selectLabelForOption(option: IMouseStrain): any {
         return displayMouseStrain(option);
     }

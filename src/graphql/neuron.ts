@@ -35,6 +35,38 @@ export const NeuronsQuery = gql`query NeuronsQuery($input: NeuronQueryInput) {
     }
 }`;
 
+export const CreateNeuronMutation = gql`mutation CreateNeuron($neuron: NeuronInput) {
+    createNeuron(neuron: $neuron) {
+        neuron {
+            id
+            idNumber
+            idString
+            tag
+            keywords
+            x
+            y
+            z
+            sharing
+            brainArea {
+                id
+                name
+            }
+            injection {
+                id
+                brainArea {
+                    id
+                    name
+                }
+            }
+            updatedAt
+            createdAt
+        }
+        error {
+            message
+        }
+    }
+}`;
+
 export const UpdateNeuronMutation = gql`mutation UpdateNeuron($neuron: NeuronInput) {
     updateNeuron(neuron: $neuron) {
         neuron {
@@ -56,11 +88,6 @@ export const UpdateNeuronMutation = gql`mutation UpdateNeuron($neuron: NeuronInp
                 brainArea {
                     id
                     name
-                }
-                sample {
-                    id
-                    idNumber
-                    sampleDate
                 }
             }
             createdAt

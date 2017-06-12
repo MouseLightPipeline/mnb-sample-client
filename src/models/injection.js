@@ -15,4 +15,13 @@ function displayInjections(injections, separator = ", ", missing = "(none)") {
     return injections.reduce((prev, curr) => prev + `${displayInjection(curr)}${separator}`, "").slice(0, -separator.length);
 }
 exports.displayInjections = displayInjections;
+function displayInjectionWithVirus(injection) {
+    if (!injection) {
+        return "(none)";
+    }
+    const b = brainArea_1.displayBrainArea(injection.brainArea, "(no brain area)");
+    const i = injection.injectionVirus ? ` (${injection.injectionVirus.name})` : "";
+    return b + i;
+}
+exports.displayInjectionWithVirus = displayInjectionWithVirus;
 //# sourceMappingURL=injection.js.map

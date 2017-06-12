@@ -1,21 +1,21 @@
 export interface IBrainArea {
     id: string;
     name: string;
-    structureId: number;
-    depth: number;
-    parentStructureId: number;
-    structureIdPath: string;
-    safeName: string;
-    acronym: string;
-    atlasId: number;
-    graphId: number;
-    graphOrder: number;
-    hemisphereId: number;
-    geometryFile: string;
-    geometryColor: string;
-    geometryEnable: boolean;
-    createdAt: number;
-    updatedAt: number;
+    structureId?: number;
+    depth?: number;
+    parentStructureId?: number;
+    structureIdPath?: string;
+    safeName?: string;
+    acronym?: string;
+    atlasId?: number;
+    graphId?: number;
+    graphOrder?: number;
+    hemisphereId?: number;
+    geometryFile?: string;
+    geometryColor?: string;
+    geometryEnable?: boolean;
+    createdAt?: number;
+    updatedAt?: number;
 
 }
 

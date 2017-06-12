@@ -12,7 +12,7 @@ import {IMouseStrain} from "../models/mouseStrain";
 import {ManageTransforms} from "./dialogs/RegistrationTransform/ManageTransforms";
 import {ManageInjections} from "./dialogs/Injection/ManageInjections";
 import {CreateSampleMutation, NeuronCountsForSamplesQuery, SamplesQuery} from "../graphql/sample";
-import {toastUpdateError, toastUpdateSuccess} from "./util/Toasts";
+import {toastCreateError, toastCreateSuccess} from "./util/Toasts";
 
 interface ISamplesGraphQLProps {
     samples: IQueryOutput<ISample>;
@@ -88,12 +88,12 @@ export class SamplesTable extends React.Component<ISamplesProps, ISamplesState> 
             const result = await this.props.createSample({id: null});
 
             if (!result.data.createSample.sample) {
-                toast.error(toastUpdateError(result.data.createSample.error), {autoClose: false});
+                toast.error(toastCreateError(result.data.createSample.error), {autoClose: false});
             } else {
-                toast.success(toastUpdateSuccess(), {autoClose: 3000});
+                toast.success(toastCreateSuccess(), {autoClose: 3000});
             }
         } catch (error) {
-            toast.error(toastUpdateError(error), {autoClose: false});
+            toast.error(toastCreateError(error), {autoClose: false});
         }
     }
 

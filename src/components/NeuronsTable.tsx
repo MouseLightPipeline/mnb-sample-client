@@ -1,54 +1,75 @@
 import * as React from "react";
-import {Table, Glyphicon, Modal, Button} from "react-bootstrap";
+import {Table, Button, Row, Col, InputGroup, Glyphicon} from "react-bootstrap";
 import {graphql, InjectedGraphQLProps} from 'react-apollo';
+import {GraphQLDataProps} from "react-apollo/lib/graphql";
 import {toast} from "react-toastify";
-import * as moment from "moment";
+import {isNullOrUndefined} from "util";
 
+import {toastCreateError, toastCreateSuccess} from "./util/Toasts";
 import {PaginationHeader} from "./util/PaginationHeader";
 import {IQueryOutput} from "../util/graphQLTypes";
-import {
-    displayNeuron, displayNeuronBrainArea, formatSomaLocation, IMutateNeuronData, INeuron,
-    INeuronInput
-} from "../models/neuron";
-import {displaySample} from "../models/sample";
-import {truncate} from "../util/string";
-import {toastDeleteError, toastDeleteSuccess, toastUpdateError, toastUpdateSuccess} from "./util/Toasts";
-import {DeleteNeuronMutation, NeuronsQuery, UpdateNeuronMutation} from "../graphql/neuron";
-import {FindVisibilityOption, IShareVisibilityOption, NeuronVisibilityOptions} from "../util/ShareVisibility";
-import {VisibilitySelect} from "./editors/VisibilitySelect";
-
-const ShareVisibilityOptions = NeuronVisibilityOptions();
+import {IMutateNeuronData, INeuron, INeuronInput} from "../models/neuron";
+import {CreateNeuronMutation, DeleteNeuronMutation, NeuronsQuery, UpdateNeuronMutation} from "../graphql/neuron";
+import {NeuronRow} from "./NeuronRow";
+import {SampleSelect} from "./editors/SampleSelect";
+import {AllSamplesQuery} from "../graphql/sample";
+import {ISample, ISamplesQueryOutput} from "../models/sample";
+import {IInjection} from "../models/injection";
+import {InjectionsForSampleSelect} from "./editors/InjectionForSampleSelect";
 
 interface INeuronsGraphQLProps {
     neurons: IQueryOutput<INeuron>;
 }
 
+interface ISamplesQueryProps {
+    samples: ISamplesQueryOutput;
+}
+
 interface INeuronsProps extends InjectedGraphQLProps<INeuronsGraphQLProps> {
     offset: number;
     limit: number;
+    samplesQuery?: ISamplesQueryProps & GraphQLDataProps;
 
     onUpdateOffsetForPage(page: number): void;
     onUpdateLimit(limit: number): void;
 
+    createNeuron?(sample: INeuronInput): any;
     updateNeuron?(neuron: INeuronInput): Promise<InjectedGraphQLProps<IMutateNeuronData>>;
     deleteNeuron?(neuron: INeuronInput): any;
 }
 
 interface INeuronState {
-    showConfirmDelete?: boolean;
     neuronToDelete?: INeuron;
     isInUpdate?: boolean;
+    sample?: ISample;
+    isSampleLocked?: boolean;
+    injection: IInjection;
 }
 
+@graphql(AllSamplesQuery, {
+    name: "samplesQuery",
+    options: {
+        pollInterval: 5000
+    }
+})
 @graphql(NeuronsQuery, {
     options: ({offset, limit}) => ({
         pollInterval: 5000,
         variables: {
             input: {
                 offset: offset,
-                limit: limit
+                limit: limit,
+                sortOrder: "DESC"
             }
         }
+    })
+})
+@graphql(CreateNeuronMutation, {
+    props: ({mutate}) => ({
+        createNeuron: (neuron: INeuronInput) => mutate({
+            variables: {neuron},
+            refetchQueries: ["NeuronsQuery"]
+        })
     })
 })
 @graphql(UpdateNeuronMutation, {
@@ -57,7 +78,7 @@ interface INeuronState {
             variables: {neuron}
         })
     })
-})@graphql(DeleteNeuronMutation, {
+}) @graphql(DeleteNeuronMutation, {
     props: ({mutate}) => ({
         deleteNeuron: (neuron: INeuronInput) => mutate({
             variables: {neuron}
@@ -69,79 +90,112 @@ export class NeuronsTable extends React.Component<INeuronsProps, INeuronState> {
         super(props);
 
         this.state = {
-            showConfirmDelete: false, neuronToDelete: null,
-            isInUpdate: false
+            neuronToDelete: null,
+            isInUpdate: false,
+            sample: null,
+            injection: null,
+            isSampleLocked: false
         };
     }
 
-    private async performUpdate(neuronPartial: INeuronInput) {
-        try {
-            const result = await this.props.updateNeuron(neuronPartial);
+    private onSampleChange(sample: ISample) {
+        if (sample !== this.state.sample) {
+            this.setState({sample, injection: null}, null);
+        }
+    }
 
-            if (!result.data.updateNeuron.neuron) {
-                toast.error(toastUpdateError(result.data.updateNeuron.error), {autoClose: false});
+    private onLockSample() {
+        this.setState({isSampleLocked: !this.state.isSampleLocked}, null);
+
+        if (typeof(Storage) !== "undefined") {
+            if (!this.state.isSampleLocked) {
+                localStorage.setItem("neuron.create.locked.sample", this.state.sample.id);
             } else {
-                toast.success(toastUpdateSuccess(), {autoClose: 3000});
+                localStorage.setItem("neuron.create.locked.sample", null);
             }
-            this.setState({isInUpdate: false});
-        } catch (error) {
-            toast.error(toastUpdateError(error), {autoClose: false});
-
-            this.setState({isInUpdate: false});
-
-            return false;
-        }
-
-        return true;
-    }
-
-    private async onAcceptVisibility(neuron: INeuron, visibility: IShareVisibilityOption): Promise<boolean> {
-        return this.performUpdate({id: neuron.id, sharing: visibility.id});
-    }
-
-    private async onShowDeleteConfirmation(neuron: INeuron) {
-        this.setState({showConfirmDelete: true, neuronToDelete: neuron}, null);
-    }
-
-
-    private async onCloseConfirmation(shouldDelete = false) {
-        this.setState({showConfirmDelete: false}, null);
-
-        if (shouldDelete) {
-            await this.deleteNeuron();
         }
     }
 
-    private async deleteNeuron() {
+    private canCreateNeuron(): boolean {
+        return !isNullOrUndefined(this.state.sample) && !isNullOrUndefined(this.state.injection);
+    }
+
+    private onInjectionChange(injection: IInjection) {
+        if (injection !== this.state.injection) {
+            this.setState({injection}, null);
+        }
+    }
+
+    private async onCreateNeuron() {
         try {
-            const result = await this.props.deleteNeuron({id: this.state.neuronToDelete.id});
+            const result = await this.props.createNeuron({id: null, injectionId: this.state.injection.id});
 
-            console.log(result);
-            if (result.data.deleteNeuron.error) {
-                toast.error(toastDeleteError(result.data.deleteNeuron.error), {autoClose: false});
+            if (!result.data.createNeuron.neuron) {
+                toast.error(toastCreateError(result.data.createNeuron.error), {autoClose: false});
             } else {
-                toast.success(toastDeleteSuccess(), {autoClose: 3000});
-                // this.setState({isDeleted: true});
+                toast.success(toastCreateSuccess(), {autoClose: 3000});
             }
         } catch (error) {
-            toast.error(toastDeleteError(error), {autoClose: false});
+            toast.error(toastCreateError(error), {autoClose: false});
         }
     }
 
-    private renderDeleteConfirmationModal() {
+    public componentWillReceiveProps(props: INeuronsProps) {
+        if (typeof(Storage) !== "undefined") {
+            const lockedSampleId = localStorage.getItem("neuron.create.locked.sample");
+
+            if (lockedSampleId && props.samplesQuery && props.samplesQuery.samples) {
+                let samples = props.samplesQuery.samples.items.filter(s => s.id === lockedSampleId);
+
+                if (samples.length > 0 && this.state.sample !== samples[0]) {
+                    this.setState({sample: samples[0], isSampleLocked: true}, null);
+                }
+            }
+        }
+    }
+
+    private renderPanelHeader(samples: ISample[]) {
         return (
-            <Modal show={this.state.showConfirmDelete} onHide={() => this.onCloseConfirmation()}>
-                <Modal.Header closeButton>
-                    <h4>Delete Neuron?</h4>
-                </Modal.Header>
-                <Modal.Body>
-                    Are you sure you want to delete neuron {displayNeuron(this.state.neuronToDelete)}?
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button onClick={() => this.onCloseConfirmation()} style={{marginRight: "20px"}}>Cancel</Button>
-                    <Button onClick={() => this.onCloseConfirmation(true)} bsStyle="danger">Delete</Button>
-                </Modal.Footer>
-            </Modal>
+            <div className="card-header">
+                <div style={{display: "inline-block"}}>
+                    <h5>Neurons</h5>
+                </div>
+                <div style={{display: "inline-block", paddingTop: "px", maxWidth: "720px"}}
+                     className="pull-right">
+                    <Row style={{margin: "0px"}}>
+                        <Col md={4} sm={12}>
+                            <InputGroup bsSize="sm">
+                                <SampleSelect idName="create-neuron-samples" options={samples}
+                                              selectedOption={this.state.sample}
+                                              disabled={this.state.isSampleLocked}
+                                              placeholder="Select sample..."
+                                              onSelect={s => this.onSampleChange(s)}/>
+                                <InputGroup.Button>
+                                    <Button bsStyle={this.state.isSampleLocked ? "danger" : "default"}
+                                            disabled={this.state.sample === null}
+                                            active={this.state.isSampleLocked}
+                                            onClick={() => this.onLockSample()}>
+                                        <Glyphicon glyph="lock"/>
+                                    </Button>
+                                </InputGroup.Button>
+                            </InputGroup>
+                        </Col>
+                        <Col md={7} sm={12}>
+                            <InjectionsForSampleSelect sample={this.state.sample}
+                                                       selectedInjection={this.state.injection}
+                                                       onInjectionChange={n => this.onInjectionChange(n)}
+                                                       disabled={this.state.sample === null}
+                                                       placeholder={this.state.sample ? "Select an injection..." : "No sample..."}/>
+                        </Col>
+                        <Col md={1} sm={12}>
+                            <Button bsSize="sm" bsStyle="primary" disabled={!this.canCreateNeuron()}
+                                    onClick={() => this.onCreateNeuron()}>
+                                <Glyphicon glyph="plus"/>
+                            </Button>
+                        </Col>
+                    </Row>
+                </div>
+            </div>
         );
     }
 
@@ -151,32 +205,7 @@ export class NeuronsTable extends React.Component<INeuronsProps, INeuronState> {
         const neurons = isDataAvailable ? this.props.data.neurons.items : [];
 
         const rows = neurons.map(n => {
-            return (<tr key={n.id}>
-                <td>{n.idString}</td>
-                <td>{n.tag}</td>
-                <td>{displaySample(n.injection.sample)}</td>
-                <td>{displayNeuronBrainArea(n)}</td>
-                <td>{formatSomaLocation(n)}</td>
-                <td>{truncate(n.keywords)}</td>
-                <td>
-                    <VisibilitySelect idName="sample-visibility"
-                                      options={ShareVisibilityOptions}
-                                      selectedOption={FindVisibilityOption(n.sharing)}
-                                      isDeferredEditMode={true}
-                                      isExclusiveEditMode={false}
-                                      onSelect={v => this.onAcceptVisibility(n, v)}/>
-                </td>
-                <td>
-                    <div style={{display: "inline-block"}}>
-                        {moment(n.createdAt).format("YYYY-MM-DD")}<br/>
-                        {moment(n.createdAt).format("hh:mm:ss")}
-                    </div>
-                    <a style={{paddingRight: "20px"}} className="pull-right"
-                       onClick={() => this.onShowDeleteConfirmation(n)}>
-                        <Glyphicon glyph="trash"/>
-                    </a>
-                </td>
-            </tr>)
+            return <NeuronRow key={n.id} neuron={n}/>
         });
 
         const totalCount = isDataAvailable ? this.props.data.neurons.totalCount : -1;
@@ -185,18 +214,19 @@ export class NeuronsTable extends React.Component<INeuronsProps, INeuronState> {
 
         const activePage = rows ? (this.props.offset ? (Math.floor(this.props.offset / this.props.limit) + 1) : 1) : 0;
 
+        const samples = this.props.samplesQuery && !this.props.samplesQuery.loading ? this.props.samplesQuery.samples.items : [];
+
         return (
             <div className="card">
-                {this.state.showConfirmDelete ? this.renderDeleteConfirmationModal() : null}
-                <div className="card-header">
-                    Neurons
-                </div>
+                {this.renderPanelHeader(samples)}
                 <div className="card-block">
-                    <PaginationHeader pageCount={pageCount}
-                                      activePage={activePage}
-                                      limit={this.props.limit}
-                                      onUpdateLimitForPage={limit => this.props.onUpdateLimit(limit)}
-                                      onUpdateOffsetForPage={page => this.props.onUpdateOffsetForPage(page)}/>
+                    <div style={{borderBottom: "1px solid #ddd"}}>
+                        <PaginationHeader pageCount={pageCount}
+                                          activePage={activePage}
+                                          limit={this.props.limit}
+                                          onUpdateLimitForPage={limit => this.props.onUpdateLimit(limit)}
+                                          onUpdateOffsetForPage={page => this.props.onUpdateOffsetForPage(page)}/>
+                    </div>
                     <Table style={{marginBottom: "0px"}}>
                         <thead>
                         <tr>
@@ -207,6 +237,7 @@ export class NeuronsTable extends React.Component<INeuronsProps, INeuronState> {
                             <th>Soma Sample Location</th>
                             <th>Keywords</th>
                             <th>Visibility</th>
+                            <th>Tracings</th>
                             <th>Created</th>
                         </tr>
                         </thead>

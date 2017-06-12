@@ -23,6 +23,24 @@ export const SampleForInjectionQuery = gql`query SampleForInjectionQuery($id: St
     }
 }`;
 
+export const InjectionsForSampleQuery = gql`query InjectionsForSample($input: InjectionQueryInput) {
+    injections(input: $input) {
+        id
+        injectionVirus {
+            id
+            name
+        }
+        fluorophore {
+            id
+            name
+        }
+        brainArea {
+            id
+            name
+        }
+     }
+}`;
+
 export const InjectionViruses = gql`query InjectionVirus {
     injectionViruses {
         id
