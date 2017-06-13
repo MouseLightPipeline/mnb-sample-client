@@ -19,6 +19,7 @@ import {AllSamplesQuery} from "../graphql/sample";
 import {ISample, ISamplesQueryOutput} from "../models/sample";
 import {IInjection} from "../models/injection";
 import {InjectionsForSampleSelect} from "./editors/InjectionForSampleSelect";
+import {UserPreferences, UserPreferencesManager} from "../util/userPreferences";
 
 interface ITracingCountsForNeuronsQueryProps {
     tracingCountsForNeurons: any;
@@ -117,20 +118,15 @@ export class NeuronsTable extends React.Component<INeuronsProps, INeuronState> {
 
     private onSampleChange(sample: ISample) {
         if (sample !== this.state.sample) {
-            this.setState({sample, injection: null}, null);
+            this.setState({sample, injection: null});
         }
     }
 
     private onLockSample() {
-        this.setState({isSampleLocked: !this.state.isSampleLocked}, null);
+        // Based on current state so if locked, clear locked sample, etc.
+        UserPreferencesManager.neuronCreateLockedSampleId = this.state.isSampleLocked ? null : this.state.sample.id;
 
-        if (typeof(Storage) !== "undefined") {
-            if (!this.state.isSampleLocked) {
-                localStorage.setItem("neuron.create.locked.sample", this.state.sample.id);
-            } else {
-                localStorage.setItem("neuron.create.locked.sample", null);
-            }
-        }
+        this.setState({isSampleLocked: !this.state.isSampleLocked});
     }
 
     private canCreateNeuron(): boolean {
@@ -139,7 +135,7 @@ export class NeuronsTable extends React.Component<INeuronsProps, INeuronState> {
 
     private onInjectionChange(injection: IInjection) {
         if (injection !== this.state.injection) {
-            this.setState({injection}, null);
+            this.setState({injection});
         }
     }
 
@@ -158,15 +154,13 @@ export class NeuronsTable extends React.Component<INeuronsProps, INeuronState> {
     }
 
     public componentWillReceiveProps(props: INeuronsProps) {
-        if (typeof(Storage) !== "undefined") {
-            const lockedSampleId = localStorage.getItem("neuron.create.locked.sample");
+        const lockedSampleId = UserPreferencesManager.neuronCreateLockedSampleId;
 
-            if (lockedSampleId && props.samplesQuery && props.samplesQuery.samples) {
-                let samples = props.samplesQuery.samples.items.filter(s => s.id === lockedSampleId);
+        if (lockedSampleId && props.samplesQuery && props.samplesQuery.samples) {
+            let samples = props.samplesQuery.samples.items.filter(s => s.id === lockedSampleId);
 
-                if (samples.length > 0 && this.state.sample !== samples[0]) {
-                    this.setState({sample: samples[0], isSampleLocked: true}, null);
-                }
+            if (samples.length > 0 && this.state.sample !== samples[0]) {
+                this.setState({sample: samples[0], isSampleLocked: true}, null);
             }
         }
     }
@@ -177,7 +171,7 @@ export class NeuronsTable extends React.Component<INeuronsProps, INeuronState> {
                 <div style={{display: "inline-block"}}>
                     <h5>Neurons</h5>
                 </div>
-                <div style={{display: "inline-block", paddingTop: "px", maxWidth: "720px"}}
+                <div style={{display: "inline-block", paddingTop: "px", minWidth: "700px", maxWidth: "720px"}}
                      className="pull-right">
                     <Row style={{margin: "0px"}}>
                         <Col md={4} sm={12}>

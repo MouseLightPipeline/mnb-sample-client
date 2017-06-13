@@ -48,7 +48,7 @@ export class DynamicAutoSuggest<T extends any> extends React.Component<IObjectAu
     }
 
     private onRequestEditMode() {
-        this.setState({mode: DynamicAutoSuggestMode.Edit}, null);
+        this.setState({mode: DynamicAutoSuggestMode.Edit});
     }
 
     private onAcceptEdit() {
@@ -60,7 +60,7 @@ export class DynamicAutoSuggest<T extends any> extends React.Component<IObjectAu
     }
 
     private onCancelEdit() {
-        this.setState({mode: DynamicAutoSuggestMode.Static, value: this.props.initialValue}, null);
+        this.setState({mode: DynamicAutoSuggestMode.Static, value: this.props.initialValue});
     }
 
     private onAutoSuggestInputChange(obj: any) {
