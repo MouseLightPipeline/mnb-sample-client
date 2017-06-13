@@ -5,6 +5,7 @@ import {Grid, Row, Col} from "react-bootstrap";
 import {NeuronsTable} from "./NeuronsTable";
 
 interface ICreateTracingProps {
+    haveLoadedBrainAreas: boolean;
 }
 
 interface ICreateTracingState {
@@ -28,17 +29,21 @@ export class Neurons extends React.Component<ICreateTracingProps, ICreateTracing
     }
 
     public render() {
-        return (
-            <Grid fluid>
-                <Row>
-                    <Col xs={12}>
-                        <NeuronsTable offset={this.state.offset}
-                                      limit={this.state.limit}
-                                      onUpdateOffsetForPage={page => this.onUpdateOffsetForPage(page)}
-                                      onUpdateLimit={limit => this.onUpdateLimit(limit)}/>
-                    </Col>
-                </Row>
-            </Grid>
-        );
+        if (this.props.haveLoadedBrainAreas) {
+            return (
+                <Grid fluid>
+                    <Row>
+                        <Col xs={12}>
+                            <NeuronsTable offset={this.state.offset}
+                                          limit={this.state.limit}
+                                          onUpdateOffsetForPage={page => this.onUpdateOffsetForPage(page)}
+                                          onUpdateLimit={limit => this.onUpdateLimit(limit)}/>
+                        </Col>
+                    </Row>
+                </Grid>
+            );
+        } else {
+            return null;
+        }
     }
 }

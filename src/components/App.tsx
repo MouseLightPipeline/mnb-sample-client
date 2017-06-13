@@ -8,6 +8,7 @@ import {IBrainArea} from "../models/brainArea";
 import {ImmutableQuery} from "../graphql/immutableTypes";
 import {isNullOrUndefined} from "util";
 import {SystemMessageQuery} from "../graphql/systemMessage";
+import {ReactElement} from "react";
 
 const linkStyle = {
     color: "white"
@@ -68,8 +69,9 @@ interface IAppProps extends InjectedGraphQLProps<IAppDataProps> {
 }
 
 interface IAppState {
-    isSettingsOpen: boolean;
+    isSettingsOpen?: boolean;
     shouldClearCreateContentsAfterUpload?: boolean;
+    haveLoadedBrainAreas?: boolean;
 }
 
 @graphql(ImmutableQuery, {
@@ -84,32 +86,40 @@ export class App extends React.Component<IAppProps, IAppState> {
         if (typeof(Storage) !== "undefined") {
             shouldClearCreateContentsAfterUpload = localStorage.getItem("shouldClearCreateContentsAfterUpload") == "true";
         }
-        this.state = {
-            isSettingsOpen: false,
-            shouldClearCreateContentsAfterUpload
-        }
+
+        let haveLoadedBrainAreas = false;
 
         if (props.data && !props.data.loading) {
-            makeBrainAreaMap(props.data.brainAreas);
+            haveLoadedBrainAreas = makeBrainAreaMap(props.data.brainAreas);
+        }
+
+        this.state = {
+            isSettingsOpen: false,
+            shouldClearCreateContentsAfterUpload,
+            haveLoadedBrainAreas
         }
     }
 
     public componentWillReceiveProps(nextProps: IAppProps) {
         if (nextProps.data && !nextProps.data.loading) {
-            makeBrainAreaMap(nextProps.data.brainAreas);
+            let haveLoadedBrainAreas = makeBrainAreaMap(nextProps.data.brainAreas);
+
+            if (haveLoadedBrainAreas !== this.state.haveLoadedBrainAreas) {
+                this.setState({haveLoadedBrainAreas});
+            }
         }
     }
 
     private onSettingsClick() {
-        this.setState({isSettingsOpen: true}, null);
+        this.setState({isSettingsOpen: true});
     }
 
     private onSettingsClose() {
-        this.setState({isSettingsOpen: false}, null);
+        this.setState({isSettingsOpen: false});
     }
 
     private onChangeClearContents(shouldClear: boolean) {
-        this.setState({shouldClearCreateContentsAfterUpload: shouldClear}, null);
+        this.setState({shouldClearCreateContentsAfterUpload: shouldClear});
 
         if (typeof(Storage) !== "undefined") {
             localStorage.setItem("shouldClearCreateContentsAfterUpload", shouldClear ? "true" : "false");
@@ -126,7 +136,7 @@ export class App extends React.Component<IAppProps, IAppState> {
                                 onChangeClearContents={(b: boolean) => this.onChangeClearContents(b)}/>
                 <Heading onSettingsClick={() => this.onSettingsClick()}/>
                 <div style={{marginTop: "50px", marginBottom: "50px"}}>
-                    {this.props.children}
+                    {React.cloneElement(this.props.children as ReactElement<any>, { haveLoadedBrainAreas: this.state.haveLoadedBrainAreas })}
                 </div>
                 <Footer/>
             </div>
@@ -169,14 +179,16 @@ const BrainAreaMap = new Map<string, IBrainArea>();
 
 export let BrainAreas: IBrainArea[] = [];
 
-function makeBrainAreaMap(brainAreas: IBrainArea[]) {
+function makeBrainAreaMap(brainAreas: IBrainArea[]): boolean {
     if (BrainAreaMap.size > 0 || isNullOrUndefined(brainAreas)) {
-        return;
+        return BrainAreaMap.size > 0;
     }
 
     BrainAreas = brainAreas;
 
     brainAreas.map(b => BrainAreaMap.set(b.id, b));
+
+    return true;
 }
 
 export function lookupBrainArea(id: string): IBrainArea {

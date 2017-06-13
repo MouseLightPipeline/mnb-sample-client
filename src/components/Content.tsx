@@ -4,6 +4,7 @@ import {Samples} from "./Samples";
 import {Neurons} from "./Neurons";
 
 interface IContentProps {
+    haveLoadedBrainAreas: boolean;
 }
 
 interface IContentState {
@@ -17,8 +18,8 @@ export class Content extends React.Component<IContentProps, IContentState> {
     public render() {
         return (
             <div>
-                <Samples/>
-                <Neurons/>
+                <Samples haveLoadedBrainAreas={this.props.haveLoadedBrainAreas}/>
+                <Neurons haveLoadedBrainAreas={this.props.haveLoadedBrainAreas}/>
             </div>
         );
     }

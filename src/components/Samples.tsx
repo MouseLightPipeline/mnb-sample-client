@@ -19,6 +19,7 @@ interface ITracingStructuresQueryProps {
 }
 
 interface ICreateTracingProps {
+    haveLoadedBrainAreas: boolean;
     mouseStrainsQuery?: ITracingStructuresQueryProps & GraphQLDataProps;
 }
 
