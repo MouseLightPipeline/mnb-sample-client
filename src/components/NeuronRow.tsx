@@ -109,10 +109,11 @@ export class NeuronRow extends React.Component<INeuronRowProps, INeuronRowState>
     private async onAcceptSomaLocationEdit(value: string): Promise<boolean> {
         const result = parseSomaLocation(value);
 
-        console.log(result);
+        if (result.error) {
+            return false;
+        }
 
-        return false;
-        // return this.performUpdate({id: this.props.neuron.id, x: parseInt(value), y: parseInt(value), z: parseInt(value)});
+        return await this.performUpdate({id: this.props.neuron.id, x: result.x, y: result.y, z: result.z});
     }
 
     private async onAcceptVisibility(visibility: IShareVisibilityOption): Promise<boolean> {
