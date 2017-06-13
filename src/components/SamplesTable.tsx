@@ -4,7 +4,6 @@ import {graphql, InjectedGraphQLProps} from 'react-apollo';
 import {toast} from "react-toastify";
 import {GraphQLDataProps} from "react-apollo/lib/graphql";
 
-import {PaginationHeader} from "./util/PaginationHeader";
 import {IQueryOutput} from "../util/graphQLTypes";
 import {ISample, ISampleInput} from "../models/sample";
 import {SampleRow} from "./SampleRow";
@@ -12,7 +11,7 @@ import {IMouseStrain} from "../models/mouseStrain";
 import {ManageTransforms} from "./dialogs/RegistrationTransform/ManageTransforms";
 import {ManageInjections} from "./dialogs/Injection/ManageInjections";
 import {CreateSampleMutation, NeuronCountsForSamplesQuery, SamplesQuery} from "../graphql/sample";
-import {toastCreateError, toastCreateSuccess} from "./util/Toasts";
+import {PaginationHeader, toastCreateError, toastCreateSuccess} from "ndb-react-components";
 
 interface ISamplesGraphQLProps {
     samples: IQueryOutput<ISample>;

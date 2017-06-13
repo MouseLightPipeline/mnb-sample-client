@@ -1,8 +1,7 @@
 import * as React from "react";
 
-import {DynamicAutoSuggest} from "../util/DynamicAutoSuggest";
 import {IMouseStrain} from "../../models/mouseStrain";
-
+import {DynamicAutoSuggest} from "ndb-react-components";
 
 export class MouseStrainAutoSuggest extends DynamicAutoSuggest<IMouseStrain> {
 }

@@ -5,8 +5,6 @@ import {GraphQLDataProps} from "react-apollo/lib/graphql";
 import {toast} from "react-toastify";
 import {isNullOrUndefined} from "util";
 
-import {toastCreateError, toastCreateSuccess} from "./util/Toasts";
-import {PaginationHeader} from "./util/PaginationHeader";
 import {IQueryOutput} from "../util/graphQLTypes";
 import {IMutateNeuronData, INeuron, INeuronInput} from "../models/neuron";
 import {
@@ -19,7 +17,8 @@ import {AllSamplesQuery} from "../graphql/sample";
 import {ISample, ISamplesQueryOutput} from "../models/sample";
 import {IInjection} from "../models/injection";
 import {InjectionsForSampleSelect} from "./editors/InjectionForSampleSelect";
-import {UserPreferences, UserPreferencesManager} from "../util/userPreferences";
+import {UserPreferencesManager} from "../util/userPreferences";
+import {PaginationHeader, toastCreateError, toastCreateSuccess} from "ndb-react-components";
 
 interface ITracingCountsForNeuronsQueryProps {
     tracingCountsForNeurons: any;

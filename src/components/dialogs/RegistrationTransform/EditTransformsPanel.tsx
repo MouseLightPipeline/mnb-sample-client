@@ -10,14 +10,15 @@ import {toast} from "react-toastify";
 
 import {IRegistrationTransform, IRegistrationTransformInput} from "../../../models/registrationTransform";
 import {ISample, ISampleInput} from "../../../models/sample";
-import {DynamicEditField} from "../../util/DynamicEditField";
 import {
     DeleteRegistrationMutation, SampleForRegistrationQuery,
     TracingCountQuery, UpdateRegistrationMutation
 } from "../../../graphql/registrationTransform";
-import {ModalAlert} from "../../util/ModalAlert";
-import {toastUpdateError, toastUpdateSuccess} from "../../util/Toasts";
 import {UpdateSampleMutation} from "../../../graphql/sample";
+import {
+    DynamicEditField, ModalAlert, toastUpdateError,
+    toastUpdateSuccess
+} from "ndb-react-components";
 
 interface ITracingCountQueryProps {
     tracingCountsForRegistrations: any;

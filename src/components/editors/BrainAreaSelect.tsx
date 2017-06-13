@@ -1,9 +1,9 @@
 import * as React from "react";
 
-import {DynamicSingleSelect, IDynamicSelectProps} from "../util/DynamicSelect";
 import {displayBrainArea, IBrainArea} from "../../models/brainArea";
 import {Option} from "react-select";
 import {lookupBrainArea} from "../App";
+import {DynamicSingleSelect, IDynamicSelectProps} from "ndb-react-components";
 
 export class BrainAreaSelect extends DynamicSingleSelect<IBrainArea, IBrainArea> {
     public constructor(props: IDynamicSelectProps<IBrainArea, IBrainArea, IBrainArea>) {

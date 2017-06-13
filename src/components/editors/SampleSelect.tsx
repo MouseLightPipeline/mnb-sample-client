@@ -1,7 +1,7 @@
 import * as React from "react";
 
-import {DynamicSimpleSelect} from "../util/DynamicSelect";
 import {displaySample, ISample} from "../../models/sample";
+import {DynamicSimpleSelect} from "ndb-react-components";
 
 export class SampleSelect extends DynamicSimpleSelect<ISample> {
     protected selectLabelForOption(option: ISample) {

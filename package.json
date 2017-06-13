@@ -47,6 +47,7 @@
     "graphql-tag": "^2.2.1",
     "immutability-helper": "^2.2.2",
     "moment": "^2.18.1",
+    "ndb-react-components": "^0.1.1",
     "rc-slider": "^7.0.8",
     "react": "^15.5.4",
     "react-apollo": "^1.2.0",

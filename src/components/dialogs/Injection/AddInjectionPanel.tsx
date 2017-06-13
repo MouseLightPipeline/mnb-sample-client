@@ -15,7 +15,7 @@ import {BrainAreaSelect} from "../../editors/BrainAreaSelect";
 import {BrainAreas, lookupBrainArea} from "../../App";
 import {IBrainArea} from "../../../models/brainArea";
 import {FluorophoreAutoSuggest} from "../../editors/FluorophoreAutoSuggest";
-import {toastUpdateError, toastUpdateSuccess} from "../../util/Toasts";
+import {toastUpdateError, toastUpdateSuccess} from "ndb-react-components";
 
 interface IAddInjectionProps {
     sample: ISample;

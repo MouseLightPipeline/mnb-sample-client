@@ -8,7 +8,7 @@ import * as update from "immutability-helper";
 import {IRegistrationTransformInput} from "../../../models/registrationTransform";
 import {ISample} from "../../../models/sample";
 import {CreateTransformMutation, SampleForRegistrationQuery} from "../../../graphql/registrationTransform";
-import {toastUpdateError, toastUpdateSuccess} from "../../util/Toasts";
+import {toastUpdateError, toastUpdateSuccess} from "ndb-react-components";
 
 type ValidationState = "success" | "warning" | "error";
 

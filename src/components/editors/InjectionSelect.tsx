@@ -1,7 +1,7 @@
 import * as React from "react";
 
-import {DynamicSimpleSelect} from "../util/DynamicSelect";
 import {displayInjectionWithVirus, IInjection} from "../../models/injection";
+import {DynamicSimpleSelect} from "ndb-react-components";
 
 export class InjectionSelect extends DynamicSimpleSelect<IInjection> {
     protected selectLabelForOption(option: IInjection): any {

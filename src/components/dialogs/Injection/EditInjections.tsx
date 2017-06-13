@@ -9,8 +9,6 @@ import {InjectedGraphQLProps} from "react-apollo/lib/graphql";
 import {toast} from "react-toastify";
 
 import {ISample} from "../../../models/sample";
-import {ModalAlert} from "../../util/ModalAlert";
-import {toastUpdateError, toastUpdateSuccess} from "../../util/Toasts";
 import {
     DeleteInjectionMutation, NeuronCountsForInjectionsQuery,
     SampleForInjectionQuery, UpdateInjectionMutation
@@ -23,6 +21,7 @@ import {VirusAutoSuggest} from "../../editors/VirusAutoSuggest";
 import {IFluorophore} from "../../../models/fluorophore";
 import {IInjectionVirus} from "../../../models/injectionVirus";
 import {FluorophoreAutoSuggest} from "../../editors/FluorophoreAutoSuggest";
+import {ModalAlert, toastUpdateError, toastUpdateSuccess} from "ndb-react-components";
 
 interface ITracingCountQueryProps {
     neuronCountsForInjections: any;

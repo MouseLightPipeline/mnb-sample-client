@@ -10,13 +10,15 @@ import {
     INeuronInput, parseSomaLocation
 } from "../models/neuron";
 import {DeleteNeuronMutation, UpdateNeuronMutation} from "../graphql/neuron";
-import {toastDeleteError, toastDeleteSuccess, toastUpdateError, toastUpdateSuccess} from "./util/Toasts";
-import {DynamicEditField, DynamicEditFieldMode} from "./util/DynamicEditField";
 import {VisibilitySelect} from "./editors/VisibilitySelect";
 import {displaySample} from "../models/sample";
 import {BrainAreaSelect} from "./editors/BrainAreaSelect";
 import {BrainAreas, lookupBrainArea} from "./App";
 import {IBrainArea} from "../models/brainArea";
+import {
+    DynamicEditField, toastUpdateSuccess, toastUpdateError, toastDeleteSuccess, toastDeleteError,
+    DynamicEditFieldMode
+} from "ndb-react-components";
 
 const ShareVisibilityOptions = NeuronVisibilityOptions();
 

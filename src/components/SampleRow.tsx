@@ -5,21 +5,24 @@ import {toast} from "react-toastify";
 const moment = require("moment");
 
 import {displaySample, IMutateSampleData, ISample, ISampleInput} from "../models/sample";
-import {DynamicEditField, DynamicEditFieldMode} from "./util/DynamicEditField";
 import {displayRegistrationTransform, IRegistrationTransform} from "../models/registrationTransform";
 import {displayInjection, IInjection} from "../models/injection";
 import {IMouseStrain} from "../models/mouseStrain";
-import {DynamicDatePicker} from "./util/DynamicDatePicker";
 import {FindVisibilityOption, IShareVisibilityOption, SampleVisibilityOptions} from "../util/ShareVisibility";
 import {VisibilitySelect} from "./editors/VisibilitySelect";
-import {toastDeleteError, toastDeleteSuccess, toastUpdateError, toastUpdateSuccess} from "./util/Toasts";
 import {DeleteSampleMutation, UpdateSampleMutation} from "../graphql/sample";
 import {MouseStrainAutoSuggest} from "./editors/MouseStrainAutoSuggest";
+import {
+    DynamicDatePicker,
+    DynamicEditField,
+    DynamicEditFieldMode, toastDeleteError, toastDeleteSuccess, toastUpdateError,
+    toastUpdateSuccess
+} from "ndb-react-components";
 
 const tableCellStyle = {verticalAlign: "middle"};
 const idTableCellStyle = Object.assign({}, tableCellStyle, {maxWidth: "80px"});
 const editTableCellStyle = Object.assign({}, tableCellStyle, {maxWidth: "150px"});
-const dateTableCellStyle = Object.assign({}, tableCellStyle, {maxWidth: "100px"});
+const dateTableCellStyle = Object.assign({}, tableCellStyle, {maxWidth: "130px"});
 
 const ShareVisibilityOptions = SampleVisibilityOptions();
 
