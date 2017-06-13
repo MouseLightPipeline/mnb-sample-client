@@ -2430,9 +2430,9 @@ natives@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/natives/-/natives-1.1.0.tgz#e9ff841418a6b2ec7a495e939984f78f163e6e31"
 
-ndb-react-components@^0.1.1:
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/ndb-react-components/-/ndb-react-components-0.1.1.tgz#ee7c77e78667ce67676a72add57065033a41475c"
+ndb-react-components@^0.1.2:
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/ndb-react-components/-/ndb-react-components-0.1.2.tgz#99884d251d1a2374d5ba562462decae322b24fde"
 
 negotiator@0.6.1:
   version "0.6.1"
