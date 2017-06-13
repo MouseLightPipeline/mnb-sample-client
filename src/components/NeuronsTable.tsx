@@ -9,13 +9,20 @@ import {toastCreateError, toastCreateSuccess} from "./util/Toasts";
 import {PaginationHeader} from "./util/PaginationHeader";
 import {IQueryOutput} from "../util/graphQLTypes";
 import {IMutateNeuronData, INeuron, INeuronInput} from "../models/neuron";
-import {CreateNeuronMutation, DeleteNeuronMutation, NeuronsQuery, UpdateNeuronMutation} from "../graphql/neuron";
+import {
+    CreateNeuronMutation, DeleteNeuronMutation, NeuronsQuery, TracingForNeuronsCountQuery,
+    UpdateNeuronMutation
+} from "../graphql/neuron";
 import {NeuronRow} from "./NeuronRow";
 import {SampleSelect} from "./editors/SampleSelect";
 import {AllSamplesQuery} from "../graphql/sample";
 import {ISample, ISamplesQueryOutput} from "../models/sample";
 import {IInjection} from "../models/injection";
 import {InjectionsForSampleSelect} from "./editors/InjectionForSampleSelect";
+
+interface ITracingCountsForNeuronsQueryProps {
+    tracingCountsForNeurons: any;
+}
 
 interface INeuronsGraphQLProps {
     neurons: IQueryOutput<INeuron>;
@@ -29,6 +36,7 @@ interface INeuronsProps extends InjectedGraphQLProps<INeuronsGraphQLProps> {
     offset: number;
     limit: number;
     samplesQuery?: ISamplesQueryProps & GraphQLDataProps;
+    tracingCountsForNeuronsQuery?: ITracingCountsForNeuronsQueryProps & GraphQLDataProps;
 
     onUpdateOffsetForPage(page: number): void;
     onUpdateLimit(limit: number): void;
@@ -46,6 +54,15 @@ interface INeuronState {
     injection: IInjection;
 }
 
+@graphql(TracingForNeuronsCountQuery, {
+    name: "tracingCountsForNeuronsQuery",
+    options: ({sample}) => ({
+        pollInterval: 5000,
+        variables: {
+            ids: []
+        }
+    })
+})
 @graphql(AllSamplesQuery, {
     name: "samplesQuery",
     options: {
@@ -202,10 +219,18 @@ export class NeuronsTable extends React.Component<INeuronsProps, INeuronState> {
     public render() {
         const isDataAvailable = this.props.data && !this.props.data.loading;
 
+        let counts = this.props.tracingCountsForNeuronsQuery && !this.props.tracingCountsForNeuronsQuery.loading ? this.props.tracingCountsForNeuronsQuery.tracingCountsForNeurons.counts : [];
+
+        counts = counts.reduce((prev: any, curr: any) => {
+            prev[curr.neuronId] = curr.count;
+
+            return prev;
+        }, {});
+
         const neurons = isDataAvailable ? this.props.data.neurons.items : [];
 
         const rows = neurons.map(n => {
-            return <NeuronRow key={n.id} neuron={n}/>
+            return <NeuronRow key={n.id} neuron={n} tracingCount={counts[n.id]}/>
         });
 
         const totalCount = isDataAvailable ? this.props.data.neurons.totalCount : -1;

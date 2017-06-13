@@ -28,7 +28,7 @@ const editTableCellStyle = Object.assign({}, tableCellStyle, {maxWidth: "150px"}
 
 interface INeuronRowProps {
     neuron: INeuron;
-    tracingCount?: number;
+    tracingCount: number;
 
     updateNeuron?(sample: INeuronInput): Promise<InjectedGraphQLProps<IMutateNeuronData>>;
     deleteNeuron?(sample: INeuronInput): any;

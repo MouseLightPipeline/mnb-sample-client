@@ -107,3 +107,16 @@ export const DeleteNeuronMutation = gql`mutation DeleteNeuron($neuron: NeuronInp
         }
     }
 }`;
+
+export const TracingForNeuronsCountQuery = gql`query TracingForNeuronsCount {
+    tracingCountsForNeurons {
+        counts {
+            neuronId
+            count
+        }
+        error {
+            message
+        }
+    }
+}`;
+
