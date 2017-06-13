@@ -74,9 +74,6 @@ export class AddInjectionPanel extends React.Component<IAddInjectionProps, IAddI
         } catch (error) {
             toast.error(toastUpdateError(error), {autoClose: false});
         }
-
-
-        this.props.createInjection(this.state.injection);
     }
 
     private get isValidBrainAreaId(): boolean {
