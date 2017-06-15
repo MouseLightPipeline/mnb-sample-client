@@ -3,8 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const React = require("react");
 const ReactDOM = require("react-dom");
 const react_router_1 = require("react-router");
-require("ndb-react-components/styles/mouselight.bootstrap.css");
-require("ndb-react-components/styles/style.css");
 const ApolloApp_1 = require("./components/ApolloApp");
 const Samples_1 = require("./components/Samples");
 const Neurons_1 = require("./components/Neurons");

@@ -2,9 +2,6 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import {Router, Route, browserHistory, IndexRoute} from "react-router";
 
-import "ndb-react-components/styles/mouselight.bootstrap.css";
-import "ndb-react-components/styles/style.css";
-
 import {ApolloApp} from "./components/ApolloApp";
 import {Samples} from "./components/Samples";
 import {Neurons} from "./components/Neurons";

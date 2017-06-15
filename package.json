@@ -1,6 +1,6 @@
 {
   "name": "sample-client-test",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "main": "src/sampleClientApp.js",
   "repository": "https://github.com/MouseLightDataBrowser/samyarn ple-client.git",
   "author": "Patrick Edson <pedson@leapscientific.com>",

@@ -16,6 +16,11 @@ const linkStyle = {
     color: "white"
 };
 
+const toastStyleOverride = {
+    minWidth: "600px",
+    marginBottom: "40px"
+};
+
 interface ISystemMessageQuery {
     systemMessage: string;
 }
@@ -131,13 +136,13 @@ export class App extends React.Component<IAppProps, IAppState> {
     public render() {
         return (
             <div>
-                <ToastContainer autoClose={6000} position="bottom-center"/>
+                <ToastContainer autoClose={6000} position="bottom-center" style={toastStyleOverride}/>
                 <SettingsDialog show={this.state.isSettingsOpen}
                                 shouldClearCreateContentsAfterUpload={this.state.shouldClearCreateContentsAfterUpload}
                                 onHide={() => this.onSettingsClose()}
                                 onChangeClearContents={(b: boolean) => this.onChangeClearContents(b)}/>
                 <Heading onSettingsClick={() => this.onSettingsClick()}/>
-                <div style={{marginTop: "50px", marginBottom: "50px"}}>
+                <div style={{marginTop: "50px", marginBottom: "40px"}}>
                     {React.cloneElement(this.props.children as ReactElement<any>, { haveLoadedBrainAreas: this.state.haveLoadedBrainAreas })}
                 </div>
                 <Footer/>
