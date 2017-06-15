@@ -10,6 +10,8 @@ import {isNullOrUndefined} from "util";
 import {SystemMessageQuery} from "../graphql/systemMessage";
 import {ReactElement} from "react";
 
+const logoImage = require("file-loader!../../public/mouseLight_logo_web_white.png");
+
 const linkStyle = {
     color: "white"
 };
@@ -37,7 +39,7 @@ class Heading extends React.Component<IHeadingProps, IHeadingState> {
                 <Navbar.Header>
                     <Navbar.Brand>
                         <Link to="/">
-                            Mouse Light
+                            <img src={logoImage}/>
                         </Link>
                     </Navbar.Brand>
                 </Navbar.Header>

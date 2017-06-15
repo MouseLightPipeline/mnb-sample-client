@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Table, Button, Row, Col, InputGroup, Glyphicon} from "react-bootstrap";
+import {Table, Button, Grid, Row, Col, InputGroup, Glyphicon, Panel} from "react-bootstrap";
 import {graphql, InjectedGraphQLProps} from 'react-apollo';
 import {GraphQLDataProps} from "react-apollo/lib/graphql";
 import {toast} from "react-toastify";
@@ -164,47 +164,73 @@ export class NeuronsTable extends React.Component<INeuronsProps, INeuronState> {
         }
     }
 
-    private renderPanelHeader(samples: ISample[]) {
+    private renderCreateNeuron(samples: ISample[]) {
         return (
-            <div className="card-header">
-                <div style={{display: "inline-block"}}>
-                    <h5>Neurons</h5>
-                </div>
-                <div style={{display: "inline-block", paddingTop: "px", minWidth: "700px", maxWidth: "720px"}}
-                     className="pull-right">
-                    <Row style={{margin: "0px"}}>
-                        <Col md={4} sm={12}>
+            <Grid fluid style={{borderBottom: "1px solid #ddd", paddingBottom: "15px"}}>
+                <Row style={{margin: "0px"}}>
+                    <Col md={5} sm={12}/>
+                    <Col md={3} sm={12}>
+                        <InputGroup bsSize="sm">
+                            <SampleSelect idName="create-neuron-samples" options={samples}
+                                          selectedOption={this.state.sample}
+                                          disabled={this.state.isSampleLocked}
+                                          placeholder="Select sample..."
+                                          hasRightInputGroup={true}
+                                          onSelect={s => this.onSampleChange(s)}/>
+                            <InputGroup.Button>
+                                <Button bsStyle={this.state.isSampleLocked ? "danger" : "default"}
+                                        disabled={this.state.sample === null}
+                                        active={this.state.isSampleLocked}
+                                        onClick={() => this.onLockSample()}>
+                                    <Glyphicon glyph="lock"/>
+                                </Button>
+                            </InputGroup.Button>
+                        </InputGroup>
+                    </Col>
+                    <Col md={4} sm={12}>
+                        <div>
                             <InputGroup bsSize="sm">
-                                <SampleSelect idName="create-neuron-samples" options={samples}
-                                              selectedOption={this.state.sample}
-                                              disabled={this.state.isSampleLocked}
-                                              placeholder="Select sample..."
-                                              onSelect={s => this.onSampleChange(s)}/>
-                                <InputGroup.Button>
-                                    <Button bsStyle={this.state.isSampleLocked ? "danger" : "default"}
-                                            disabled={this.state.sample === null}
-                                            active={this.state.isSampleLocked}
-                                            onClick={() => this.onLockSample()}>
-                                        <Glyphicon glyph="lock"/>
+                                <InjectionsForSampleSelect sample={this.state.sample}
+                                                           selectedInjection={this.state.injection}
+                                                           onInjectionChange={n => this.onInjectionChange(n)}
+                                                           disabled={this.state.sample === null}
+                                                           placeholder={this.state.sample ? "Select an injection..." : "No sample..."}/>
+
+                                <InputGroup.Button disabled={!this.canCreateNeuron()}>
+                                    <Button bsStyle="primary" style={{marginLeft: "20px", borderRadius: "0px"}}
+                                            onClick={() => this.onCreateNeuron()}>
+                                        <Glyphicon glyph="plus"/>
                                     </Button>
                                 </InputGroup.Button>
                             </InputGroup>
-                        </Col>
-                        <Col md={7} sm={12}>
-                            <InjectionsForSampleSelect sample={this.state.sample}
-                                                       selectedInjection={this.state.injection}
-                                                       onInjectionChange={n => this.onInjectionChange(n)}
-                                                       disabled={this.state.sample === null}
-                                                       placeholder={this.state.sample ? "Select an injection..." : "No sample..."}/>
-                        </Col>
-                        <Col md={1} sm={12}>
-                            <Button bsSize="sm" bsStyle="primary" disabled={!this.canCreateNeuron()}
-                                    onClick={() => this.onCreateNeuron()}>
-                                <Glyphicon glyph="plus"/>
-                            </Button>
-                        </Col>
-                    </Row>
+                        </div>
+                    </Col>
+                </Row>
+            </Grid>
+        );
+    }
+
+    private renderPanelHeader() {
+        return (
+            <div>
+                <div style={{display: "inline-block"}}>
+                    <h4>Neurons</h4>
                 </div>
+            </div>
+        );
+    }
+
+    private renderPanelFooter(totalCount: number, activePage: number, pageCount: number) {
+        const start = this.props.offset + 1;
+        const end = Math.min(this.props.offset + this.props.limit, totalCount);
+        return (
+            <div>
+                <span>
+                    {totalCount >= 0 ? (totalCount > 0 ? `Showing ${start} to ${end} of ${totalCount} neurons` : "It's a clean slate - create the first neuron!") : ""}
+                </span>
+                <span className="pull-right">
+                    {`Page ${activePage} of ${pageCount}`}
+                </span>
             </div>
         );
     }
@@ -235,39 +261,35 @@ export class NeuronsTable extends React.Component<INeuronsProps, INeuronState> {
         const samples = this.props.samplesQuery && !this.props.samplesQuery.loading ? this.props.samplesQuery.samples.items : [];
 
         return (
-            <div className="card">
-                {this.renderPanelHeader(samples)}
-                <div className="card-block">
-                    <div style={{borderBottom: "1px solid #ddd"}}>
-                        <PaginationHeader pageCount={pageCount}
-                                          activePage={activePage}
-                                          limit={this.props.limit}
-                                          onUpdateLimitForPage={limit => this.props.onUpdateLimit(limit)}
-                                          onUpdateOffsetForPage={page => this.props.onUpdateOffsetForPage(page)}/>
-                    </div>
-                    <Table style={{marginBottom: "0px"}}>
-                        <thead>
-                        <tr>
-                            <th>Id</th>
-                            <th>Tag</th>
-                            <th>Sample</th>
-                            <th>Soma Brain Area</th>
-                            <th>Soma Sample Location</th>
-                            <th>Keywords</th>
-                            <th>Visibility</th>
-                            <th>Tracings</th>
-                            <th>Created</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {rows}
-                        </tbody>
-                    </Table>
-                    <div className="card-footer">
-                        {totalCount >= 0 ? (totalCount > 0 ? `${totalCount} neurons` : "It's a clean slate - create the first neuron!") : ""}
-                    </div>
+            <Panel bsStyle="default" header={this.renderPanelHeader()}
+                   footer={this.renderPanelFooter(totalCount, activePage, pageCount)}>
+                {this.renderCreateNeuron(samples)}
+                <div style={{borderBottom: "1px solid #ddd"}}>
+                    <PaginationHeader pageCount={pageCount}
+                                      activePage={activePage}
+                                      limit={this.props.limit}
+                                      onUpdateLimitForPage={limit => this.props.onUpdateLimit(limit)}
+                                      onUpdateOffsetForPage={page => this.props.onUpdateOffsetForPage(page)}/>
                 </div>
-            </div>
+                <Table style={{marginBottom: "0px"}}>
+                    <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Tag</th>
+                        <th>Sample</th>
+                        <th>Soma Brain Area</th>
+                        <th>Soma Sample Location</th>
+                        <th>Keywords</th>
+                        <th>Visibility</th>
+                        <th>Tracings</th>
+                        <th>Created</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {rows}
+                    </tbody>
+                </Table>
+            </Panel>
         );
     }
 }

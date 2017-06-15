@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Table, Button, Glyphicon} from "react-bootstrap";
+import {Table, Button, Glyphicon, Panel} from "react-bootstrap";
 import {graphql, InjectedGraphQLProps} from 'react-apollo';
 import {toast} from "react-toastify";
 import {GraphQLDataProps} from "react-apollo/lib/graphql";
@@ -57,7 +57,7 @@ interface ISamplesState {
     props: ({mutate}) => ({
         createSample: (sample: ISampleInput) => mutate({
             variables: {sample},
-            refetchQueries:["Samples"]
+            refetchQueries: ["Samples"]
         })
     })
 })
@@ -149,6 +149,21 @@ export class SamplesTable extends React.Component<ISamplesProps, ISamplesState> 
         );
     }
 
+    private renderHeader() {
+        return (
+            <div>
+                <div style={{display: "inline-block"}}>
+                    <h4>Samples</h4>
+                </div>
+                <div className="pull-right">
+                   <Button bsSize="sm" bsStyle="primary" onClick={() => this.onCreateSample()}>
+                        <Glyphicon glyph="plus"/>
+                    </Button>
+                </div>
+            </div>
+        );
+    }
+
     public render() {
         const isDataAvailable = this.props.data && !this.props.data.loading;
 
@@ -176,50 +191,36 @@ export class SamplesTable extends React.Component<ISamplesProps, ISamplesState> 
         });
 
         return (
-            <div className="card">
-                <div className="card-header">
-                    <div style={{display: "inline-block"}}>
-                        <h5>Samples</h5>
-                    </div>
-                    <div className="pull-right">
-                        <Button bsSize="sm" bsStyle="primary" onClick={() => this.onCreateSample()}>
-                            <Glyphicon glyph="plus"/>
-                        </Button>
-                    </div>
-                </div>
-                <div className="card-block">
-                    <PaginationHeader pageCount={pageCount}
-                                      activePage={activePage}
-                                      limit={this.props.limit}
-                                      onUpdateLimitForPage={limit => this.props.onUpdateLimit(limit)}
-                                      onUpdateOffsetForPage={page => this.props.onUpdateOffsetForPage(page)}/>
-                    <Table style={{marginBottom: "0px"}}>
-                        <thead>
-                        <tr>
-                            <th>Id</th>
-                            <th>Tag</th>
-                            <th>Animal Id</th>
-                            <th>Acq. Date</th>
-                            <th>Strain</th>
-                            <th>Registrations</th>
-                            <th>Injections</th>
-                            <th>Comment</th>
-                            <th>Visibility</th>
-                            <th>Neurons</th>
-                            <th>Created</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {rows}
-                        </tbody>
-                    </Table>
-                    {this.renderTransformsDialog()}
-                    {this.renderInjectionsDialog()}
-                </div>
-                <div className="card-footer">
-                    {this.renderPanelFooter(totalCount, activePage, pageCount)}
-                </div>
-            </div>
+            <Panel bsStyle="default" header={this.renderHeader()}
+                   footer={this.renderPanelFooter(totalCount, activePage, pageCount)}>
+                <PaginationHeader pageCount={pageCount}
+                                  activePage={activePage}
+                                  limit={this.props.limit}
+                                  onUpdateLimitForPage={limit => this.props.onUpdateLimit(limit)}
+                                  onUpdateOffsetForPage={page => this.props.onUpdateOffsetForPage(page)}/>
+                <Table style={{marginBottom: "0px"}}>
+                    <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Tag</th>
+                        <th>Animal Id</th>
+                        <th>Acq. Date</th>
+                        <th>Strain</th>
+                        <th>Registrations</th>
+                        <th>Injections</th>
+                        <th>Comment</th>
+                        <th>Visibility</th>
+                        <th>Neurons</th>
+                        <th>Created</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {rows}
+                    </tbody>
+                </Table>
+                {this.renderTransformsDialog()}
+                {this.renderInjectionsDialog()}
+            </Panel>
         );
     }
 }
