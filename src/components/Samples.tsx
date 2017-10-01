@@ -1,5 +1,5 @@
 import * as React from "react";
-import {graphql} from 'react-apollo';
+import {graphql} from "react-apollo";
 import gql from "graphql-tag";
 import {GraphQLDataProps} from "react-apollo/lib/graphql";
 import {Grid, Row, Col} from "react-bootstrap";
