@@ -10,14 +10,14 @@ const configurations: any = {
         host: "sample-client-test",
         port: 9673,
         graphQLEndpoint: "/graphQL",
-        graphQLHostname: "sample-api-test",
+        graphQLHostname: "sample-api",
         graphQLPort: 9671
     },
     production: {
         host: "sample-client-test",
         port: 9673,
         graphQLEndpoint: "/graphQL",
-        graphQLHostname: "sample-api-test",
+        graphQLHostname: "sample-api",
         graphQLPort: 9671
     }
 };
