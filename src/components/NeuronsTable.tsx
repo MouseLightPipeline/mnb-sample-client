@@ -282,6 +282,7 @@ export class NeuronsTable extends React.Component<INeuronsProps, INeuronState> {
                         <th>Keywords</th>
                         <th>Visibility</th>
                         <th>Tracings</th>
+                        <th>DOI</th>
                         <th>Created</th>
                     </tr>
                     </thead>

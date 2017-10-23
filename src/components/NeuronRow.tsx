@@ -236,6 +236,9 @@ export class NeuronRow extends React.Component<INeuronRowProps, INeuronRowState>
                     {count}
                 </td>
                 <td style={tableCellStyle}>
+                    {n.doi}
+                </td>
+                <td style={tableCellStyle}>
                     <div style={{display: "inline-block"}}>
                         {moment(n.createdAt).format("YYYY-MM-DD")}<br/>
                         {moment(n.createdAt).format("hh:mm:ss")}

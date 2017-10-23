@@ -11,9 +11,10 @@ export interface INeuron {
     x: number;
     y: number;
     z: number;
+    sharing: number;
+    doi: string;
     injection: IInjection;
     brainArea: IBrainArea;
-    sharing: number;
     createdAt: number;
     updatedAt: number;
 }

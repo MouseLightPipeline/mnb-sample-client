@@ -13,6 +13,7 @@ export const NeuronsQuery = gql`query NeuronsQuery($input: NeuronQueryInput) {
             y
             z
             sharing
+            doi
             brainArea {
                 id
                 name
