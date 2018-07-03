@@ -23,6 +23,7 @@ const tableCellStyle = {verticalAlign: "middle"};
 const idTableCellStyle = Object.assign({}, tableCellStyle, {maxWidth: "80px"});
 const editTableCellStyle = Object.assign({}, tableCellStyle, {maxWidth: "150px"});
 const dateTableCellStyle = Object.assign({}, tableCellStyle, {maxWidth: "130px"});
+const tagEditTableCellStyle = Object.assign({}, editTableCellStyle, {wordBreak: "break-all"});
 
 const ShareVisibilityOptions = SampleVisibilityOptions();
 
@@ -223,7 +224,7 @@ export class SampleRow extends React.Component<ISampleRowProps, ISampleRowState>
                     <DynamicEditField initialValue={s.idNumber} acceptFunction={v => this.onAcceptIdNumberEdit(v)}
                                       onEditModeChanged={(m: DynamicEditFieldMode) => this.onEditModeChanged(m)}/>
                 </td>
-                <td style={editTableCellStyle}>
+                <td style={tagEditTableCellStyle}>
                     <DynamicEditField initialValue={s.tag} placeHolder="(none)"
                                       acceptFunction={v => this.onAcceptTagEdit(v)}/>
                 </td>
