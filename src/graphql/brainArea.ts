@@ -1,6 +1,6 @@
 import gql from "graphql-tag";
 
-export const ImmutableQuery = gql`query {
+export const BrainAreaQuery = gql`query {
     brainAreas {
         id
         name

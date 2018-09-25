@@ -5,6 +5,8 @@ import {Option} from "react-select";
 import {lookupBrainArea} from "../App";
 import {DynamicSingleSelect, IDynamicSelectProps} from "ndb-react-components";
 
+type OptionValue = string | number | boolean;
+
 export class BrainAreaSelect extends DynamicSingleSelect<IBrainArea, IBrainArea> {
     public constructor(props: IDynamicSelectProps<IBrainArea, IBrainArea, IBrainArea>) {
         super(props);
@@ -29,10 +31,14 @@ export class BrainAreaSelect extends DynamicSingleSelect<IBrainArea, IBrainArea>
     private onFilterBrainAreas(options: Option[], filterValue: string, currentValues: Option[]) {
         filterValue = filterValue.toLowerCase();
 
-        if (currentValues) currentValues = currentValues.map((i: any) => i["value"]);
+        let mappedValues: OptionValue[] = null;
+
+        if (currentValues) {
+            mappedValues = currentValues.map((i: any) => i["value"]);
+        }
 
         const optionsInList = options.filter(option => {
-            if (currentValues && currentValues.indexOf(option["value"]) > -1) {
+            if (mappedValues && mappedValues.indexOf(option["value"]) > -1) {
                 return false;
             }
 
