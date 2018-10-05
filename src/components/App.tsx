@@ -5,7 +5,7 @@ import {Link} from "react-router";
 import {graphql, InjectedGraphQLProps} from 'react-apollo';
 
 import {IBrainArea} from "../models/brainArea";
-import {BrainAreaQuery} from "../graphql/brainArea";
+import {ImmutableQuery} from "../graphql/immutableTypes";
 import {isNullOrUndefined} from "util";
 import {SystemMessageQuery} from "../graphql/systemMessage";
 import {ReactElement} from "react";
@@ -81,7 +81,7 @@ interface IAppState {
     haveLoadedBrainAreas?: boolean;
 }
 
-@graphql(BrainAreaQuery, {
+@graphql(ImmutableQuery, {
     options: {}
 })
 export class App extends React.Component<IAppProps, IAppState> {

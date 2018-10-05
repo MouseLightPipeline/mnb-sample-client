@@ -2,12 +2,18 @@
   "compileOnSave": true,
   "compilerOptions": {
     "sourceMap": true,
+    "noImplicitAny": true,
     "module": "commonjs",
     "target": "es6",
     "experimentalDecorators": true,
     "jsx": "react",
     "skipLibCheck": true
   },
+  "include": [
+    "webpack.config.ts",
+    "src/**/*.ts*",
+    "src/**/*.d.ts"
+  ],
   "exclude": [
     "node_modules"
   ]
