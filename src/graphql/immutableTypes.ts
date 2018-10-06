@@ -10,6 +10,7 @@ export const ImmutableQuery = gql`query {
         structureIdPath
         safeName
         acronym
+        aliases
         atlasId
         graphId
         graphOrder

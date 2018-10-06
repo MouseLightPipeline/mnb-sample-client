@@ -6,6 +6,7 @@ import {ApolloApp} from "./components/ApolloApp";
 import {Samples} from "./components/Samples";
 import {Neurons} from "./components/Neurons";
 import {Content} from "./components/Content";
+import {Compartments} from "./components/Compartments";
 
 const rootEl = document.getElementById("root");
 
@@ -15,6 +16,7 @@ ReactDOM.render(
             <IndexRoute component={Content}/>
             <Route path="/samples" component={Samples}/>
             <Route path="/neurons" component={Neurons}/>
+            <Route path="/compartments" component={Compartments}/>
         </Route>
     </Router>, rootEl
 );

@@ -50,6 +50,7 @@ class Heading extends React.Component<IHeadingProps, IHeadingState> {
                 </Navbar.Header>
                 <Navbar.Text><Link to="/samples" style={linkStyle}>Samples</Link></Navbar.Text>
                 <Navbar.Text><Link to="/neurons" style={linkStyle}>Neurons</Link></Navbar.Text>
+                <Navbar.Text><Link to="/compartments" style={linkStyle}>Compartments</Link></Navbar.Text>
                 <Navbar.Collapse>
                     <Nav pullRight style={{marginRight: "15px"}}>
                         <NavItem onSelect={() => this.props.onSettingsClick()}>
