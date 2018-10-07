@@ -112,6 +112,15 @@ export class Compartments extends React.Component<ICompartmentsProps, ICompartme
             });
 
             this.setState({data});
+        } else {
+            props.compartmentsQuery.brainAreas.map((c: IBrainArea) => {
+               const existing: ICompartmentNode = this.compartments.get(c.structureId);
+
+               if (existing && existing.compartment.updatedAt < c.updatedAt) {
+                   console.log("updating more recent compartment");
+                   existing.compartment = c;
+               }
+            });
         }
     }
 
@@ -131,7 +140,7 @@ export class Compartments extends React.Component<ICompartmentsProps, ICompartme
     public render() {
         const {loading, error} = this.props.compartmentsQuery;
 
-        if (loading) {
+        if (loading || this.state.data === null) {
             return (
                 <div>
                     loading
@@ -146,7 +155,6 @@ export class Compartments extends React.Component<ICompartmentsProps, ICompartme
                 </div>
             );
         }
-
 
         return (
             <Treebeard data={this.state.data} onToggle={this.onToggle}/>

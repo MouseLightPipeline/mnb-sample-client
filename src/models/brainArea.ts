@@ -7,7 +7,7 @@ export interface IBrainArea {
     structureIdPath?: string;
     safeName?: string;
     acronym?: string;
-    aliases?: string;
+    aliases?: string[];
     atlasId?: number;
     graphId?: number;
     graphOrder?: number;
