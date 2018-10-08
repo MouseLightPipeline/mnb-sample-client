@@ -10,7 +10,7 @@ import {isNullOrUndefined} from "util";
 import {SystemMessageQuery} from "../graphql/systemMessage";
 import {ReactElement} from "react";
 
-const logoImage = require("file-loader!../../public/mouseLight_logo_web_white.png");
+const logoImage = require("file-loader!../../assets/mouseLight_logo_web_white.png");
 
 const linkStyle = {
     color: "white"
@@ -65,7 +65,7 @@ class Heading extends React.Component<IHeadingProps, IHeadingState> {
 
 const Footer = () => (
     <div className="footer">
-        <span>Mouse Light Neuron Data Browser Copyright © 2016 - 2017 Howard Hughes Medical Institute</span>
+        <span>Mouse Light Neuron Data Browser Copyright © 2016 - {(new Date().getFullYear())} Howard Hughes Medical Institute</span>
     </div>
 );
 

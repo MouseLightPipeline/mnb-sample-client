@@ -1,10 +1,11 @@
 import * as React from "react";
+import {Container, List, Table} from "semantic-ui-react";
 import {graphql} from "react-apollo";
 import gql from "graphql-tag";
 
-import {Treebeard} from "react-treebeard";
-
 import {IBrainArea} from "../models/brainArea";
+import {Compartment} from "./Compartment";
+import {CompartmentNode} from "./CompartmentNode";
 
 const CompartmentsQuery = gql`query Compartments {
     brainAreas {
@@ -29,10 +30,9 @@ const CompartmentsQuery = gql`query Compartments {
     }
 }`;
 
-interface ICompartmentNode {
+export interface ICompartmentNode {
     name: string;
     toggled: boolean;
-    active: boolean;
     children: ICompartmentNode[];
     compartment: IBrainArea;
 }
@@ -42,7 +42,7 @@ interface ICompartmentsProps {
 }
 
 interface ICompartmentsState {
-    data?: ICompartmentNode;
+    rootNode?: ICompartmentNode;
     selectedNode?: ICompartmentNode;
 }
 
@@ -59,7 +59,7 @@ export class Compartments extends React.Component<ICompartmentsProps, ICompartme
         super(props);
 
         this.state = {
-            data: null,
+            rootNode: null,
             selectedNode: null
         }
     }
@@ -71,7 +71,7 @@ export class Compartments extends React.Component<ICompartmentsProps, ICompartme
             return;
         }
 
-        if (this.state.data == null) {
+        if (this.state.rootNode == null) {
             let sorted = props.compartmentsQuery.brainAreas.slice().sort((a: IBrainArea, b: IBrainArea) => {
                 return a.depth - b.depth;
             });
@@ -81,7 +81,6 @@ export class Compartments extends React.Component<ICompartmentsProps, ICompartme
             const data: ICompartmentNode = {
                 name: root.name,
                 toggled: true,
-                active: true,
                 children: null,
                 compartment: root
             };
@@ -94,7 +93,6 @@ export class Compartments extends React.Component<ICompartmentsProps, ICompartme
                 const node: ICompartmentNode = {
                     name: c.name,
                     toggled: false,
-                    active: false,
                     children: null,
                     compartment: c
                 };
@@ -111,27 +109,26 @@ export class Compartments extends React.Component<ICompartmentsProps, ICompartme
                 }
             });
 
-            this.setState({data});
+            this.setState({rootNode: data, selectedNode: data});
         } else {
             props.compartmentsQuery.brainAreas.map((c: IBrainArea) => {
-               const existing: ICompartmentNode = this.compartments.get(c.structureId);
+                const existing: ICompartmentNode = this.compartments.get(c.structureId);
 
-               if (existing && existing.compartment.updatedAt < c.updatedAt) {
-                   console.log("updating more recent compartment");
-                   existing.compartment = c;
-               }
+                if (existing && existing.compartment.updatedAt < c.updatedAt) {
+                    console.log("updating more recent compartment");
+                    existing.compartment = c;
+                }
             });
         }
     }
 
-    public onToggle = (node: ICompartmentNode, toggled: boolean) => {
-        if (this.state.selectedNode && this.state.selectedNode != node) {
-            this.state.selectedNode.active = false;
-            node.active = true;
-        }
+    public onSelect = (node: ICompartmentNode) => {
+        this.setState({selectedNode: node});
+    };
 
+    public onToggle = (node: ICompartmentNode) => {
         if (node.children) {
-            node.toggled = toggled;
+            node.toggled = !node.toggled;
         }
 
         this.setState({selectedNode: node});
@@ -140,7 +137,7 @@ export class Compartments extends React.Component<ICompartmentsProps, ICompartme
     public render() {
         const {loading, error} = this.props.compartmentsQuery;
 
-        if (loading || this.state.data === null) {
+        if (loading || this.state.rootNode === null) {
             return (
                 <div>
                     loading
@@ -156,8 +153,28 @@ export class Compartments extends React.Component<ICompartmentsProps, ICompartme
             );
         }
 
+        // TODO Using Table due to overloaded Grid css between semantic-ui-react and react-bootstrap
         return (
-            <Treebeard data={this.state.data} onToggle={this.onToggle}/>
+            <Container fluid>
+                <Table basic="very">
+                    <Table.Body>
+                        <Table.Row>
+                            <Table.Cell width={8} verticalAlign="top">
+                                <List>
+                                    <CompartmentNode compartmentNode={this.state.rootNode}
+                                                     selectedNode={this.state.selectedNode}
+                                                     onToggle={(node) => this.onToggle(node)}
+                                                     onSelect={(node) => this.onSelect(node)}/>
+                                </List>
+                            </Table.Cell>
+                            <Table.Cell width={8} verticalAlign="top">
+                                <Compartment
+                                    compartment={this.state.selectedNode ? this.state.selectedNode.compartment : null}/>
+                            </Table.Cell>
+                        </Table.Row>
+                    </Table.Body>
+                </Table>
+            </Container>
         );
     }
 }

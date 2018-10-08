@@ -8,6 +8,8 @@ import {Neurons} from "./components/Neurons";
 import {Content} from "./components/Content";
 import {Compartments} from "./components/Compartments";
 
+require("file-loader?name=index.html!../index.html");
+
 const rootEl = document.getElementById("root");
 
 ReactDOM.render(

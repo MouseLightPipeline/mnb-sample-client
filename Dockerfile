@@ -1,15 +1,11 @@
-FROM node:7.10
+FROM node:8.12
 
 WORKDIR /app
 
-RUN npm install -g yarn typescript@2.3.4
+COPY dist .
 
-COPY . .
+RUN yarn install --production=true
 
-RUN yarn install
+CMD ["./docker-entry.sh"]
 
-RUN tsc
-
-CMD ["npm", "run", "start"]
-
-EXPOSE  9673
+EXPOSE 5000

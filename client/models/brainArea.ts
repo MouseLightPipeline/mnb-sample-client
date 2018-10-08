@@ -20,6 +20,11 @@ export interface IBrainArea {
 
 }
 
+export interface IBrainAreaInput {
+    id: string;
+    aliases: string[];
+}
+
 export function displayBrainArea(brainArea: IBrainArea, missing = "(none)", append = "") {
     if (!brainArea || !brainArea.name) {
         return missing;
