@@ -1,13 +1,15 @@
 {
-  "name": "sample-client",
+  "name": "mnb-sample-client",
   "version": "1.4.0",
   "main": "dist/app.js",
   "repository": "https://github.com/MouseLightPipeline/sample-client.git",
   "author": "Patrick Edson <pedson@leapscientific.com>",
   "license": "SEE LICENSE IN LICENSE",
   "dockerRepository": "mouselightdatabrowser",
+  "dockerImageName": "sample-client",
   "scripts": {
     "debug": "DEBUG=mnb* node $NODE_DEBUG_OPTION server/app.js",
+    "express": "DEBUG=mnb* node $NODE_DEBUG_OPTION dist/app.js",
     "docker-build": "gulp docker-build",
     "docker-release": "gulp release"
   },

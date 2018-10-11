@@ -42,7 +42,7 @@ if (process.env.NODE_ENV !== "production") {
 } else {
     debug("configuring production express server");
 
-    const rootPath = path.resolve(path.join(__dirname, "public"));
+    let rootPath = path.resolve(path.join(__dirname, "public"));
 
     app = express();
 
