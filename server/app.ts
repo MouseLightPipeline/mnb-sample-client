@@ -1,4 +1,5 @@
 import * as path from "path";
+import * as os from "os";
 
 const express = require("express");
 const proxy = require("express-http-proxy");
@@ -7,12 +8,12 @@ const DigestStrategy = require("passport-http").DigestStrategy;
 
 const debug = require("debug")("mnb:sample-client:app");
 
-import {Configuration} from "./configuration";
+import {ServiceOptions} from "./serviceOptions";
 
 passport.use(new DigestStrategy({qop: 'auth'},
     function (username: any, done: any) {
-        if (username === "mouselight") {
-            return done(null, {id: 1, name: username}, "MostlyCloudy");
+        if (username === ServiceOptions.authUser) {
+            return done(null, {id: 1, name: username}, ServiceOptions.authPassword);
         } else {
             return done("Invalid user", null);
         }
@@ -28,11 +29,11 @@ passport.serializeUser(function (user: any, done: any) {
 });
 
 passport.deserializeUser(function (id: any, done: any) {
-    done(null, {id: 1, name: "mouselight"});
+    done(null, {id: 1, name: ServiceOptions.authUser});
 });
 
-const apiUri = `http://${Configuration.graphQLHostname}:${Configuration.graphQLPort}`;
-debug(`proxy GraphQL calls to ${apiUri}`);
+const apiUri = `http://${ServiceOptions.graphQLHostname}:${ServiceOptions.graphQLPort}`;
+debug(`proxy GraphQL calls to ${apiUri}/${ServiceOptions.graphQLEndpoint}`);
 
 let app = null;
 
@@ -45,13 +46,15 @@ if (process.env.NODE_ENV !== "production") {
 
     app = express();
 
-    app.use(passport.initialize());
+    if (ServiceOptions.authRequired) {
+        app.use(passport.initialize());
 
-    app.get("/", passport.authenticate('digest', {session: false}), (request: any, response: any, next: any) => {
-        next();
-    });
+        app.get("/", passport.authenticate('digest', {session: false}), (request: any, response: any, next: any) => {
+            next();
+        });
+    }
 
-    app.post("/graphql", proxy(apiUri + "/graphql"));
+    app.post(`/${ServiceOptions.graphQLEndpoint}`, proxy(`${apiUri}/${ServiceOptions.graphQLEndpoint}`));
 
     app.use(express.static(rootPath));
 
@@ -72,11 +75,10 @@ function devServer() {
             colors: true
         },
         proxy: {
-            "/graphql": {
+            [`/${ServiceOptions.graphQLEndpoint}`]: {
                 target: apiUri
             }
         },
-        contentBase: path.resolve(path.join(__dirname, "..", "public")),
         disableHostCheck: true,
         publicPath: webpackConfig.output.publicPath,
         historyApiFallback: true,
@@ -85,42 +87,10 @@ function devServer() {
     });
 }
 
-app.listen(Configuration.port, "0.0.0.0", () => {
+app.listen(ServiceOptions.port, "0.0.0.0", () => {
     if (process.env.NODE_ENV !== "production") {
-        debug(`Listening at http://localhost:${Configuration.port}/`);
+        debug(`Listening at http://${os.hostname()}:${ServiceOptions.port}/`);
     } else {
-        debug(`Listening on port ${Configuration.port}`);
+        debug(`Listening on port http://localhost:${ServiceOptions.port}`);
     }
 });
-
-/*
-const compiler = Webpack(webpackConfig);
-
-const server = new WebpackDevServer(compiler, {
-    stats: {
-        colors: true
-    },
-    proxy: {
-        "/graphql": {
-            target: `http://${Configuration.graphQLHostname}:${Configuration.graphQLPort}`
-        }
-    },
-    setup: (app: any) => {
-        app.use(passport.initialize());
-
-        app.get("/", passport.authenticate('digest', {session: false}), (request: any, response: any, next: any) => {
-            next();
-        });
-    },
-    disableHostCheck: true,
-    publicPath: webpackConfig.output.publicPath,
-    hot: true,
-    historyApiFallback: true,
-    noInfo: false,
-    quiet: false
-});
-
-server.listen(Configuration.port, "0.0.0.0", () =>{
-    debug(`Starting sample client server on http://localhost:${Configuration.port}`);
-});
-*/

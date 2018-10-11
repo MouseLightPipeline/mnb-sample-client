@@ -211,7 +211,7 @@ export class SampleRow extends React.Component<ISampleRowProps, ISampleRowState>
             return null;
         }
 
-        const count = this.props.neuronCount || 0;
+        const count = this.props.neuronCount || "?";
 
         if (this.state.isDeleted) {
             return null;

@@ -181,7 +181,7 @@ export class NeuronRow extends React.Component<INeuronRowProps, INeuronRowState>
             return null;
         }
 
-        const count = this.props.tracingCount || 0;
+        const count = this.props.tracingCount || "?";
 
         if (this.state.isDeleted) {
             return null;

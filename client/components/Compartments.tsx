@@ -25,7 +25,6 @@ const CompartmentsQuery = gql`query Compartments {
         geometryFile
         geometryColor
         geometryEnable
-        createdAt
         updatedAt
     }
 }`;
