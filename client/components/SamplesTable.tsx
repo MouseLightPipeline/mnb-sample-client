@@ -11,7 +11,8 @@ import {IMouseStrain} from "../models/mouseStrain";
 import {ManageTransforms} from "./dialogs/RegistrationTransform/ManageTransforms";
 import {ManageInjections} from "./dialogs/Injection/ManageInjections";
 import {CreateSampleMutation, NeuronCountsForSamplesQuery, SamplesQuery} from "../graphql/sample";
-import {PaginationHeader, toastCreateError, toastCreateSuccess} from "ndb-react-components";
+import {toastCreateError, toastCreateSuccess} from "./components/Toasts";
+import {PaginationHeader} from "./components/PaginationHeader";
 
 interface ISamplesGraphQLProps {
     samples: IQueryOutput<ISample>;

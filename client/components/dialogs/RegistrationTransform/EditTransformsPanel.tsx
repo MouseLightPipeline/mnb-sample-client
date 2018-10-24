@@ -15,10 +15,9 @@ import {
     TracingCountQuery, UpdateRegistrationMutation
 } from "../../../graphql/registrationTransform";
 import {UpdateSampleMutation} from "../../../graphql/sample";
-import {
-    DynamicEditField, ModalAlert, toastUpdateError,
-    toastUpdateSuccess
-} from "ndb-react-components";
+import {toastUpdateError, toastUpdateSuccess} from "../../components/Toasts";
+import {DynamicEditField} from "../../components/DynamicEditField";
+import {ModalAlert} from "../../components/ModalAlert";
 
 interface ITracingCountQueryProps {
     tracingCountsForRegistrations: any;

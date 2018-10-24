@@ -12,12 +12,9 @@ import {FindVisibilityOption, IShareVisibilityOption, SampleVisibilityOptions} f
 import {VisibilitySelect} from "./editors/VisibilitySelect";
 import {DeleteSampleMutation, UpdateSampleMutation} from "../graphql/sample";
 import {MouseStrainAutoSuggest} from "./editors/MouseStrainAutoSuggest";
-import {
-    DynamicDatePicker,
-    DynamicEditField,
-    DynamicEditFieldMode, toastDeleteError, toastDeleteSuccess, toastUpdateError,
-    toastUpdateSuccess
-} from "ndb-react-components";
+import {DynamicEditField, DynamicEditFieldMode} from "./components/DynamicEditField";
+import {DynamicDatePicker} from "./components/DynamicDatePicker";
+import {toastDeleteError, toastDeleteSuccess, toastUpdateError, toastUpdateSuccess} from "./components/Toasts";
 
 const tableCellStyle = {verticalAlign: "middle"};
 const idTableCellStyle = Object.assign({}, tableCellStyle, {maxWidth: "80px"});

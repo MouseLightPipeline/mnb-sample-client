@@ -17,8 +17,9 @@ import {AllSamplesQuery} from "../graphql/sample";
 import {ISample, ISamplesQueryOutput} from "../models/sample";
 import {IInjection} from "../models/injection";
 import {InjectionsForSampleSelect} from "./editors/InjectionForSampleSelect";
-import {UserPreferencesManager} from "../util/userPreferences";
-import {PaginationHeader, toastCreateError, toastCreateSuccess} from "ndb-react-components";
+import {UserPreferences} from "../util/userPreferences";
+import {toastCreateError, toastCreateSuccess} from "./components/Toasts";
+import {PaginationHeader} from "./components/PaginationHeader";
 
 interface ITracingCountsForNeuronsQueryProps {
     tracingCountsForNeurons: any;
@@ -123,7 +124,7 @@ export class NeuronsTable extends React.Component<INeuronsProps, INeuronState> {
 
     private onLockSample() {
         // Based on current state so if locked, clear locked sample, etc.
-        UserPreferencesManager.neuronCreateLockedSampleId = this.state.isSampleLocked ? null : this.state.sample.id;
+        UserPreferences.Instance.neuronCreateLockedSampleId = this.state.isSampleLocked ? "" : this.state.sample.id;
 
         this.setState({isSampleLocked: !this.state.isSampleLocked});
     }
@@ -153,7 +154,7 @@ export class NeuronsTable extends React.Component<INeuronsProps, INeuronState> {
     }
 
     public componentWillReceiveProps(props: INeuronsProps) {
-        const lockedSampleId = UserPreferencesManager.neuronCreateLockedSampleId;
+        const lockedSampleId = UserPreferences.Instance.neuronCreateLockedSampleId;
 
         if (lockedSampleId && props.samplesQuery && props.samplesQuery.samples) {
             let samples = props.samplesQuery.samples.items.filter(s => s.id === lockedSampleId);
@@ -198,7 +199,7 @@ export class NeuronsTable extends React.Component<INeuronsProps, INeuronState> {
 
                                 <InputGroup.Button disabled={!this.canCreateNeuron()}>
                                     <Button bsStyle="primary" style={{marginLeft: "20px", borderRadius: "0px"}}
-                                            onClick={() => this.onCreateNeuron()}>
+                                            onClick={() => this.onCreateNeuron()} disabled={this.state.injection === null}>
                                         <Glyphicon glyph="plus"/>
                                     </Button>
                                 </InputGroup.Button>

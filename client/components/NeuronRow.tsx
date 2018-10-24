@@ -15,10 +15,8 @@ import {displaySample} from "../models/sample";
 import {BrainAreaSelect} from "./editors/BrainAreaSelect";
 import {BrainAreas, lookupBrainArea} from "./App";
 import {IBrainArea} from "../models/brainArea";
-import {
-    DynamicEditField, toastUpdateSuccess, toastUpdateError, toastDeleteSuccess, toastDeleteError,
-    DynamicEditFieldMode
-} from "ndb-react-components";
+import {toastDeleteError, toastDeleteSuccess, toastUpdateError, toastUpdateSuccess} from "./components/Toasts";
+import {DynamicEditField, DynamicEditFieldMode} from "./components/DynamicEditField";
 
 const ShareVisibilityOptions = NeuronVisibilityOptions();
 

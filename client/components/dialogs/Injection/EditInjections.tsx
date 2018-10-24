@@ -21,7 +21,8 @@ import {VirusAutoSuggest} from "../../editors/VirusAutoSuggest";
 import {IFluorophore} from "../../../models/fluorophore";
 import {IInjectionVirus} from "../../../models/injectionVirus";
 import {FluorophoreAutoSuggest} from "../../editors/FluorophoreAutoSuggest";
-import {ModalAlert, toastUpdateError, toastUpdateSuccess} from "ndb-react-components";
+import {toastUpdateError, toastUpdateSuccess} from "../../components/Toasts";
+import {ModalAlert} from "../../components/ModalAlert";
 
 interface ITracingCountQueryProps {
     neuronCountsForInjections: any;

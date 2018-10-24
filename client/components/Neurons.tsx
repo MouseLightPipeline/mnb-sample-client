@@ -3,6 +3,7 @@ import {Grid, Row, Col} from "react-bootstrap";
 
 
 import {NeuronsTable} from "./NeuronsTable";
+import {UserPreferences} from "../util/userPreferences";
 
 interface ICreateTracingProps {
     haveLoadedBrainAreas: boolean;
@@ -17,16 +18,35 @@ export class Neurons extends React.Component<ICreateTracingProps, ICreateTracing
     public constructor(props: ICreateTracingProps) {
         super(props);
 
-        this.state = {offset: 0, limit: 10};
+        this.state = {
+            offset: UserPreferences.Instance.neuronPageOffset,
+            limit: UserPreferences.Instance.neuronPageLimit
+        }
     }
 
     private onUpdateOffsetForPage(page: number) {
-        this.setState({offset: this.state.limit * (page - 1)}, null);
+        const offset = this.state.limit * (page - 1);
+
+        if (offset != this.state.offset) {
+            this.setState({offset});
+
+            UserPreferences.Instance.neuronPageOffset = offset;
+        }
     }
 
     private onUpdateLimit(limit: number) {
-        this.setState({limit: limit}, null);
-    }
+        if (limit !== this.state.limit) {
+            let offset = this.state.offset;
+
+            if (offset < limit) {
+                offset = 0;
+            }
+
+            this.setState({offset, limit});
+
+            UserPreferences.Instance.neuronPageOffset = offset;
+            UserPreferences.Instance.neuronPageLimit = limit;
+        }    }
 
     public render() {
         if (this.props.haveLoadedBrainAreas) {

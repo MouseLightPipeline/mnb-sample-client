@@ -5,7 +5,7 @@ import {graphql} from "react-apollo";
 import {IBrainArea, IBrainAreaInput} from "../models/brainArea";
 import {UpdateBrainAreaMutation} from "../graphql/brainAreas";
 import {toast} from "react-toastify";
-import {toastUpdateError, toastUpdateSuccess} from "ndb-react-components";
+import {toastUpdateError, toastUpdateSuccess} from "./components/Toasts";
 
 interface ICompartmentProps {
     compartment: IBrainArea;

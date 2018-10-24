@@ -6,6 +6,7 @@ import {Grid, Row, Col} from "react-bootstrap";
 
 import {IMouseStrain} from "../models/mouseStrain";
 import {SamplesTable} from "./SamplesTable";
+import {UserPreferences} from "../util/userPreferences";
 
 const MouseStrainsQuery = gql`query MouseStrains {
     mouseStrains {
@@ -38,16 +39,34 @@ export class Samples extends React.Component<ICreateTracingProps, ICreateTracing
     public constructor(props: ICreateTracingProps) {
         super(props);
 
-        this.state = {offset: 0, limit: 10};
+        this.state = {
+            offset: UserPreferences.Instance.samplePageOffset,
+            limit: UserPreferences.Instance.samplePageLimit
+        };
     }
 
     private onUpdateOffsetForPage(page: number) {
-        this.setState({offset: this.state.limit * (page - 1)}, null);
+        const offset = this.state.limit * (page - 1);
+
+        if (offset != this.state.offset) {
+            this.setState({offset});
+
+            UserPreferences.Instance.samplePageOffset = offset;
+        }
     }
 
     private onUpdateLimit(limit: number) {
         if (limit !== this.state.limit) {
-            this.setState({offset: 0, limit: limit}, null);
+            let offset = this.state.offset;
+
+            if (offset < limit) {
+                offset = 0;
+            }
+
+            this.setState({offset, limit});
+
+            UserPreferences.Instance.samplePageOffset = offset;
+            UserPreferences.Instance.samplePageLimit = limit;
         }
     }
 
