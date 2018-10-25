@@ -65,7 +65,7 @@ class Heading extends React.Component<IHeadingProps, IHeadingState> {
 
 const Footer = () => (
     <div className="footer">
-        <span>Mouse Light Neuron Data Browser Copyright © 2016 - {(new Date().getFullYear())} Howard Hughes Medical Institute</span>
+        <span>Mouse Light Neuron Browser Copyright © 2016 - {(new Date().getFullYear())} Howard Hughes Medical Institute</span>
     </div>
 );
 
