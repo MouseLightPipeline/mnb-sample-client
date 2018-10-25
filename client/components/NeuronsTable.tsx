@@ -1,9 +1,8 @@
 import * as React from "react";
-import {Table, Button, Grid, Row, Col, InputGroup, Glyphicon, Panel} from "react-bootstrap";
+import {Table, Panel} from "react-bootstrap";
 import {graphql, InjectedGraphQLProps} from 'react-apollo';
 import {GraphQLDataProps} from "react-apollo/lib/graphql";
 import {toast} from "react-toastify";
-import {isNullOrUndefined} from "util";
 
 import {IQueryOutput} from "../util/graphQLTypes";
 import {IMutateNeuronData, INeuron, INeuronInput} from "../models/neuron";
@@ -12,14 +11,14 @@ import {
     UpdateNeuronMutation
 } from "../graphql/neuron";
 import {NeuronRow} from "./NeuronRow";
-import {SampleSelect} from "./editors/SampleSelect";
 import {AllSamplesQuery} from "../graphql/sample";
-import {ISample, ISamplesQueryOutput} from "../models/sample";
+import {displaySample, ISample, ISamplesQueryOutput} from "../models/sample";
 import {IInjection} from "../models/injection";
-import {InjectionsForSampleSelect} from "./editors/InjectionForSampleSelect";
 import {UserPreferences} from "../util/userPreferences";
 import {toastCreateError, toastCreateSuccess} from "./components/Toasts";
 import {PaginationHeader} from "./components/PaginationHeader";
+import {Button, Dropdown, Grid} from "semantic-ui-react";
+import {InjectionsForSampleDropdown} from "./editors/InjectionForSampleDropdown";
 
 interface ITracingCountsForNeuronsQueryProps {
     tracingCountsForNeurons: any;
@@ -50,6 +49,7 @@ interface INeuronsProps extends InjectedGraphQLProps<INeuronsGraphQLProps> {
 interface INeuronState {
     neuronToDelete?: INeuron;
     isInUpdate?: boolean;
+    samples?: ISample[];
     sample?: ISample;
     isSampleLocked?: boolean;
     injection: IInjection;
@@ -57,7 +57,7 @@ interface INeuronState {
 
 @graphql(TracingForNeuronsCountQuery, {
     name: "tracingCountsForNeuronsQuery",
-    options: ({sample}) => ({
+    options: () => ({
         pollInterval: 5000,
         variables: {
             ids: []
@@ -111,14 +111,15 @@ export class NeuronsTable extends React.Component<INeuronsProps, INeuronState> {
             neuronToDelete: null,
             isInUpdate: false,
             sample: null,
+            samples: [],
             injection: null,
             isSampleLocked: false
         };
     }
 
-    private onSampleChange(sample: ISample) {
-        if (sample !== this.state.sample) {
-            this.setState({sample, injection: null});
+    private onSampleChange(sampleId: string) {
+        if (!this.state.sample || sampleId !== this.state.sample.id) {
+            this.setState({sample: this.state.samples.find(s => s.id === sampleId) || null, injection: null});
         }
     }
 
@@ -127,10 +128,6 @@ export class NeuronsTable extends React.Component<INeuronsProps, INeuronState> {
         UserPreferences.Instance.neuronCreateLockedSampleId = this.state.isSampleLocked ? "" : this.state.sample.id;
 
         this.setState({isSampleLocked: !this.state.isSampleLocked});
-    }
-
-    private canCreateNeuron(): boolean {
-        return !isNullOrUndefined(this.state.sample) && !isNullOrUndefined(this.state.injection);
     }
 
     private onInjectionChange(injection: IInjection) {
@@ -156,58 +153,55 @@ export class NeuronsTable extends React.Component<INeuronsProps, INeuronState> {
     public componentWillReceiveProps(props: INeuronsProps) {
         const lockedSampleId = UserPreferences.Instance.neuronCreateLockedSampleId;
 
-        if (lockedSampleId && props.samplesQuery && props.samplesQuery.samples) {
-            let samples = props.samplesQuery.samples.items.filter(s => s.id === lockedSampleId);
+        if (props.samplesQuery && !props.samplesQuery.loading && props.samplesQuery.samples) {
+            this.setState({samples: props.samplesQuery.samples.items});
 
-            if (samples.length > 0 && this.state.sample !== samples[0]) {
-                this.setState({sample: samples[0], isSampleLocked: true}, null);
+            if (lockedSampleId) {
+                let samples = props.samplesQuery.samples.items.filter(s => s.id === lockedSampleId);
+
+                if (samples.length > 0 && this.state.sample !== samples[0]) {
+                    this.setState({sample: samples[0], isSampleLocked: true});
+                }
             }
         }
     }
 
     private renderCreateNeuron(samples: ISample[]) {
-        return (
-            <Grid fluid style={{borderBottom: "1px solid #ddd", paddingBottom: "15px"}}>
-                <Row style={{margin: "0px"}}>
-                    <Col md={5} sm={12}/>
-                    <Col md={3} sm={12}>
-                        <InputGroup bsSize="sm">
-                            <SampleSelect idName="create-neuron-samples" options={samples}
-                                          selectedOption={this.state.sample}
-                                          disabled={this.state.isSampleLocked}
-                                          placeholder="Select sample..."
-                                          hasRightInputGroup={true}
-                                          onSelect={s => this.onSampleChange(s)}/>
-                            <InputGroup.Button>
-                                <Button bsStyle={this.state.isSampleLocked ? "danger" : "default"}
-                                        disabled={this.state.sample === null}
-                                        active={this.state.isSampleLocked}
-                                        onClick={() => this.onLockSample()}>
-                                    <Glyphicon glyph="lock"/>
-                                </Button>
-                            </InputGroup.Button>
-                        </InputGroup>
-                    </Col>
-                    <Col md={4} sm={12}>
-                        <div>
-                            <InputGroup bsSize="sm">
-                                <InjectionsForSampleSelect sample={this.state.sample}
-                                                           selectedInjection={this.state.injection}
-                                                           onInjectionChange={n => this.onInjectionChange(n)}
-                                                           disabled={this.state.sample === null}
-                                                           placeholder={this.state.sample ? "Select an injection..." : "No sample..."}/>
+        const items = samples.map(s => {
+            return {value: s.id, text: displaySample(s)}
+        });
 
-                                <InputGroup.Button disabled={!this.canCreateNeuron()}>
-                                    <Button bsStyle="primary" style={{marginLeft: "20px", borderRadius: "0px"}}
-                                            onClick={() => this.onCreateNeuron()} disabled={this.state.injection === null}>
-                                        <Glyphicon glyph="plus"/>
-                                    </Button>
-                                </InputGroup.Button>
-                            </InputGroup>
-                        </div>
-                    </Col>
-                </Row>
-            </Grid>
+        return (
+            <Grid fluid columns={16}>
+                <Grid.Column width={6}/>
+                <Grid.Column width={4} textAlign="right">
+                    <Button as="div" fluid labelPosition="left">
+                        <Dropdown search fluid selection options={items}
+                                  className="label"
+                                  placeholder="Select sample..."
+                                  disabled={this.state.isSampleLocked || samples.length === 0}
+                                  value={this.state.sample ? this.state.sample.id : null}
+                                  onChange={(e, {value}) => this.onSampleChange(value as string)}
+                                  style={{fontWeight: "normal"}}/>
+                        <Button compact icon="lock" color={this.state.isSampleLocked ? "red" : null}
+                                disabled={this.state.sample === null}
+                                active={this.state.isSampleLocked}
+                                onClick={() => this.onLockSample()}/>
+                    </Button>
+                </Grid.Column>
+
+                <Grid.Column width={4} textAlign="left">
+                    <InjectionsForSampleDropdown sample={this.state.sample}
+                                               selectedInjection={this.state.injection}
+                                               onInjectionChange={n => this.onInjectionChange(n)}
+                                               disabled={this.state.sample === null}/>
+                </Grid.Column>
+
+                <Grid.Column width={2} textAlign="right">
+                    <Button content="Add" icon="add" labelPosition="right" color="blue"
+                            disabled={this.state.injection === null}
+                            onClick={() => this.onCreateNeuron()}/>
+                </Grid.Column> </Grid>
         );
     }
 
@@ -259,12 +253,10 @@ export class NeuronsTable extends React.Component<INeuronsProps, INeuronState> {
 
         const activePage = rows ? (this.props.offset ? (Math.floor(this.props.offset / this.props.limit) + 1) : 1) : 0;
 
-        const samples = this.props.samplesQuery && !this.props.samplesQuery.loading ? this.props.samplesQuery.samples.items : [];
-
         return (
             <Panel bsStyle="default" header={this.renderPanelHeader()}
                    footer={this.renderPanelFooter(totalCount, activePage, pageCount)}>
-                {this.renderCreateNeuron(samples)}
+                {this.renderCreateNeuron(this.state.samples)}
                 <div style={{borderBottom: "1px solid #ddd"}}>
                     <PaginationHeader pageCount={pageCount}
                                       activePage={activePage}

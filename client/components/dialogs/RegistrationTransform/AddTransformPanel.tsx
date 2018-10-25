@@ -3,12 +3,11 @@ import {Button, FormGroup, FormControl, ControlLabel, HelpBlock,} from "react-bo
 import {graphql} from 'react-apollo';
 import {toast} from "react-toastify";
 
-import * as update from "immutability-helper";
-
 import {IRegistrationTransformInput} from "../../../models/registrationTransform";
 import {ISample} from "../../../models/sample";
 import {CreateTransformMutation, SampleForRegistrationQuery} from "../../../graphql/registrationTransform";
 import {toastUpdateError, toastUpdateSuccess} from "../../components/Toasts";
+import update from "immutability-helper";
 
 type ValidationState = "success" | "warning" | "error";
 

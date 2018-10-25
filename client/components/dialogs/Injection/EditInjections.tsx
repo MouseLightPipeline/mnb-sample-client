@@ -2,7 +2,7 @@ import * as React from "react";
 import {
     Table,
     Glyphicon,
-    Alert
+    Alert, FormGroup
 } from "react-bootstrap";
 import {graphql} from 'react-apollo';
 import {InjectedGraphQLProps} from "react-apollo/lib/graphql";
@@ -16,13 +16,13 @@ import {
 import {IInjection, IInjectionInput} from "../../../models/injection";
 import {IBrainArea} from "../../../models/brainArea";
 import {BrainAreas, lookupBrainArea} from "../../App";
-import {BrainAreaSelect} from "../../editors/BrainAreaSelect";
 import {VirusAutoSuggest} from "../../editors/VirusAutoSuggest";
 import {IFluorophore} from "../../../models/fluorophore";
 import {IInjectionVirus} from "../../../models/injectionVirus";
 import {FluorophoreAutoSuggest} from "../../editors/FluorophoreAutoSuggest";
 import {toastUpdateError, toastUpdateSuccess} from "../../components/Toasts";
 import {ModalAlert} from "../../components/ModalAlert";
+import {BrainAreaDropdown} from "../../editors/BrainAreaDropdown";
 
 interface ITracingCountQueryProps {
     neuronCountsForInjections: any;
@@ -95,7 +95,13 @@ export class EditInjectionsPanel extends React.Component<IEditInjectionsProps, I
     }
 
     private async onAcceptBrainArea(injection: IInjection, brainArea: IBrainArea): Promise<boolean> {
-        return this.performUpdate({id: injection.id, brainAreaId: brainArea ? brainArea.id : null});
+        if (brainArea) {
+            if (!injection.brainArea || injection.brainArea.id !== brainArea.id) {
+                return this.performUpdate({id: injection.id, brainAreaId: brainArea.id });
+            }
+        } else if (injection.brainArea) {
+            return this.performUpdate({id: injection.id, brainAreaId: null });
+        }
     }
 
     private async onFluorophoreChanged(injection: IInjection, value: string): Promise<boolean> {
@@ -216,6 +222,7 @@ export class EditInjectionsPanel extends React.Component<IEditInjectionsProps, I
             return (
                 <tr key={t.id}>
                     <td>
+                        {/*
                         <BrainAreaSelect idName="brain-area"
                                          options={BrainAreas}
                                          selectedOption={lookupBrainArea(t.brainArea.id)}
@@ -224,6 +231,9 @@ export class EditInjectionsPanel extends React.Component<IEditInjectionsProps, I
                                          isExclusiveEditMode={false}
                                          placeholder="select..."
                                          onSelect={(brainArea: IBrainArea) => this.onAcceptBrainArea(t, brainArea)}/>
+                                         */}
+                        <BrainAreaDropdown brainArea={lookupBrainArea(t.brainArea.id)}
+                                           onBrainAreaChange={(brainArea: IBrainArea) => this.onAcceptBrainArea(t, brainArea)}/>
                     </td>
                     <td>
                         <VirusAutoSuggest items={this.props.injectionViruses} displayProperty="name"

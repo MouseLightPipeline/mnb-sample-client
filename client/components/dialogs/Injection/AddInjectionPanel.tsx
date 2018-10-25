@@ -2,7 +2,6 @@ import * as React from "react";
 import {Button, FormGroup, ControlLabel} from "react-bootstrap";
 import {graphql} from 'react-apollo';
 import {toast} from "react-toastify";
-import * as update from "immutability-helper";
 
 import {ISample} from "../../../models/sample";
 import {IInjection, IInjectionInput} from "../../../models/injection";
@@ -11,11 +10,13 @@ import {IInjectionVirus} from "../../../models/injectionVirus";
 import {isNullOrUndefined} from "util";
 import {VirusAutoSuggest} from "../../editors/VirusAutoSuggest";
 import {IFluorophore} from "../../../models/fluorophore";
-import {BrainAreaSelect} from "../../editors/BrainAreaSelect";
 import {BrainAreas, lookupBrainArea} from "../../App";
 import {IBrainArea} from "../../../models/brainArea";
 import {FluorophoreAutoSuggest} from "../../editors/FluorophoreAutoSuggest";
 import {toastUpdateError, toastUpdateSuccess} from "../../components/Toasts";
+import update from "immutability-helper";
+import {BrainAreaDropdown} from "../../editors/BrainAreaDropdown";
+
 interface IAddInjectionProps {
     sample: ISample;
 
@@ -129,12 +130,8 @@ export class AddInjectionPanel extends React.Component<IAddInjectionProps, IAddI
                 </p>
                 <FormGroup bsSize="sm" controlId="brain-area-group">
                     <ControlLabel>Brain Area</ControlLabel>
-                    <BrainAreaSelect idName="brain-area"
-                                     options={BrainAreas}
-                                     selectedOption={lookupBrainArea(this.state.injection.brainAreaId)}
-                                     multiSelect={false}
-                                     placeholder="select..."
-                                     onSelect={(brainArea: IBrainArea) => this.onBrainAreaChange(brainArea)}/>
+                    <BrainAreaDropdown isEditOnly={true} brainArea={lookupBrainArea(this.state.injection.brainAreaId)}
+                                       onBrainAreaChange={(brainArea: IBrainArea) => this.onBrainAreaChange(brainArea)}/>
                 </FormGroup>
                 <FormGroup bsSize="sm">
                     <ControlLabel>Virus</ControlLabel>

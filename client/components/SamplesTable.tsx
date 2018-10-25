@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Table, Button, Glyphicon, Panel} from "react-bootstrap";
+import {Table, Panel} from "react-bootstrap";
 import {graphql, InjectedGraphQLProps} from 'react-apollo';
 import {toast} from "react-toastify";
 import {GraphQLDataProps} from "react-apollo/lib/graphql";
@@ -13,6 +13,7 @@ import {ManageInjections} from "./dialogs/Injection/ManageInjections";
 import {CreateSampleMutation, NeuronCountsForSamplesQuery, SamplesQuery} from "../graphql/sample";
 import {toastCreateError, toastCreateSuccess} from "./components/Toasts";
 import {PaginationHeader} from "./components/PaginationHeader";
+import {Button} from "semantic-ui-react";
 
 interface ISamplesGraphQLProps {
     samples: IQueryOutput<ISample>;
@@ -49,7 +50,8 @@ interface ISamplesState {
         variables: {
             input: {
                 offset: offset,
-                limit: limit
+                limit: limit,
+                sortOrder: "DESC"
             }
         }
     })
@@ -64,7 +66,7 @@ interface ISamplesState {
 })
 @graphql(NeuronCountsForSamplesQuery, {
     name: "neuronCountsForSamplesQuery",
-    options: ({sample}) => ({
+    options: () => ({
         pollInterval: 5000,
         variables: {
             ids: []
@@ -157,9 +159,9 @@ export class SamplesTable extends React.Component<ISamplesProps, ISamplesState> 
                     <h4>Samples</h4>
                 </div>
                 <div className="pull-right">
-                   <Button bsSize="sm" bsStyle="primary" onClick={() => this.onCreateSample()}>
-                        <Glyphicon glyph="plus"/>
-                    </Button>
+
+                    <Button content="Add" icon="add" labelPosition="right" color="blue"
+                            onClick={() => this.onCreateSample()}/>
                 </div>
             </div>
         );

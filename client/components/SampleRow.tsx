@@ -8,13 +8,17 @@ import {displaySample, IMutateSampleData, ISample, ISampleInput} from "../models
 import {displayRegistrationTransform, IRegistrationTransform} from "../models/registrationTransform";
 import {displayInjection, IInjection} from "../models/injection";
 import {IMouseStrain} from "../models/mouseStrain";
-import {FindVisibilityOption, IShareVisibilityOption, SampleVisibilityOptions} from "../util/ShareVisibility";
-import {VisibilitySelect} from "./editors/VisibilitySelect";
+import {
+    FindVisibilityOption,
+    SampleVisibilityOptions,
+    ShareVisibility
+} from "../util/ShareVisibility";
 import {DeleteSampleMutation, UpdateSampleMutation} from "../graphql/sample";
 import {MouseStrainAutoSuggest} from "./editors/MouseStrainAutoSuggest";
 import {DynamicEditField, DynamicEditFieldMode} from "./components/DynamicEditField";
 import {DynamicDatePicker} from "./components/DynamicDatePicker";
 import {toastDeleteError, toastDeleteSuccess, toastUpdateError, toastUpdateSuccess} from "./components/Toasts";
+import {Dropdown} from "semantic-ui-react";
 
 const tableCellStyle = {verticalAlign: "middle"};
 const idTableCellStyle = Object.assign({}, tableCellStyle, {maxWidth: "80px"});
@@ -114,8 +118,10 @@ export class SampleRow extends React.Component<ISampleRowProps, ISampleRowState>
         return this.performUpdate({id: this.props.sample.id, comment: value});
     }
 
-    private async onAcceptVisibility(visibility: IShareVisibilityOption): Promise<boolean> {
-        return this.performUpdate({id: this.props.sample.id, sharing: visibility.id});
+    private async onAcceptVisibility(visibility: ShareVisibility): Promise<boolean> {
+        if (visibility !== this.props.sample.sharing) {
+            return this.performUpdate({id: this.props.sample.id, sharing: visibility});
+        }
     }
 
     private async onAddRegistrationTransform() {
@@ -255,12 +261,9 @@ export class SampleRow extends React.Component<ISampleRowProps, ISampleRowState>
                                       acceptFunction={v => this.onAcceptCommentEdit(v)}/>
                 </td>
                 <td style={tableCellStyle}>
-                    <VisibilitySelect idName="sample-visibility"
-                                      options={ShareVisibilityOptions}
-                                      selectedOption={FindVisibilityOption(s.sharing)}
-                                      isDeferredEditMode={true}
-                                      isExclusiveEditMode={false}
-                                      onSelect={s => this.onAcceptVisibility(s)}/>
+                    <Dropdown search fluid inline options={ShareVisibilityOptions}
+                              value={FindVisibilityOption(s.sharing).value}
+                              onChange={(e, {value}) => this.onAcceptVisibility(value as ShareVisibility)}/>
                 </td>
                 <td style={tableCellStyle}>
                     {count}

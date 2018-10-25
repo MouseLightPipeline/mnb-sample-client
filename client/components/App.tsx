@@ -192,7 +192,7 @@ function makeBrainAreaMap(brainAreas: IBrainArea[]): boolean {
         return BrainAreaMap.size > 0;
     }
 
-    BrainAreas = brainAreas;
+    BrainAreas = brainAreas.slice().sort((a, b) => a.name.localeCompare(b.name));
 
     brainAreas.map(b => BrainAreaMap.set(b.id, b));
 

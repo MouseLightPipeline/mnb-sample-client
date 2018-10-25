@@ -11,9 +11,9 @@ const configurations = {
 function loadConfiguration() {
     const config = Object.assign({}, configurations);
 
-    config.port = process.env.SAMPLE_CLIENT_PORT || config.port;
+    config.port = parseInt(process.env.SAMPLE_CLIENT_PORT) || config.port;
     config.graphQLHostname = process.env.SAMPLE_API_HOST || process.env.CORE_SERVICES_HOST || config.graphQLHostname;
-    config.graphQLPort = process.env.SAMPLE_API_PORT || config.graphQLPort;
+    config.graphQLPort = parseInt(process.env.SAMPLE_API_PORT) || config.graphQLPort;
     config.authRequired = process.env.SAMPLE_AUTH_REQUIRED !== "false";
     config.authUser = process.env.SAMPLE_AUTH_USER || config.authUser;
     config.authPassword = process.env.SAMPLE_AUTH_PASS || config.authPassword;

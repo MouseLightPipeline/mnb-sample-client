@@ -1,10 +1,10 @@
 import * as React from "react";
 import {graphql} from 'react-apollo';
 import {GraphQLDataProps} from "react-apollo/lib/graphql";
-import {IInjection} from "../../models/injection";
+import {displayInjection, IInjection} from "../../models/injection";
 import {ISample} from "../../models/sample";
-import {InjectionSelect} from "./InjectionSelect";
 import {InjectionsForSampleQuery} from "../../graphql/injection";
+import {Dropdown} from "semantic-ui-react";
 
 
 interface InjectionsForSampleQueryProps {
@@ -14,14 +14,11 @@ interface InjectionsForSampleQueryProps {
 interface IInjectionForSampleSelectProps {
     sample: ISample;
     selectedInjection: IInjection;
-    injectionsQuery?: InjectionsForSampleQueryProps & GraphQLDataProps;
-    placeholder?: string;
     disabled?: boolean;
 
     onInjectionChange?(injection: IInjection): void;
-}
 
-interface IInjectionForSampleSelectState {
+    injectionsQuery?: InjectionsForSampleQueryProps & GraphQLDataProps;
 }
 
 @graphql(InjectionsForSampleQuery, {
@@ -29,17 +26,23 @@ interface IInjectionForSampleSelectState {
     options: ({sample}) => ({variables: {input: {sampleIds: [sample.id]}}, pollInterval: 5000}),
     skip: (ownProps) => ownProps.sample === null
 })
-export class InjectionsForSampleSelect extends React.Component<IInjectionForSampleSelectProps, IInjectionForSampleSelectState> {
+export class InjectionsForSampleDropdown extends React.Component<IInjectionForSampleSelectProps, {}> {
     public render() {
 
         const injections = this.props.injectionsQuery && !this.props.injectionsQuery.loading ? this.props.injectionsQuery.injections : [];
 
+        const items = injections.map(s => {
+            return {value: s.id, text: displayInjection(s)}
+        });
+
         return (
-            <InjectionSelect idName="create-neuron-injection" options={injections}
-                          selectedOption={this.props.selectedInjection}
-                          disabled={this.props.disabled}
-                          placeholder={this.props.placeholder}
-                          onSelect={this.props.onInjectionChange}/>
+            <Dropdown search fluid selection options={items}
+                      placeholder="Select injection..."
+                      disabled={this.props.disabled}
+                      value={this.props.selectedInjection ? this.props.selectedInjection.id : null}
+                      onChange={(e, {value}) => {
+                          this.props.onInjectionChange(injections.find(i => i.id === value) || null)
+                      }}/>
         );
     }
 }

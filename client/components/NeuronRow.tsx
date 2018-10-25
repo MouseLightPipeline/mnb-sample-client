@@ -1,30 +1,34 @@
 import * as React from "react";
-import {Glyphicon, Modal, Button} from "react-bootstrap";
+import {Glyphicon, Modal, Button, ControlLabel, FormGroup} from "react-bootstrap";
 import {graphql, InjectedGraphQLProps} from 'react-apollo';
 import {toast} from "react-toastify";
-import * as moment  from "moment";
+import * as moment from "moment";
 
-import {FindVisibilityOption, IShareVisibilityOption, NeuronVisibilityOptions} from "../util/ShareVisibility";
+import {
+    FindVisibilityOption,
+    IShareVisibilityOption,
+    NeuronVisibilityOptions,
+    ShareVisibility
+} from "../util/ShareVisibility";
 import {
     displayNeuron, formatSomaLocation, IMutateNeuronData, INeuron,
     INeuronInput, parseSomaLocation
 } from "../models/neuron";
 import {DeleteNeuronMutation, UpdateNeuronMutation} from "../graphql/neuron";
-import {VisibilitySelect} from "./editors/VisibilitySelect";
 import {displaySample} from "../models/sample";
-import {BrainAreaSelect} from "./editors/BrainAreaSelect";
 import {BrainAreas, lookupBrainArea} from "./App";
 import {IBrainArea} from "../models/brainArea";
 import {toastDeleteError, toastDeleteSuccess, toastUpdateError, toastUpdateSuccess} from "./components/Toasts";
 import {DynamicEditField, DynamicEditFieldMode} from "./components/DynamicEditField";
+import {Dropdown} from "semantic-ui-react";
+import {BrainAreaDropdown} from "./editors/BrainAreaDropdown";
 
 const ShareVisibilityOptions = NeuronVisibilityOptions();
 
 const tableCellStyle = {verticalAlign: "middle"};
-const brainAreaTableCellStyle = Object.assign({}, tableCellStyle, {minWidth: "300px"});
-const somaTableCellStyle = Object.assign({}, tableCellStyle, {minWidth: "200px"});
-const editTableCellStyle = Object.assign({}, tableCellStyle, {maxWidth: "150px"});
-
+// const brainAreaTableCellStyle = Object.assign({}, tableCellStyle, {minWidth: "300px"});
+// const somaTableCellStyle = Object.assign({}, tableCellStyle, {minWidth: "200px"});
+// const editTableCellStyle = Object.assign({}, tableCellStyle, {maxWidth: "150px"});
 
 interface INeuronRowProps {
     neuron: INeuron;
@@ -114,14 +118,22 @@ export class NeuronRow extends React.Component<INeuronRowProps, INeuronRowState>
         return await this.performUpdate({id: this.props.neuron.id, x: result.x, y: result.y, z: result.z});
     }
 
-    private async onAcceptVisibility(visibility: IShareVisibilityOption): Promise<boolean> {
-        return this.performUpdate({id: this.props.neuron.id, sharing: visibility.id});
+    private async onAcceptVisibility(value: ShareVisibility): Promise<boolean> {
+        if (value !== this.props.neuron.sharing) {
+            return this.performUpdate({id: this.props.neuron.id, sharing: value});
+        }
     }
 
     private onBrainAreaChange(brainArea: IBrainArea) {
-        const id = brainArea && brainArea.id.length > 0 ? brainArea.id : null;
-
-        return this.performUpdate({id: this.props.neuron.id, brainAreaId: id});
+        if (brainArea) {
+            if (!this.props.neuron.brainArea || brainArea.id !== this.props.neuron.brainArea.id) {
+                return this.performUpdate({id: this.props.neuron.id, brainAreaId: brainArea.id});
+            }
+        } else {
+            if (this.props.neuron.brainArea) {
+                return this.performUpdate({id: this.props.neuron.id, brainAreaId: null});
+            }
+        }
     }
 
     private onEditModeChanged(mode: DynamicEditFieldMode) {
@@ -188,31 +200,25 @@ export class NeuronRow extends React.Component<INeuronRowProps, INeuronRowState>
         return (
             <tr>
                 {this.state.showConfirmDelete ? this.renderDeleteConfirmationModal() : null}
-                <td style={editTableCellStyle}>
+                <td style={tableCellStyle}>
                     <DynamicEditField initialValue={n.idString} placeHolder="(none)"
                                       acceptFunction={v => this.onAcceptIdStringEdit(v)}
                                       onEditModeChanged={(m: DynamicEditFieldMode) => this.onEditModeChanged(m)}/>
                 </td>
-                <td style={editTableCellStyle}>
+                <td style={tableCellStyle}>
                     <DynamicEditField initialValue={n.tag} placeHolder="(none)"
                                       acceptFunction={v => this.onAcceptTagEdit(v)}/>
                 </td>
                 <td style={tableCellStyle}>
                     {displaySample(n.injection.sample)}
                 </td>
-                <td style={brainAreaTableCellStyle}>
-                    <BrainAreaSelect idName="brain-area"
-                                     options={BrainAreas}
-                                     selectedOption={n.brainArea ? lookupBrainArea(n.brainArea.id) : null}
-                                     userData={lookupBrainArea(n.injection.brainArea.id)}
-                                     multiSelect={false}
-                                     isDeferredEditMode={true}
-                                     isExclusiveEditMode={false}
-                                     placeholder="select..."
-                                     onSelect={(brainArea: IBrainArea) => this.onBrainAreaChange(brainArea)}/>
+                <td style={tableCellStyle}>
+                    <BrainAreaDropdown brainArea={n.brainArea ? lookupBrainArea(n.brainArea.id) : null}
+                                       inheritedBrainArea={lookupBrainArea(n.injection.brainArea.id)}
+                                       onBrainAreaChange={(brainArea: IBrainArea) => this.onBrainAreaChange(brainArea)}/>
 
                 </td>
-                <td style={somaTableCellStyle}>
+                <td style={tableCellStyle}>
                     <DynamicEditField initialValue={formatSomaLocation(n)} placeHolder="(undefined)"
                                       acceptFunction={v => this.onAcceptSomaLocationEdit(v)}
                                       canAcceptFunction={v => !parseSomaLocation(v).error}
@@ -223,12 +229,9 @@ export class NeuronRow extends React.Component<INeuronRowProps, INeuronRowState>
                                       acceptFunction={v => this.onAcceptKeywordsEdit(v)}/>
                 </td>
                 <td style={tableCellStyle}>
-                    <VisibilitySelect idName="neuron-visibility"
-                                      options={ShareVisibilityOptions}
-                                      selectedOption={FindVisibilityOption(n.sharing)}
-                                      isDeferredEditMode={true}
-                                      isExclusiveEditMode={false}
-                                      onSelect={s => this.onAcceptVisibility(s)}/>
+                    <Dropdown search fluid inline options={ShareVisibilityOptions}
+                              value={FindVisibilityOption(n.sharing).value}
+                              onChange={(e, {value}) => this.onAcceptVisibility(value as ShareVisibility)}/>
                 </td>
                 <td style={tableCellStyle}>
                     {count}

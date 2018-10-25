@@ -6,26 +6,31 @@ export enum ShareVisibility {
 }
 
 export interface IShareVisibilityOption {
-    id: ShareVisibility;
-    label: string;
+    key: ShareVisibility;
+    value: ShareVisibility;
+    text: string;
 }
 
 const ShareVisibilityOptions: IShareVisibilityOption[] = [
     {
-        id: ShareVisibility.DoNotShare,
-        label: "Not shared"
+        key: ShareVisibility.DoNotShare,
+        value: ShareVisibility.DoNotShare,
+        text: "Not shared"
     },
     {
-        id: ShareVisibility.Inherited,
-        label: "Inherited"
+        key: ShareVisibility.Inherited,
+        value: ShareVisibility.Inherited,
+        text: "Inherited"
     },
     {
-        id: ShareVisibility.ShareAllInternal,
-        label: "Internal"
+        key: ShareVisibility.ShareAllInternal,
+        value: ShareVisibility.ShareAllInternal,
+        text: "Internal"
     },
     {
-        id: ShareVisibility.ShareAllExternal,
-        label: "Public"
+        key: ShareVisibility.ShareAllExternal,
+        value: ShareVisibility.ShareAllExternal,
+        text: "Public"
     }
 ];
 
@@ -34,7 +39,7 @@ export function NeuronVisibilityOptions(): IShareVisibilityOption[] {
 }
 
 export function SampleVisibilityOptions(): IShareVisibilityOption[] {
-    return ShareVisibilityOptions.filter(s => s.id !== ShareVisibility.Inherited);
+    return ShareVisibilityOptions.filter(s => s.key !== ShareVisibility.Inherited);
 }
 
 export function FindVisibilityOption(id: number): IShareVisibilityOption {
