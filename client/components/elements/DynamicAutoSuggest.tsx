@@ -1,6 +1,5 @@
 import * as React from "react";
 import Autosuggest = require("react-autosuggest");
-import {isNullOrUndefined} from "util";
 import {Button} from "semantic-ui-react";
 
 export enum DynamicAutoSuggestMode {
@@ -44,7 +43,7 @@ export class DynamicAutoSuggest<T extends any> extends React.Component<IObjectAu
     }
 
     private get isDeferredEditMode() {
-        return !isNullOrUndefined(this.props.isDeferredEditMode) && this.props.isDeferredEditMode;
+        return !(this.props.isDeferredEditMode === undefined || this.props.isDeferredEditMode === null) && this.props.isDeferredEditMode;
     }
 
     private onRequestEditMode() {
@@ -91,9 +90,14 @@ export class DynamicAutoSuggest<T extends any> extends React.Component<IObjectAu
 
     public componentWillReceiveProps(props: IObjectAutoSuggestProps<T>) {
         this.setState({
-            initialPropValue: props.initialValue,
-            value: props.initialValue
-        }, null);
+            initialPropValue: props.initialValue
+        });
+
+        if (this.state.mode === DynamicAutoSuggestMode.Static) {
+            this.setState({
+                value: props.initialValue
+            });
+        }
     }
 
     private renderClickableValue() {
@@ -105,7 +109,7 @@ export class DynamicAutoSuggest<T extends any> extends React.Component<IObjectAu
     }
 
     protected renderValue(value: string) {
-        if (isNullOrUndefined(value) || value.length === 0) {
+        if (!value) {
             return (<span style={{color: "#AAA"}}>{this.props.placeHolder || "(none)"}</span>)
         }
 
@@ -164,22 +168,17 @@ export class DynamicAutoSuggest<T extends any> extends React.Component<IObjectAu
 
 
     public render() {
-        const style = {
-            margin: "0px",
-            display: "inline"
-        };
-
         if (this.isInEditMode) {
             if (!this.isDeferredEditMode) {
                 return this.renderAutoSuggest();
             } else {
                 return (
                     <Button.Group size="mini">
-                        <Button icon="cancel" onClick={() => this.onCancelEdit()}/>
-                        <Button as="div" style={{padding: 0}}>
+                        <Button size="mini" icon="cancel" onClick={() => this.onCancelEdit()}/>
+                        <Button size="mini" as="div" style={{padding: 0}}>
                             {this.renderAutoSuggest(true)}
                         </Button>
-                        <Button icon="check" onClick={() => this.onAcceptEdit()}/>
+                        <Button size="mini" icon="check" color="teal" onClick={() => this.onAcceptEdit()}/>
                     </Button.Group>
                 )
             }

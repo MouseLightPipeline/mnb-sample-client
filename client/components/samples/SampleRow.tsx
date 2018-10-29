@@ -1,11 +1,11 @@
 import * as React from "react";
-import {Confirm, Icon, Table} from "semantic-ui-react";
+import {Table, Dropdown, Label, Button, List} from "semantic-ui-react";
 import {toast} from "react-toastify";
 
 const moment = require("moment");
 
-import {displaySample, IMutateSampleData, ISample, ISampleInput} from "../../models/sample";
-import {displayRegistrationTransform, IRegistrationTransform} from "../../models/registrationTransform";
+import {ISample, ISampleInput} from "../../models/sample";
+import {displayRegistrationTransform} from "../../models/registrationTransform";
 import {displayInjection, IInjection} from "../../models/injection";
 import {IMouseStrain} from "../../models/mouseStrain";
 import {
@@ -13,115 +13,91 @@ import {
     SampleVisibilityOptions,
     ShareVisibility
 } from "../../util/ShareVisibility";
-import {DeleteSampleMutation, UpdateSampleMutation} from "../../graphql/sample";
 import {MouseStrainAutoSuggest} from "../editors/MouseStrainAutoSuggest";
-import {DynamicEditField, DynamicEditFieldMode} from "../elements/DynamicEditField";
+import {DynamicEditField} from "../elements/DynamicEditField";
 import {DynamicDatePicker} from "../elements/DynamicDatePicker";
-import {toastDeleteError, toastDeleteSuccess, toastUpdateError, toastUpdateSuccess} from "../elements/Toasts";
-import {Dropdown} from "semantic-ui-react";
-
-const tableCellStyle = {verticalAlign: "middle"};
-const idTableCellStyle = Object.assign({}, tableCellStyle, {maxWidth: "80px"});
-const editTableCellStyle = Object.assign({}, tableCellStyle, {maxWidth: "150px"});
-const dateTableCellStyle = Object.assign({}, tableCellStyle, {maxWidth: "130px"});
-const tagEditTableCellStyle = Object.assign({}, editTableCellStyle, {wordBreak: "break-all"});
+import {toastCreateError, toastUpdateError} from "../elements/Toasts";
+import {
+    UPDATE_SAMPLE_MUTATION,
+    UpdateSampleMutation,
+    UpdateSampleMutationData,
+    UpdateSampleMutationFn
+} from "../../graphql/sample";
 
 const ShareVisibilityOptions = SampleVisibilityOptions();
+
+function onSampleUpdated(data: UpdateSampleMutationData) {
+    if (!data.sample || data.error) {
+        toast.error(toastCreateError(data.error.message), {autoClose: false});
+    }
+}
 
 interface ISampleRowProps {
     mouseStrains: IMouseStrain[];
     sample: ISample;
-    neuronCount: number;
 
-    onRequestAddRegistrationTransform?(forSample: ISample): void;
-    onRequestManageInjections?(forSample: ISample): void;
+    onRequestAddRegistrationTransform(forSample: ISample): void;
+    onRequestManageInjections(forSample: ISample): void;
+    onRequestDeleteSample(forSample: ISample): void;
 
     updateSample?(sample: ISampleInput): any;
     deleteSample?(sample: ISampleInput): any;
 }
 
 interface ISampleRowState {
-    isEditingId?: boolean;
     isInUpdate?: boolean;
-    showConfirmDelete?: boolean;
-    isDeleted?: boolean;
 }
 
-/*
-@graphql(UpdateSampleMutation, {
-    props: ({mutate}) => ({
-        updateSample: (sample: ISampleInput) => mutate({
-            variables: {sample}
-        })
-    })
-})
-@graphql(DeleteSampleMutation, {
-    props: ({mutate}) => ({
-        deleteSample: (sample: ISampleInput) => mutate({
-            variables: {sample}
-        })
-    })
-})*/
 export class SampleRow extends React.Component<ISampleRowProps, ISampleRowState> {
     public constructor(props: ISampleRowProps) {
         super(props);
 
         this.state = {
-            isEditingId: false,
-            isInUpdate: false,
-            showConfirmDelete: false,
-            isDeleted: false
+            isInUpdate: false
         }
     }
 
-    private async performUpdate(samplePartial: ISampleInput) {
-        try {
-            const result = await this.props.updateSample(samplePartial);
-
-            if (!result.data.updateSample.sample) {
-                toast.error(toastUpdateError(result.data.updateSample.error), {autoClose: false});
-            } else {
-                toast.success(toastUpdateSuccess(), {autoClose: 3000});
-            }
-            this.setState({isInUpdate: false});
-        } catch (error) {
-            toast.error(toastUpdateError(error), {autoClose: false});
-
-            this.setState({isInUpdate: false});
-
-            return false;
+    private async onAcceptTagEdit(value: string, updateFn: UpdateSampleMutationFn) {
+        if (value !== this.props.sample.tag) {
+            await updateFn({variables: {sample: {id: this.props.sample.id, tag: value}}});
         }
-
-        return true;
     }
 
-    private async onAcceptTagEdit(value: string): Promise<boolean> {
-        return this.performUpdate({id: this.props.sample.id, tag: value});
+    private async onAcceptAnimalIdEdit(value: string, updateFn: UpdateSampleMutationFn) {
+        if (value !== this.props.sample.animalId) {
+            await updateFn({variables: {sample: {id: this.props.sample.id, animalId: value}}});
+        }
     }
 
-    private async onAcceptAnimalIdEdit(value: string): Promise<boolean> {
-        return this.performUpdate({id: this.props.sample.id, animalId: value});
+    private async onAcceptIdNumberEdit(value: string, updateFn: UpdateSampleMutationFn) {
+        const idNumber = parseInt(value);
+
+        if (!isNaN(idNumber) && idNumber !== this.props.sample.idNumber) {
+            await updateFn({variables: {sample: {id: this.props.sample.id, idNumber}}});
+        }
     }
 
-    private async onAcceptIdNumberEdit(value: string): Promise<boolean> {
-        return this.performUpdate({id: this.props.sample.id, idNumber: parseInt(value)});
+    private async onDateChanged(value: Date, updateFn: UpdateSampleMutationFn) {
+        if (value.valueOf() !== this.props.sample.sampleDate) {
+            await updateFn({variables: {sample: {id: this.props.sample.id, sampleDate: value.valueOf()}}});
+        }
     }
 
-    private async onDateChanged(value: Date): Promise<boolean> {
-        return this.performUpdate({id: this.props.sample.id, sampleDate: value.valueOf()});
+    private async onAcceptMouseStrainChange(name: string, updateFn: UpdateSampleMutationFn) {
+        if ((!this.props.sample.mouseStrain || name !== this.props.sample.mouseStrain.name) || (!name && this.props.sample.mouseStrain)) {
+            await updateFn({variables: {sample: {id: this.props.sample.id, mouseStrainName: name || null}}});
+        }
     }
 
-    private async onAcceptMouseStrainChange(name: string) {
-        return this.performUpdate({id: this.props.sample.id, mouseStrainName: name || null});
+    private async onAcceptCommentEdit(value: string, updateFn: UpdateSampleMutationFn) {
+        if (value !== this.props.sample.comment) {
+            await updateFn({variables: {sample: {id: this.props.sample.id, comment: value}}});
+        }
     }
 
-    private async onAcceptCommentEdit(value: string): Promise<boolean> {
-        return this.performUpdate({id: this.props.sample.id, comment: value});
-    }
-
-    private async onAcceptVisibility(visibility: ShareVisibility): Promise<boolean> {
+    private async onAcceptVisibility(visibility: ShareVisibility, updateFn: UpdateSampleMutationFn) {
         if (visibility !== this.props.sample.sharing) {
-            return this.performUpdate({id: this.props.sample.id, sharing: visibility});
+            await updateFn({variables: {sample: {id: this.props.sample.id, sharing: visibility}}});
         }
     }
 
@@ -131,88 +107,18 @@ export class SampleRow extends React.Component<ISampleRowProps, ISampleRowState>
         }
     }
 
-    private onEditModeChanged(mode: DynamicEditFieldMode) {
-        this.setState({isEditingId: mode === DynamicEditFieldMode.Edit});
-    }
-
-    private async onShowDeleteConfirmation() {
-        this.setState({showConfirmDelete: true}, null);
-    }
-
-
-    private async onCloseConfirmation(shouldDelete = false) {
-        this.setState({showConfirmDelete: false}, null);
-
-        if (shouldDelete) {
-            await this.deleteSample();
-        }
-    }
-
-    private async deleteSample() {
-        try {
-            const result = await this.props.deleteSample({id: this.props.sample.id});
-
-            if (result.data.deleteSample.error) {
-                toast.error(toastDeleteError(result.data.deleteSample.error), {autoClose: false});
-            } else {
-                toast.success(toastDeleteSuccess(), {autoClose: 3000});
-                this.setState({isDeleted: true});
-            }
-        } catch (error) {
-            toast.error(toastDeleteError(error), {autoClose: false});
-        }
-    }
-
-    private renderDeleteConfirmationModal() {
-        /*
-        return (
-            <Modal show={this.state.showConfirmDelete} onHide={() => this.onCloseConfirmation()}>
-                <Modal.Header closeButton>
-                    <h4>Delete Sample?</h4>
-                </Modal.Header>
-                <Modal.Body>
-                    Are you sure you want to delete the sample {displaySample(this.props.sample)}?
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button onClick={() => this.onCloseConfirmation()} style={{marginRight: "20px"}}>Cancel</Button>
-                    <Button onClick={() => this.onCloseConfirmation(true)} bsStyle="danger">Delete</Button>
-                </Modal.Footer>
-            </Modal>
-        );
-        */
-        return <Confirm on={this.state.showConfirmDelete} header="Delete Sample?"
-                        content={`Are you sure you want to delete the sample ${displaySample(this.props.sample)}?`}
-                        confirmButton={{content: "Delete", color: "red"}}
-                        onCancel={() => this.onCloseConfirmation()}
-                        onConfirm={() => this.onCloseConfirmation(true)}/>
-    }
-
-    private renderTransform(transform: IRegistrationTransform) {
-        if (!transform) {
-            return "(none)";
-        }
-
-        return displayRegistrationTransform(transform);
-    }
-
     private renderInjections(injections: IInjection[]) {
         if (!injections || injections.length === 0) {
             return "(none)";
         }
 
         const rows = injections.map(i => (
-            <tr key={`sil_${i.id}`}>
-                <td>{displayInjection(i)}</td>
-            </tr>)
+            <List.Item key={`sil_${i.id}`}>
+                {displayInjection(i, 20)}
+            </List.Item>)
         );
 
-        return (
-            <table>
-                <tbody>
-                {rows}
-                </tbody>
-            </table>
-        );
+        return <List>{rows} </List>;
     }
 
     public render() {
@@ -222,85 +128,82 @@ export class SampleRow extends React.Component<ISampleRowProps, ISampleRowState>
             return null;
         }
 
-        const count = this.props.neuronCount || "?";
-
-        if (this.state.isDeleted) {
-            return null;
-        }
-
         return (
-            <Table.Row>
-                <Table.Cell>
-                    <DynamicEditField initialValue={s.idNumber} acceptFunction={v => this.onAcceptIdNumberEdit(v)}
-                                      onEditModeChanged={(m: DynamicEditFieldMode) => this.onEditModeChanged(m)}/>
-                </Table.Cell>
+            <UpdateSampleMutation mutation={UPDATE_SAMPLE_MUTATION}
+                                  onCompleted={(data) => onSampleUpdated(data.updateSample)}
+                                  onError={(error) => toast.error(toastUpdateError(error), {autoClose: false})}>
+                {(updateSample) => (
+                    <Table.Row>
+                        <Table.Cell style={{minWidth: "120px"}}>
+                            <DynamicEditField initialValue={s.idNumber}
+                                              canAcceptFunction={(val) => !isNaN(parseInt(val))}
+                                              acceptFunction={v => this.onAcceptIdNumberEdit(v, updateSample)}/>
+                        </Table.Cell>
 
-                <Table.Cell style={{maxWidth: "150px", wordBreak: "break-all"}}>
-                    <DynamicEditField initialValue={s.tag} placeHolder="(none)"
-                                      acceptFunction={v => this.onAcceptTagEdit(v)}/>
-                </Table.Cell>
+                        <Table.Cell style={{wordBreak: "break-all"}}>
+                            <DynamicEditField initialValue={s.tag} placeHolder="(none)"
+                                              acceptFunction={v => this.onAcceptTagEdit(v, updateSample)}/>
+                        </Table.Cell>
 
-                <Table.Cell>
-                    <DynamicEditField initialValue={s.animalId} placeHolder="(none)"
-                                      acceptFunction={v => this.onAcceptAnimalIdEdit(v)}/>
-                </Table.Cell>
+                        <Table.Cell style={{minWidth: "150px"}}>
+                            <DynamicEditField initialValue={s.animalId} placeHolder="(none)"
+                                              acceptFunction={v => this.onAcceptAnimalIdEdit(v, updateSample)}/>
+                        </Table.Cell>
 
-                <Table.Cell style={{minWidth: "170px"}}>
-                    <DynamicDatePicker initialValue={new Date(s.sampleDate)} isDeferredEditMode={true}
-                                       onChangeDate={(d) => this.onDateChanged(d)}/>
-                </Table.Cell>
+                        <Table.Cell style={{minWidth: "170px", maxWidth: "180px"}}>
+                            <DynamicDatePicker initialValue={new Date(s.sampleDate)} isDeferredEditMode={true}
+                                               onChangeDate={(d) => this.onDateChanged(d, updateSample)}/>
+                        </Table.Cell>
 
-                <Table.Cell>
-                    <MouseStrainAutoSuggest items={this.props.mouseStrains} displayProperty="name"
-                                            placeholder="select or name a mouse strain"
-                                            initialValue={s.mouseStrain ? s.mouseStrain.name : ""}
-                                            isDeferredEditMode={true}
-                                            onChange={(v: string) => this.onAcceptMouseStrainChange(v)}/>
-                </Table.Cell>
+                        <Table.Cell style={{minWidth: "120px"}}>
+                            <MouseStrainAutoSuggest items={this.props.mouseStrains} displayProperty="name"
+                                                    placeholder="select or name a mouse strain"
+                                                    initialValue={s.mouseStrain ? s.mouseStrain.name : ""}
+                                                    isDeferredEditMode={true}
+                                                    onChange={(v: string) => this.onAcceptMouseStrainChange(v, updateSample)}/>
+                        </Table.Cell>
 
-                <Table.Cell>
-                    <a onClick={() => this.onAddRegistrationTransform()}>
-                        {this.renderTransform(s.activeRegistrationTransform)}
-                    </a>
-                </Table.Cell>
 
-                <Table.Cell>
-                    <a onClick={() => this.props.onRequestManageInjections(s)}>
-                        {this.renderInjections(s.injections)}
-                    </a>
-                </Table.Cell>
+                        <Table.Cell style={{minWidth: "180px"}}>
+                            <a onClick={() => this.onAddRegistrationTransform()}>
+                                {s.activeRegistrationTransform ? displayRegistrationTransform(s.activeRegistrationTransform) : "(none)"}
+                            </a>
+                        </Table.Cell>
 
-                <Table.Cell>
-                    <DynamicEditField initialValue={s.comment} placeHolder="(none)"
-                                      acceptFunction={v => this.onAcceptCommentEdit(v)}/>
-                </Table.Cell>
+                        <Table.Cell style={{minWidth: "200px"}}>
+                            <a onClick={() => this.props.onRequestManageInjections(s)}>
+                                {this.renderInjections(s.injections)}
+                            </a>
+                        </Table.Cell>
 
-                <Table.Cell>
-                    <Dropdown search fluid inline options={ShareVisibilityOptions}
-                              value={FindVisibilityOption(s.sharing).value}
-                              onChange={(e, {value}) => this.onAcceptVisibility(value as ShareVisibility)}/>
-                </Table.Cell>
+                        <Table.Cell>
+                            <DynamicEditField initialValue={s.comment} placeHolder="(none)"
+                                              acceptFunction={v => this.onAcceptCommentEdit(v, updateSample)}/>
+                        </Table.Cell>
 
-                <Table.Cell>
-                    {count}
-                </Table.Cell>
+                        <Table.Cell style={{minWidth: "100px"}}>
+                            <Dropdown search fluid inline options={ShareVisibilityOptions}
+                                      value={FindVisibilityOption(s.sharing).value}
+                                      onChange={(e, {value}) => this.onAcceptVisibility(value as ShareVisibility, updateSample)}/>
+                        </Table.Cell>
 
-                <Table.Cell>
-                    <div style={{display: "inline-block"}}>
-                        {moment(s.createdAt).format("YYYY-MM-DD")}<br/>
-                        {moment(s.createdAt).format("hh:mm:ss")}
-                    </div>
-                    {count === 0 ?
-                        <a style={{paddingRight: "20px"}} className="pull-right"
-                           onClick={() => this.onShowDeleteConfirmation()}>
-                            <Icon name="trash"/>
-                        </a> : null
-                    }
-                </Table.Cell>
-                {/*
-                {this.state.showConfirmDelete ? this.renderDeleteConfirmationModal() : null}
-                */}
-            </Table.Row>
+                        <Table.Cell style={{minWidth: "100px"}}>
+                            <div style={{display: "inline-block"}}>
+                                {moment(s.createdAt).format("YYYY-MM-DD")}<br/>
+                            </div>
+
+                        </Table.Cell>
+
+                        <Table.Cell style={{minWidth: "120px"}}>
+                            {s.neuronCount === 0 ?
+                                <Button icon="trash" color="red" size="mini" content="delete" labelPosition="left"
+                                        onClick={() => this.props.onRequestDeleteSample(s)}/> :
+                                <Label>{s.neuronCount}<Label.Detail>neurons</Label.Detail></Label>
+                            }
+                        </Table.Cell>
+                    </Table.Row>
+                )}
+            </UpdateSampleMutation>
         );
     }
 }

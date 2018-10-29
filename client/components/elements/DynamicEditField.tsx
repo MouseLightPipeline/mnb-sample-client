@@ -12,12 +12,10 @@ export interface IDynamicEditFieldProps {
 
     canEditFunction?(): boolean;
     canAcceptFunction?(value: string): boolean;
-    acceptFunction?(value: string): Promise<boolean>;
+    acceptFunction?(value: string): any;
     filterFunction?(proposedValue: string): any;
     feedbackFunction?(proposedValue: string): any;
     formatFunction?(value: any, mode: DynamicEditFieldMode): string;
-
-    onEditModeChanged?(mode: DynamicEditFieldMode): void;
 }
 
 export interface IDynamicEditFieldState {
@@ -44,9 +42,9 @@ export class DynamicEditField extends React.Component<IDynamicEditFieldProps, ID
     private onEdit = () => {
         if (!this.props.canEditFunction || this.props.canEditFunction()) {
             this.setState({mode: DynamicEditFieldMode.Edit}, null);
-            if (this.props.onEditModeChanged) {
-                this.props.onEditModeChanged(DynamicEditFieldMode.Edit);
-            }
+            // if (this.props.onEditModeChanged) {
+            //     this.props.onEditModeChanged(DynamicEditFieldMode.Edit);
+            // }
         } else {
             this.setState({showEditFail: true});
         }
@@ -54,9 +52,9 @@ export class DynamicEditField extends React.Component<IDynamicEditFieldProps, ID
 
     private onCancelEdit = () => {
         this.setState({value: this.props.initialValue, mode: DynamicEditFieldMode.Static}, null);
-        if (this.props.onEditModeChanged) {
-            this.props.onEditModeChanged(DynamicEditFieldMode.Static);
-        }
+        //if (this.props.onEditModeChanged) {
+        //    this.props.onEditModeChanged(DynamicEditFieldMode.Static);
+        //}
     };
 
     private onCanAcceptEdit() {
@@ -68,14 +66,15 @@ export class DynamicEditField extends React.Component<IDynamicEditFieldProps, ID
     }
 
     private onAcceptEdit = async () => {
-        const result = !this.props.acceptFunction || await this.props.acceptFunction(this.state.value);
-
-        if (result) {
-            this.setState({mode: DynamicEditFieldMode.Static});
-            if (this.props.onEditModeChanged) {
-                this.props.onEditModeChanged(DynamicEditFieldMode.Static);
-            }
+        if (this.props.acceptFunction) {
+            await this.props.acceptFunction(this.state.value);
         }
+
+        this.setState({mode: DynamicEditFieldMode.Static});
+
+        //if (this.props.onEditModeChanged) {
+        //    this.props.onEditModeChanged(DynamicEditFieldMode.Static);
+        //}
     };
 
     private onKeyPress = async (event: any) => {
@@ -84,7 +83,7 @@ export class DynamicEditField extends React.Component<IDynamicEditFieldProps, ID
         }
     };
 
-    private onValueChanged =(event: any) => {
+    private onValueChanged = (event: any) => {
         let value = event.target.value;
 
         let feedback = this.state.feedback;
@@ -115,8 +114,11 @@ export class DynamicEditField extends React.Component<IDynamicEditFieldProps, ID
     public componentWillReceiveProps(props: IDynamicEditFieldProps) {
         this.setState({
             initialPropValue: props.initialValue,
-            value: props.initialValue
         });
+
+        if (this.state.mode === DynamicEditFieldMode.Static) {
+            this.setState({value: props.initialValue});
+        }
     }
 
     public get staticValueDisplay() {

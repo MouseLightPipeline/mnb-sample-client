@@ -21,12 +21,18 @@ export interface IInjectionInput {
     sampleId?: string;
 }
 
-export function displayInjection(injection: IInjection) {
+export function displayInjection(injection: IInjection, truncate: number = 0) {
     if (!injection) {
         return "(none)";
     }
 
-    return displayBrainArea(injection.brainArea, "(no brain area)");
+    const str = displayBrainArea(injection.brainArea, "(no brain area)");
+
+    if (truncate > 0 && str.length > truncate + 3) {
+        return str.substring(0, truncate) + "...";
+    }
+
+    return str;
 }
 
 export function displayInjections(injections: IInjection[], separator: string = ", ", missing: string = "(none)") {

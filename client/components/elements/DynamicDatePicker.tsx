@@ -19,7 +19,6 @@ export interface IDynamicDatePickerProps {
 }
 
 export interface IDynamicDatePickerState {
-    // initialPropValue?: Moment;
     value?: Moment;
     mode?: DynamicDatePickerMode;
     userValue?: string;
@@ -30,7 +29,6 @@ export class DynamicDatePicker extends React.Component<IDynamicDatePickerProps, 
         super(props);
 
         this.state = {
-            // initialPropValue: moment(props.initialValue),
             value: moment(props.initialValue),
             mode: DynamicDatePickerMode.Static,
             userValue: moment(props.initialValue).format("YYYY-MM-DD")
@@ -62,9 +60,8 @@ export class DynamicDatePicker extends React.Component<IDynamicDatePickerProps, 
     };
 
     private handleChange = (date: any) => {
-        console.log(date);
         this.setState({
-            value: date.toDate()
+            value: date
         });
 
         if (this.isInEditMode && !this.isDeferredEditMode) {
@@ -73,18 +70,14 @@ export class DynamicDatePicker extends React.Component<IDynamicDatePickerProps, 
     };
 
     public componentWillReceiveProps(props: IDynamicDatePickerProps) {
-        this.setState({
-            // initialPropValue: moment(props.initialValue),
-            value: moment(props.initialValue)
-        });
+        if (this.state.mode === DynamicDatePickerMode.Static) {
+            this.setState({
+                value: moment(props.initialValue)
+            });
+        }
     }
 
     public render() {
-        const style = {
-            margin: "0px",
-            display: "inline"
-        };
-
         const CustomInput = (
             <Input size="mini" fluid type="text"
                    value={this.state.value}

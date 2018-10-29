@@ -1,6 +1,6 @@
 import * as React from "react";
 import {NavLink, Route, Switch} from "react-router-dom";
-import {Menu, Image, Message, Label, Icon} from "semantic-ui-react";
+import {Menu, Image, Message, Label, Icon, Segment} from "semantic-ui-react";
 import {ToastContainer, ToastPosition} from "react-toastify";
 
 import {Content} from "./Content";
@@ -46,9 +46,9 @@ const Heading = () => (
 );
 
 const Footer = () => (
-    <div className="footer">
-        <span>Mouse Light Neuron Browser Copyright © 2016 - {(new Date().getFullYear())} Howard Hughes Medical Institute</span>
-    </div>
+    <Segment size="small" attached="bottom" inverted>
+        Mouse Light Neuron Browser Copyright © 2016 - {(new Date().getFullYear())} Howard Hughes Medical Institute
+    </Segment>
 );
 
 interface IAppState {
@@ -70,17 +70,10 @@ export class App extends React.Component<{}, IAppState> {
                 <ToastContainer autoClose={6000} position={"bottom-center" as ToastPosition}
                                 style={toastStyleOverride}/>
                 <Heading/>
-                <div style={{marginTop: "62px", marginBottom: "40px", padding: "20px"}}>
-                    <AppQuery query={APP_QUERY} pollInterval={10000}>
+                <div style={{marginTop: "62px", padding: "20px"}}>
+                    <AppQuery query={APP_QUERY} pollInterval={30000}>
                         {({loading, error, data}) => {
-                            if (error) {
-                                return (
-                                    <Message negative icon="exclamation triangle" header="Service not responding"
-                                             content="Initial data could not be loaded.  Verify the service is available and reload the page."/>
-                                );
-                            }
-
-                            if (loading) {
+                           if (loading) {
                                 return (
                                     <Message icon>
                                         <Icon name="circle notched" loading/>
@@ -89,6 +82,13 @@ export class App extends React.Component<{}, IAppState> {
                                             We are retrieving basic system data.
                                         </Message.Content>
                                     </Message>
+                                );
+                            }
+
+                            if (error) {
+                                return (
+                                    <Message negative icon="exclamation triangle" header="Service not responding"
+                                             content="System data could not be loaded.  Will attempt again shortly."/>
                                 );
                             }
 

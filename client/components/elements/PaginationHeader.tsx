@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Input, Pagination, Table} from "semantic-ui-react";
+import {Grid, Input, Pagination, Table} from "semantic-ui-react";
 
 const Slider = require("rc-slider").default;
 
@@ -70,6 +70,7 @@ export class PaginationHeader extends React.Component<IPaginationHeaderProps, IP
                 content: "Go",
                 labelPosition: 'right',
                 icon: "chevron right",
+                size: "mini",
                 disabled: !this.state.isValidPageJump,
                 onClick: () => this.setActivePage(this.state.pageJumpText)
             };
@@ -115,7 +116,7 @@ export class PaginationHeader extends React.Component<IPaginationHeaderProps, IP
                             {this.renderPagination()}
                         </Table.Cell>
 
-                        <Table.Cell style={{width: "33%", paddingRight: "4px"}} textAlign="right">
+                        <Table.Cell style={{width: "33%", paddingRight: "1px"}} textAlign="right">
                             {this.renderPageJump()}
                         </Table.Cell>
                     </Table.Row>

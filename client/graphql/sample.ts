@@ -1,4 +1,7 @@
 import gql from "graphql-tag";
+import {IBrainArea} from "../models/brainArea";
+import {Mutation, MutationFn} from "react-apollo";
+import {ISample} from "../models/sample";
 
 export const SAMPLE_FIELDS_FRAGMENT = gql`fragment SampleFields on Sample {
     id
@@ -8,6 +11,7 @@ export const SAMPLE_FIELDS_FRAGMENT = gql`fragment SampleFields on Sample {
     comment
     sampleDate
     sharing
+    neuronCount
     mouseStrain {
         id
         name
@@ -34,6 +38,10 @@ export const SAMPLE_FIELDS_FRAGMENT = gql`fragment SampleFields on Sample {
     updatedAt
 }`;
 
+///
+/// Samples Query
+///
+
 export const SAMPLES_QUERY = gql`query {
     samples {
         totalCount
@@ -45,86 +53,100 @@ export const SAMPLES_QUERY = gql`query {
 ${SAMPLE_FIELDS_FRAGMENT}
 `;
 
-export const CreateSampleMutation = gql`mutation CreateSample($sample: SampleInput) {
+///
+/// Mutation Input
+
+type SampleVariables = {
+    id?: string;
+    idNumber?: number;
+    animalId?: string;
+    tag?: string;
+    aliases?: string[];
+    comment?: string;
+    sampleDate?: number;
+    sharing?: number;
+    mouseStrainId?: string;
+    mouseStrainName?: string;
+    activeRegistrationTransformId?: string;
+}
+
+///
+/// Create Sample Mutation
+///
+
+export const CREATE_SAMPLE_MUTATION = gql`mutation CreateSample($sample: SampleInput) {
     createSample(sample: $sample) {
         sample {
-            id
-            idNumber
-            animalId
-            tag
-            comment
-            sampleDate
-            sharing
-            mouseStrain {
-                id
-                name
-            }
-            injections {
-                id
-                brainArea {
-                    id
-                    name
-                }
-            }
-            activeRegistrationTransform {
-                id
-                location
-                name
-            }
-            registrationTransforms {
-                id
-                location
-                name
-            }
-            updatedAt
-            createdAt
+           ...SampleFields
         }
         error {
             message
         }
     }
-}`;
+}
+${SAMPLE_FIELDS_FRAGMENT}
+`;
 
-export const UpdateSampleMutation = gql`mutation UpdateSample($sample: SampleInput) {
+type CreateSampleVariables = {
+    sample: SampleVariables;
+}
+
+export type CreateSampleMutationData = {
+    sample: ISample;
+    error: {
+        message: string;
+    };
+}
+
+type CreateSampleMutationResponse = {
+    createSample: CreateSampleMutationData;
+}
+
+export class CreateSampleMutation extends Mutation<CreateSampleMutationResponse, CreateSampleVariables> {
+}
+
+///
+/// Update Sample Mutation
+///
+
+export const UPDATE_SAMPLE_MUTATION = gql`mutation UpdateSample($sample: SampleInput) {
     updateSample(sample: $sample) {
         sample {
-            id
-            idNumber
-            animalId
-            tag
-            comment
-            sampleDate
-            sharing
-            mouseStrain {
-                id
-                name
-            }
-            injections {
-                id
-                brainArea {
-                    id
-                    name
-                }
-            }
-            activeRegistrationTransform {
-                id
-                location
-                name
-            }
-            registrationTransforms {
-                id
-                location
-                name
-            }
-            updatedAt
+            ...SampleFields
         }
         error {
             message
         }
     }
-}`;
+}
+${SAMPLE_FIELDS_FRAGMENT}
+`;
 
-export const DeleteSampleMutation = gql`mutation DeleteSample($sample: SampleInput) {
+type UpdateSampleVariables = {
+    sample: SampleVariables;
+}
+
+export type UpdateSampleMutationData = {
+    sample: ISample;
+    error: {
+        message: string;
+    }
+}
+
+type UpdateSampleMutationResponse = {
+    updateSample: UpdateSampleMutationData;
+}
+
+export class UpdateSampleMutation extends Mutation<UpdateSampleMutationResponse, UpdateSampleVariables> {
+}
+
+export type UpdateSampleMutationFn = MutationFn<UpdateSampleMutationResponse, UpdateSampleVariables>;
+
+///
+/// Delete Sample Mutation
+///
+
+export const DELETE_SAMPLE_MUTATION = gql`mutation DeleteSample($sample: SampleInput) {
     deleteSample(sample: $sample) {
         sample {
             id
@@ -135,15 +157,24 @@ export const DeleteSampleMutation = gql`mutation DeleteSample($sample: SampleInp
     }
 }`;
 
-export const NeuronCountsForSamplesQuery = gql`query NeuronCountsForSamples($ids: [String!]) {
-    neuronCountsForSamples(ids: $ids) {
-        counts {
-            sampleId
-            count
-        }
-        error {
-            message
-        }
+type DeleteSampleVariables = {
+    sample: {
+        id: string;
     }
-}`;
+}
 
+type DeleteSampleMutationData = {
+    sample: {
+        id: string
+    };
+    error: {
+        message: string;
+    }
+}
+
+type DeleteSampleMutationResponse = {
+    deleteSample: DeleteSampleMutationData;
+}
+
+export class DeleteSampleMutation extends Mutation<DeleteSampleMutationResponse, DeleteSampleVariables> {
+}

@@ -13,6 +13,7 @@ export interface ISample {
     comment: string;
     sampleDate: number;
     sharing: number;
+    neuronCount: number;
     mouseStrain: IMouseStrain;
     injections: IInjection[];
     activeRegistrationTransform: IRegistrationTransform;
@@ -33,11 +34,6 @@ export interface ISampleInput {
     mouseStrainId?: string;
     mouseStrainName?: string;
     activeRegistrationTransformId?: string;
-}
-
-export interface ISamplesQueryOutput {
-    totalCount: number;
-    items: ISample[];
 }
 
 export interface IMutatedSample {

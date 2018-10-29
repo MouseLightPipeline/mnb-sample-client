@@ -4,8 +4,12 @@ export const toastCreateSuccess = () => {
     return (<div><h3>Create successful</h3></div>);
 };
 
-export const toastCreateError = (error: Error) => {
-    return (<div><h3>Create failed</h3>{error ? error.message : "(no additional details available)"}</div>);
+export const toastCreateError = (error: Error | string) => {
+    if (typeof error === "string") {
+        return (<div><h3>Create failed</h3>{error || "(no additional details available)"}</div>);
+    } else {
+        return (<div><h3>Create failed</h3>{error ? error.message : "(no additional details available)"}</div>);
+    }
 };
 
 export const toastUpdateSuccess = () => {

@@ -7,7 +7,7 @@ import {ISample} from "../models/sample";
 import {COMPARTMENT_FIELDS_FRAGMENT} from "./compartment";
 import {SAMPLE_FIELDS_FRAGMENT} from "./sample";
 
-export const APP_QUERY = gql`query {
+export const APP_QUERY = gql`query AppQuery {
     brainAreas {
         ...CompartmentFields
     }

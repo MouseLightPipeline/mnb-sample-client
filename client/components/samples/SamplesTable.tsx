@@ -1,75 +1,51 @@
 import * as React from "react";
 import {toast} from "react-toastify";
-import {Button, Table, Header, Segment} from "semantic-ui-react";
+import {Button, Table, Segment, Confirm} from "semantic-ui-react";
 
-// import {IMouseStrain} from "../models/mouseStrain";
 // import {ManageTransforms} from "./dialogs/RegistrationTransform/ManageTransforms";
 // import {ManageInjections} from "./dialogs/Injection/ManageInjections";
-// import {toastCreateError, toastCreateSuccess} from "./components/Toasts";
-// import {PaginationHeader} from "./components/PaginationHeader";
-import {ISample} from "../../models/sample";
+import {toastCreateError, toastDeleteError} from "../elements/Toasts";
+import {displaySample, ISample} from "../../models/sample";
 import {IMouseStrain} from "../../models/mouseStrain";
 import {SampleRow} from "./SampleRow";
 import {PaginationHeader} from "../elements/PaginationHeader";
+import {UserPreferences} from "../../util/userPreferences";
+import {
+    CREATE_SAMPLE_MUTATION,
+    CreateSampleMutation,
+    CreateSampleMutationData, DELETE_SAMPLE_MUTATION,
+    DeleteSampleMutation
+} from "../../graphql/sample";
+
+function onSampleCreated(data: CreateSampleMutationData) {
+    if (!data.sample || data.error) {
+        toast.error(toastCreateError(data.error.message), {autoClose: false});
+    }
+}
 
 interface ISamplesProps {
     samples: ISample[];
-    mouseStrainList: IMouseStrain[];
-
-    offset: number;
-    limit: number;
-
-    // neuronCountsForSamplesQuery?: INeuronsForSamplesQueryProps & GraphQLDataProps;
-
-    onUpdateOffsetForPage(page: number): void;
-    onUpdateLimit(limit: number): void;
-
-    // createSample?(sample: ISampleInput): any;
+    mouseStrains: IMouseStrain[];
 }
 
 interface ISamplesState {
+    offset?: number;
+    limit?: number;
+    requestedSampleForDelete?: ISample;
     isTransformDialogShown?: boolean;
     manageTransformsSample?: ISample;
     isInjectionDialogShown?: boolean;
     manageInjectionsSample?: ISample;
 }
 
-/*
-@graphql(SamplesQuery, {
-    options: ({offset, limit}) => ({
-        pollInterval: 5000,
-        variables: {
-            input: {
-                offset: offset,
-                limit: limit,
-                sortOrder: "DESC"
-            }
-        }
-    })
-})
-@graphql(CreateSampleMutation, {
-    props: ({mutate}) => ({
-        createSample: (sample: ISampleInput) => mutate({
-            variables: {sample},
-            refetchQueries: ["Samples"]
-        })
-    })
-})
-@graphql(NeuronCountsForSamplesQuery, {
-    name: "neuronCountsForSamplesQuery",
-    options: () => ({
-        pollInterval: 5000,
-        variables: {
-            ids: []
-        }
-    })
-})
-*/
 export class SamplesTable extends React.Component<ISamplesProps, ISamplesState> {
     public constructor(props: ISamplesProps) {
         super(props);
 
         this.state = {
+            offset: UserPreferences.Instance.samplePageOffset,
+            limit: UserPreferences.Instance.samplePageLimit,
+            requestedSampleForDelete: null,
             isTransformDialogShown: false,
             manageTransformsSample: null,
             isInjectionDialogShown: false,
@@ -77,20 +53,29 @@ export class SamplesTable extends React.Component<ISamplesProps, ISamplesState> 
         }
     }
 
-    private async onCreateSample() {
-        /*
-        try {
-            const result = await this.props.createSample({id: null});
+    private onUpdateOffsetForPage(page: number) {
+        const offset = this.state.limit * (page - 1);
 
-            if (!result.data.createSample.sample) {
-                toast.error(toastCreateError(result.data.createSample.error), {autoClose: false});
-            } else {
-                toast.success(toastCreateSuccess(), {autoClose: 3000});
-            }
-        } catch (error) {
-            toast.error(toastCreateError(error), {autoClose: false});
+        if (offset != this.state.offset) {
+            this.setState({offset});
+
+            UserPreferences.Instance.samplePageOffset = offset;
         }
-        */
+    }
+
+    private onUpdateLimit(limit: number) {
+        if (limit !== this.state.limit) {
+            let offset = this.state.offset;
+
+            if (offset < limit) {
+                offset = 0;
+            }
+
+            this.setState({offset, limit});
+
+            UserPreferences.Instance.samplePageOffset = offset;
+            UserPreferences.Instance.samplePageLimit = limit;
+        }
     }
 
     private onRequestAddRegistrationTransform(forSample: ISample) {
@@ -137,9 +122,28 @@ export class SamplesTable extends React.Component<ISamplesProps, ISamplesState> 
         return null as any;
     }
 
+    private renderDeleteConfirmationModal() {
+        if (!this.state.requestedSampleForDelete) {
+            return null;
+        }
+
+        return <DeleteSampleMutation mutation={DELETE_SAMPLE_MUTATION} refetchQueries={["AppQuery"]} onError={(error) => toast.error(toastDeleteError(error), {autoClose: false})}>
+            {(deleteSample) => (
+                <Confirm open={true} dimmer="blurring"
+                         header="Delete Sample?"
+                         content={`Are you sure you want to delete the sample ${displaySample(this.state.requestedSampleForDelete)}?`}
+                         confirmButton="Delete"
+                         onCancel={() => this.setState({requestedSampleForDelete: null})}
+                         onConfirm={() => {
+                             deleteSample({variables: {sample: {id: this.state.requestedSampleForDelete.id}}});
+                             this.setState({requestedSampleForDelete: null});
+                         }}/>)}
+        </DeleteSampleMutation>;
+    }
+
     private renderPanelFooter(totalCount: number, activePage: number, pageCount: number) {
-        const start = this.props.offset + 1;
-        const end = Math.min(this.props.offset + this.props.limit, totalCount);
+        const start = this.state.offset + 1;
+        const end = Math.min(this.state.offset + this.state.limit, totalCount);
         return (
             <div>
                 <span>
@@ -152,58 +156,44 @@ export class SamplesTable extends React.Component<ISamplesProps, ISamplesState> 
         );
     }
 
-    private renderHeader() {
-        return (
-            <div>
-                <div style={{display: "inline-block", verticalAlign: "middle"}}>
-                    <h4>Samples</h4>
-                </div>
-                <div className="pull-right">
-
-                    <Button content="Add" icon="add" labelPosition="right" color="blue"
-                            onClick={() => this.onCreateSample()}/>
-                </div>
-            </div>
-        );
-    }
-
     public render() {
-        const samples = this.props.samples.slice(this.props.offset, this.props.offset + this.props.limit);
+        const samples = this.props.samples.sort((a, b) => b.createdAt - a.createdAt).slice(this.state.offset, this.state.offset + this.state.limit);
 
         const totalCount = this.props.samples.length;
 
-        const pageCount = Math.ceil(totalCount / this.props.limit);
+        const pageCount = Math.ceil(totalCount / this.state.limit);
 
-        const activePage = (this.props.offset ? (Math.floor(this.props.offset / this.props.limit) + 1) : 1);
-
-        /*
-        let counts = this.props.neuronCountsForSamplesQuery && !this.props.neuronCountsForSamplesQuery.loading ? this.props.neuronCountsForSamplesQuery.neuronCountsForSamples.counts : [];
-
-        counts = counts.reduce((prev: any, curr: any) => {
-            prev[curr.sampleId] = curr.count;
-
-            return prev;
-        }, {});
-*/
+        const activePage = (this.state.offset ? (Math.floor(this.state.offset / this.state.limit) + 1) : 1);
 
         const rows = samples.map(s => {
-            return <SampleRow key={`sl_${s.id}`} sample={s} mouseStrains={this.props.mouseStrainList}
-                              neuronCount={/*counts[s.id]*/0}
+            return <SampleRow key={`sl_${s.id}`} sample={s} mouseStrains={this.props.mouseStrains}
+                              onRequestDeleteSample={(s) => this.setState({requestedSampleForDelete: s})}
                               onRequestAddRegistrationTransform={(s) => this.onRequestAddRegistrationTransform(s)}
                               onRequestManageInjections={(s) => this.onRequestManageInjections(s)}/>
         });
 
         return (
             <div>
+                {this.renderTransformsDialog()}
+                {this.renderInjectionsDialog()}
+                {this.renderDeleteConfirmationModal()}
                 <Segment attached="top" secondary clearing style={{borderBottomWidth: 0}}>
-                    {this.renderHeader()}
+                    <h3 style={{display: "inline-block", verticalAlign: "middle"}}>Samples</h3>
+                    <CreateSampleMutation mutation={CREATE_SAMPLE_MUTATION} refetchQueries={["AppQuery"]}
+                                          onCompleted={(data) => onSampleCreated(data.createSample)}
+                                          onError={(error) => toast.error(toastCreateError(error), {autoClose: false})}>
+                        {(createSample) => (
+                            <Button content="Add" icon="add" labelPosition="right" color="blue" floated="right"
+                                    onClick={() => createSample({variables: {sample: {}}})}/>
+                        )}
+                    </CreateSampleMutation>
                 </Segment>
                 <Segment attached secondary style={{borderBottomWidth: 0}}>
                     <PaginationHeader pageCount={pageCount}
                                       activePage={activePage}
-                                      limit={this.props.limit}
-                                      onUpdateLimitForPage={limit => this.props.onUpdateLimit(limit)}
-                                      onUpdateOffsetForPage={page => this.props.onUpdateOffsetForPage(page)}/>
+                                      limit={this.state.limit}
+                                      onUpdateLimitForPage={limit => this.onUpdateLimit(limit)}
+                                      onUpdateOffsetForPage={page => this.onUpdateOffsetForPage(page)}/>
                 </Segment>
                 <Table attached="bottom" compact="very">
                     <Table.Body>
@@ -217,8 +207,8 @@ export class SamplesTable extends React.Component<ISamplesProps, ISamplesState> 
                             <Table.HeaderCell>Injections</Table.HeaderCell>
                             <Table.HeaderCell>Comment</Table.HeaderCell>
                             <Table.HeaderCell>Visibility</Table.HeaderCell>
-                            <Table.HeaderCell>Neurons</Table.HeaderCell>
                             <Table.HeaderCell>Created</Table.HeaderCell>
+                            <Table.HeaderCell/>
                         </Table.Row>
                         {rows}
                     </Table.Body>
@@ -230,8 +220,6 @@ export class SamplesTable extends React.Component<ISamplesProps, ISamplesState> 
                         </Table.Row>
                     </Table.Footer>
                 </Table>
-                {this.renderTransformsDialog()}
-                {this.renderInjectionsDialog()}
             </div>
         );
     }
