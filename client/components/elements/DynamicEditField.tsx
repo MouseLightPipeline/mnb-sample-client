@@ -1,7 +1,5 @@
 import * as React from "react";
-
-import {Glyphicon, FormControl, FormGroup, InputGroup, Overlay, Tooltip, Button, HelpBlock} from "react-bootstrap";
-import {isNullOrUndefined} from "util";
+import {Input} from "semantic-ui-react";
 
 export enum DynamicEditFieldMode {
     Static,
@@ -10,8 +8,6 @@ export enum DynamicEditFieldMode {
 
 export interface IDynamicEditFieldProps {
     initialValue: any;
-    style?: any;
-    canEditFailMessage?: string;
     placeHolder?: string;
 
     canEditFunction?(): boolean;
@@ -52,7 +48,7 @@ export class DynamicEditField extends React.Component<IDynamicEditFieldProps, ID
                 this.props.onEditModeChanged(DynamicEditFieldMode.Edit);
             }
         } else {
-            this.setState({showEditFail: true}, null);
+            this.setState({showEditFail: true});
         }
     };
 
@@ -71,18 +67,24 @@ export class DynamicEditField extends React.Component<IDynamicEditFieldProps, ID
         return true;
     }
 
-    private async onAcceptEdit() {
+    private onAcceptEdit = async () => {
         const result = !this.props.acceptFunction || await this.props.acceptFunction(this.state.value);
 
         if (result) {
-            this.setState({mode: DynamicEditFieldMode.Static}, null);
+            this.setState({mode: DynamicEditFieldMode.Static});
             if (this.props.onEditModeChanged) {
                 this.props.onEditModeChanged(DynamicEditFieldMode.Static);
             }
         }
     };
 
-    private onValueChanged(event: any) {
+    private onKeyPress = async (event: any) => {
+        if ((event.charCode || event.which) == 13) {
+            await this.onAcceptEdit();
+        }
+    };
+
+    private onValueChanged =(event: any) => {
         let value = event.target.value;
 
         let feedback = this.state.feedback;
@@ -96,15 +98,9 @@ export class DynamicEditField extends React.Component<IDynamicEditFieldProps, ID
         }
 
         if (value !== null) {
-            this.setState({value, feedback}, null);
+            this.setState({value, feedback});
         } else {
-            this.setState({feedback}, null);
-        }
-    };
-
-    private async onKeyPress(event: any) {
-        if ((event.charCode || event.which) == 13) {
-            await this.onAcceptEdit();
+            this.setState({feedback});
         }
     };
 
@@ -116,17 +112,15 @@ export class DynamicEditField extends React.Component<IDynamicEditFieldProps, ID
         return value;
     };
 
-    private overlayControl: any = null;
-
     public componentWillReceiveProps(props: IDynamicEditFieldProps) {
         this.setState({
             initialPropValue: props.initialValue,
             value: props.initialValue
-        }, null);
+        });
     }
 
     public get staticValueDisplay() {
-        if (isNullOrUndefined(this.state.value) || this.state.value.length === 0) {
+        if (this.state.value == undefined || this.state.value == null || this.state.value.length === 0) {
             return (<span style={{color: "#AAA"}}>{this.props.placeHolder}</span>)
         }
 
@@ -134,54 +128,25 @@ export class DynamicEditField extends React.Component<IDynamicEditFieldProps, ID
     }
 
     public render() {
-        const style = {
-            margin: "0px",
-            display: "inline"
-        };
-
-        const staticDivStyle = this.props.style || {display: "inline-block"};
-
-        const overlapProps = {
-            placement: "top",
-            rootClose: true,
-            target: this.overlayControl,
-            show: this.state.showEditFail,
-            onHide: () => this.setState({showEditFail: false}, null),
-            onEntered: () => setTimeout(() => this.setState({showEditFail: false}, null), 4000)
-        };
-
         if (this.state.mode === DynamicEditFieldMode.Edit) {
             return (
-                <FormGroup style={style}>
-                    <InputGroup bsSize="sm">
-                        <InputGroup.Button>
-                            <Button onClick={this.onCancelEdit} style={{display: "inline"}}>
-                                <Glyphicon glyph="remove"/>
-                            </Button>
-                        </InputGroup.Button>
-                        <FormControl type="text" style={this.state.feedback ? {color: "red"} : {}}
-                                     value={this.format(this.state.value)}
-                                     placeholder={this.props.placeHolder}
-                                     onKeyPress={(evt) => this.onKeyPress(evt)}
-                                     onChange={(evt) => this.onValueChanged(evt)}/>
-                        <InputGroup.Button>
-                            <Button bsStyle="success"
-                                    disabled={!this.onCanAcceptEdit()}
-                                    onClick={() => this.onAcceptEdit()}>
-                                <Glyphicon glyph="ok"/>
-                            </Button>
-                        </InputGroup.Button>
-                    </InputGroup>
-                    {this.state.feedback ? <HelpBlock>{this.state.feedback}</HelpBlock> : null}
-                </FormGroup>);
+                <Input size="mini" fluid type="text" placeholder={this.props.placeHolder}
+                       value={this.format(this.state.value)}
+                       label={{icon: "cancel", size: "mini", onClick: this.onCancelEdit}} labelPosition="left"
+                       action={{
+                           icon: "check",
+                           color: "teal",
+                           size: "mini",
+                           disabled: !this.onCanAcceptEdit(),
+                           onClick: this.onAcceptEdit
+                       }}
+                       onKeyPress={this.onKeyPress}
+                       onChange={this.onValueChanged}/>
+            );
         } else {
             return (
-                <div ref={node => this.overlayControl = node} style={staticDivStyle} onClick={() => this.onEdit()}>
-                    <Overlay {...overlapProps}>
-                        <Tooltip id="overload-left">{this.props.canEditFailMessage}</Tooltip>
-                    </Overlay>
-                    <a>{this.staticValueDisplay}</a>
-                </div>);
+                <a onClick={() => this.onEdit()}>{this.staticValueDisplay}</a>
+            );
         }
     }
 }

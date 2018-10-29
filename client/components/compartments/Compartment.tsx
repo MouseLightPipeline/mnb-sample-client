@@ -1,16 +1,13 @@
 import * as React from "react";
 import {List, Form, Button} from "semantic-ui-react";
-import {graphql} from "react-apollo";
-
-import {IBrainArea, IBrainAreaInput} from "../models/brainArea";
-import {UpdateBrainAreaMutation} from "../graphql/brainAreas";
 import {toast} from "react-toastify";
-import {toastUpdateError, toastUpdateSuccess} from "./components/Toasts";
+
+import {IBrainArea} from "../../models/brainArea";
+import {toastUpdateError, toastUpdateSuccess} from "../elements/Toasts";
+import {UPDATE_COMPARTMENT_MUTATION, UpdateCompartmentMutation} from "../../graphql/compartment";
 
 interface ICompartmentProps {
     compartment: IBrainArea;
-
-    updateBrainArea?(input: IBrainAreaInput): any;
 }
 
 interface ICompartmentState {
@@ -19,13 +16,6 @@ interface ICompartmentState {
     isInUpdate?: boolean;
 }
 
-@graphql(UpdateBrainAreaMutation, {
-    props: ({mutate}) => ({
-        updateBrainArea: (brainArea: IBrainAreaInput) => mutate({
-            variables: {brainArea}
-        })
-    })
-})
 export class Compartment extends React.Component<ICompartmentProps, ICompartmentState> {
     public constructor(props: ICompartmentProps) {
         super(props);
@@ -53,30 +43,6 @@ export class Compartment extends React.Component<ICompartmentProps, ICompartment
                 isInUpdate: false
             })
         }
-    }
-
-    private async performUpdate() {
-        try {
-            const result = await this.props.updateBrainArea({
-                id: this.props.compartment.id,
-                aliases: this.state.aliases.length > 0 ? this.state.aliases.split(",").map(a => a.trim()) : null
-            });
-
-            if (!result.data.updateBrainArea.brainArea) {
-                toast.error(toastUpdateError(result.data.updateBrainArea.error), {autoClose: false});
-            } else {
-                toast.success(toastUpdateSuccess(), {autoClose: 3000});
-            }
-            this.setState({isInUpdate: false});
-        } catch (error) {
-            toast.error(toastUpdateError(error), {autoClose: false});
-
-            this.setState({isInUpdate: false});
-
-            return false;
-        }
-
-        return true;
     }
 
     public render() {
@@ -123,8 +89,10 @@ export class Compartment extends React.Component<ICompartmentProps, ICompartment
                                 Current Aliases
                             </List.Header>
                             {this.props.compartment.aliases.length > 0 ?
-                                <List.List as={"ul"}>{this.props.compartment.aliases.map((a, idx) => <List.Item as="li" value="•" style={{marginTop: "4px"}}
-                                    key={idx}>{a}</List.Item>)}</List.List> :
+                                <List.List as={"ul"}>{this.props.compartment.aliases.map((a, idx) => <List.Item as="li"
+                                                                                                                value="•"
+                                                                                                                style={{marginTop: "4px"}}
+                                                                                                                key={idx}>{a}</List.Item>)}</List.List> :
                                 <List.Description>(none)</List.Description>}
                         </List.Content>
                     </List.Item>
@@ -132,12 +100,38 @@ export class Compartment extends React.Component<ICompartmentProps, ICompartment
                 <Form>
                     <Form.Input fluid label="Update Aliases" value={this.state.aliases}
                                 onChange={(e, {value}) => this.updateAliases(value)}/>
-                    <Button disabled={this.state.aliases === this.state.srcAliases}
-                            onClick={() => this.performUpdate()}>
-                        Update
-                    </Button>
+                    <UpdateCompartmentAliasesButton aliases={this.state.aliases} srcAliases={this.state.srcAliases}
+                                                    compartmentId={this.props.compartment.id}/>
                 </Form>
             </div>
         );
     }
 }
+
+interface IUpdateCompartmentAliasesButtonProps {
+    aliases: string;
+    srcAliases: string;
+    compartmentId: string;
+}
+
+const UpdateCompartmentAliasesButton = (props: IUpdateCompartmentAliasesButtonProps) => (
+    <UpdateCompartmentMutation mutation={UPDATE_COMPARTMENT_MUTATION}
+                               onCompleted={() => toast.success(toastUpdateSuccess(), {autoClose: 3000})}
+                               onError={(error) => toast.error(toastUpdateError(error), {autoClose: false})}>
+        {(updateBrainArea) => {
+            return (
+                <Button icon="cloud upload" color="green" content="Update"
+                        disabled={props.aliases === props.srcAliases}
+                        onClick={() => updateBrainArea({
+                            variables: {
+                                brainArea: {
+                                    id: props.compartmentId,
+                                    aliases: props.aliases.length > 0 ? props.aliases.split(",").map(a => a.trim()).filter(a => a.length > 0) : null
+                                }
+                            }
+                        })}>
+                </Button>
+            );
+        }}
+    </UpdateCompartmentMutation>
+);

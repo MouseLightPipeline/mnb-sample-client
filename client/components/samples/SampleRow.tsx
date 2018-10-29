@@ -1,23 +1,23 @@
 import * as React from "react";
-import {Glyphicon, Modal, Button} from "react-bootstrap";
-import {graphql, InjectedGraphQLProps} from 'react-apollo';
+import {Confirm, Icon, Table} from "semantic-ui-react";
 import {toast} from "react-toastify";
+
 const moment = require("moment");
 
-import {displaySample, IMutateSampleData, ISample, ISampleInput} from "../models/sample";
-import {displayRegistrationTransform, IRegistrationTransform} from "../models/registrationTransform";
-import {displayInjection, IInjection} from "../models/injection";
-import {IMouseStrain} from "../models/mouseStrain";
+import {displaySample, IMutateSampleData, ISample, ISampleInput} from "../../models/sample";
+import {displayRegistrationTransform, IRegistrationTransform} from "../../models/registrationTransform";
+import {displayInjection, IInjection} from "../../models/injection";
+import {IMouseStrain} from "../../models/mouseStrain";
 import {
     FindVisibilityOption,
     SampleVisibilityOptions,
     ShareVisibility
-} from "../util/ShareVisibility";
-import {DeleteSampleMutation, UpdateSampleMutation} from "../graphql/sample";
-import {MouseStrainAutoSuggest} from "./editors/MouseStrainAutoSuggest";
-import {DynamicEditField, DynamicEditFieldMode} from "./components/DynamicEditField";
-import {DynamicDatePicker} from "./components/DynamicDatePicker";
-import {toastDeleteError, toastDeleteSuccess, toastUpdateError, toastUpdateSuccess} from "./components/Toasts";
+} from "../../util/ShareVisibility";
+import {DeleteSampleMutation, UpdateSampleMutation} from "../../graphql/sample";
+import {MouseStrainAutoSuggest} from "../editors/MouseStrainAutoSuggest";
+import {DynamicEditField, DynamicEditFieldMode} from "../elements/DynamicEditField";
+import {DynamicDatePicker} from "../elements/DynamicDatePicker";
+import {toastDeleteError, toastDeleteSuccess, toastUpdateError, toastUpdateSuccess} from "../elements/Toasts";
 import {Dropdown} from "semantic-ui-react";
 
 const tableCellStyle = {verticalAlign: "middle"};
@@ -36,7 +36,7 @@ interface ISampleRowProps {
     onRequestAddRegistrationTransform?(forSample: ISample): void;
     onRequestManageInjections?(forSample: ISample): void;
 
-    updateSample?(sample: ISampleInput): Promise<InjectedGraphQLProps<IMutateSampleData>>;
+    updateSample?(sample: ISampleInput): any;
     deleteSample?(sample: ISampleInput): any;
 }
 
@@ -47,6 +47,7 @@ interface ISampleRowState {
     isDeleted?: boolean;
 }
 
+/*
 @graphql(UpdateSampleMutation, {
     props: ({mutate}) => ({
         updateSample: (sample: ISampleInput) => mutate({
@@ -60,7 +61,7 @@ interface ISampleRowState {
             variables: {sample}
         })
     })
-})
+})*/
 export class SampleRow extends React.Component<ISampleRowProps, ISampleRowState> {
     public constructor(props: ISampleRowProps) {
         super(props);
@@ -163,6 +164,7 @@ export class SampleRow extends React.Component<ISampleRowProps, ISampleRowState>
     }
 
     private renderDeleteConfirmationModal() {
+        /*
         return (
             <Modal show={this.state.showConfirmDelete} onHide={() => this.onCloseConfirmation()}>
                 <Modal.Header closeButton>
@@ -177,6 +179,12 @@ export class SampleRow extends React.Component<ISampleRowProps, ISampleRowState>
                 </Modal.Footer>
             </Modal>
         );
+        */
+        return <Confirm on={this.state.showConfirmDelete} header="Delete Sample?"
+                        content={`Are you sure you want to delete the sample ${displaySample(this.props.sample)}?`}
+                        confirmButton={{content: "Delete", color: "red"}}
+                        onCancel={() => this.onCloseConfirmation()}
+                        onConfirm={() => this.onCloseConfirmation(true)}/>
     }
 
     private renderTransform(transform: IRegistrationTransform) {
@@ -221,54 +229,63 @@ export class SampleRow extends React.Component<ISampleRowProps, ISampleRowState>
         }
 
         return (
-            <tr>
-                {this.state.showConfirmDelete ? this.renderDeleteConfirmationModal() : null}
-                <td style={idTableCellStyle}>
+            <Table.Row>
+                <Table.Cell>
                     <DynamicEditField initialValue={s.idNumber} acceptFunction={v => this.onAcceptIdNumberEdit(v)}
                                       onEditModeChanged={(m: DynamicEditFieldMode) => this.onEditModeChanged(m)}/>
-                </td>
-                <td style={tagEditTableCellStyle}>
+                </Table.Cell>
+
+                <Table.Cell style={{maxWidth: "150px", wordBreak: "break-all"}}>
                     <DynamicEditField initialValue={s.tag} placeHolder="(none)"
                                       acceptFunction={v => this.onAcceptTagEdit(v)}/>
-                </td>
-                <td style={editTableCellStyle}>
+                </Table.Cell>
+
+                <Table.Cell>
                     <DynamicEditField initialValue={s.animalId} placeHolder="(none)"
                                       acceptFunction={v => this.onAcceptAnimalIdEdit(v)}/>
-                </td>
-                <td style={dateTableCellStyle}>
+                </Table.Cell>
+
+                <Table.Cell style={{minWidth: "170px"}}>
                     <DynamicDatePicker initialValue={new Date(s.sampleDate)} isDeferredEditMode={true}
                                        onChangeDate={(d) => this.onDateChanged(d)}/>
-                </td>
-                <td style={tableCellStyle}>
+                </Table.Cell>
+
+                <Table.Cell>
                     <MouseStrainAutoSuggest items={this.props.mouseStrains} displayProperty="name"
                                             placeholder="select or name a mouse strain"
                                             initialValue={s.mouseStrain ? s.mouseStrain.name : ""}
                                             isDeferredEditMode={true}
                                             onChange={(v: string) => this.onAcceptMouseStrainChange(v)}/>
-                </td>
-                <td style={tableCellStyle}>
+                </Table.Cell>
+
+                <Table.Cell>
                     <a onClick={() => this.onAddRegistrationTransform()}>
                         {this.renderTransform(s.activeRegistrationTransform)}
                     </a>
-                </td>
-                <td style={tableCellStyle}>
+                </Table.Cell>
+
+                <Table.Cell>
                     <a onClick={() => this.props.onRequestManageInjections(s)}>
                         {this.renderInjections(s.injections)}
                     </a>
-                </td>
-                <td style={tableCellStyle}>
+                </Table.Cell>
+
+                <Table.Cell>
                     <DynamicEditField initialValue={s.comment} placeHolder="(none)"
                                       acceptFunction={v => this.onAcceptCommentEdit(v)}/>
-                </td>
-                <td style={tableCellStyle}>
+                </Table.Cell>
+
+                <Table.Cell>
                     <Dropdown search fluid inline options={ShareVisibilityOptions}
                               value={FindVisibilityOption(s.sharing).value}
                               onChange={(e, {value}) => this.onAcceptVisibility(value as ShareVisibility)}/>
-                </td>
-                <td style={tableCellStyle}>
+                </Table.Cell>
+
+                <Table.Cell>
                     {count}
-                </td>
-                <td style={tableCellStyle}>
+                </Table.Cell>
+
+                <Table.Cell>
                     <div style={{display: "inline-block"}}>
                         {moment(s.createdAt).format("YYYY-MM-DD")}<br/>
                         {moment(s.createdAt).format("hh:mm:ss")}
@@ -276,11 +293,14 @@ export class SampleRow extends React.Component<ISampleRowProps, ISampleRowState>
                     {count === 0 ?
                         <a style={{paddingRight: "20px"}} className="pull-right"
                            onClick={() => this.onShowDeleteConfirmation()}>
-                            <Glyphicon glyph="trash"/>
+                            <Icon name="trash"/>
                         </a> : null
                     }
-                </td>
-            </tr>
+                </Table.Cell>
+                {/*
+                {this.state.showConfirmDelete ? this.renderDeleteConfirmationModal() : null}
+                */}
+            </Table.Row>
         );
     }
 }

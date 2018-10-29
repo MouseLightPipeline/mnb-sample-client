@@ -1,27 +1,13 @@
 import * as React from "react";
-import {graphql} from "react-apollo";
-import gql from "graphql-tag";
-import {GraphQLDataProps} from "react-apollo/lib/graphql";
-import {Grid, Row, Col} from "react-bootstrap";
 
-import {IMouseStrain} from "../models/mouseStrain";
 import {SamplesTable} from "./SamplesTable";
-import {UserPreferences} from "../util/userPreferences";
+import {UserPreferences} from "../../util/userPreferences";
+import {MOUSE_STRAINS_QUERY, MouseStrainsQuery} from "../../graphql/mouseStrain";
+import {Message} from "semantic-ui-react";
+import {ISample} from "../../models/sample";
 
-const MouseStrainsQuery = gql`query MouseStrains {
-    mouseStrains {
-        id
-        name
-    }
-}`;
-
-interface ITracingStructuresQueryProps {
-    mouseStrains: IMouseStrain[];
-}
-
-interface ICreateTracingProps {
-    haveLoadedBrainAreas: boolean;
-    mouseStrainsQuery?: ITracingStructuresQueryProps & GraphQLDataProps;
+interface ISamplesProps {
+    samples: ISample[];
 }
 
 interface ICreateTracingState {
@@ -29,14 +15,8 @@ interface ICreateTracingState {
     limit?: number;
 }
 
-@graphql(MouseStrainsQuery, {
-    name: "mouseStrainsQuery",
-    options: {
-        pollingInterval: 5000
-    }
-})
-export class Samples extends React.Component<ICreateTracingProps, ICreateTracingState> {
-    public constructor(props: ICreateTracingProps) {
+export class Samples extends React.Component<ISamplesProps, ICreateTracingState> {
+    public constructor(props: ISamplesProps) {
         super(props);
 
         this.state = {
@@ -71,20 +51,26 @@ export class Samples extends React.Component<ICreateTracingProps, ICreateTracing
     }
 
     public render() {
-        const mouseStrains = this.props.mouseStrainsQuery && !this.props.mouseStrainsQuery.loading ? this.props.mouseStrainsQuery.mouseStrains : [];
-
         return (
-            <Grid fluid>
-                <Row>
-                    <Col xs={12}>
-                        <SamplesTable mouseStrains={mouseStrains}
+            <MouseStrainsQuery query={MOUSE_STRAINS_QUERY} pollInterval={5000}>
+                {({error, data}) => {
+                    if (error) {
+                        return (
+                            <Message negative icon="exclamation triangle" header="Server unavailable"
+                                     content="Mouse strain information could not be loaded.  Will attempt again shortly."/>
+                        );
+                    }
+
+                    return (
+                        <SamplesTable samples={this.props.samples}
+                                      mouseStrainList={data.mouseStrains || null}
                                       offset={this.state.offset}
                                       limit={this.state.limit}
                                       onUpdateOffsetForPage={page => this.onUpdateOffsetForPage(page)}
                                       onUpdateLimit={limit => this.onUpdateLimit(limit)}/>
-                    </Col>
-                </Row>
-            </Grid>
+                    );
+                }}
+            </MouseStrainsQuery>
 
         );
     }

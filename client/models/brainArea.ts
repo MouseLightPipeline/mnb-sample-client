@@ -17,12 +17,6 @@ export interface IBrainArea {
     geometryEnable?: boolean;
     createdAt?: number;
     updatedAt?: number;
-
-}
-
-export interface IBrainAreaInput {
-    id: string;
-    aliases: string[];
 }
 
 export function displayBrainArea(brainArea: IBrainArea, missing = "(none)", append = "") {

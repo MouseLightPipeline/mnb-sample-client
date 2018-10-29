@@ -1,7 +1,7 @@
 import * as React from "react";
 
 import {IInjectionVirus} from "../../models/injectionVirus";
-import {DynamicAutoSuggest} from "../components/DynamicAutoSuggest";
+import {DynamicAutoSuggest} from "../elements/DynamicAutoSuggest";
 
 export class VirusAutoSuggest extends DynamicAutoSuggest<IInjectionVirus> {
 }

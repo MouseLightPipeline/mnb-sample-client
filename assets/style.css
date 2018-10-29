@@ -43,15 +43,19 @@
     z-index: 1000;
 }
 
+.react-datepicker-wrapper {
+    width: 100%;
+}
+
 .react-datepicker__input-container {
     width: 100%;
 }
 
 .react-datepicker__input-container .date-picker-input {
-    height: 30px;
     padding: 8px 12px;
     font-size: 12px;
     line-height: 1.5;
+    border: 1px solid gray;
     border-radius: 0;
     width: 100%;
 }

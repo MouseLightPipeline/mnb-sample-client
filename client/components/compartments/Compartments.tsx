@@ -1,33 +1,13 @@
 import * as React from "react";
 import {Container, List, Table} from "semantic-ui-react";
-import {graphql} from "react-apollo";
-import gql from "graphql-tag";
 
-import {IBrainArea} from "../models/brainArea";
-import {Compartment} from "./Compartment";
+import {IBrainArea} from "../../models/brainArea";
 import {CompartmentNode} from "./CompartmentNode";
+import {Compartment} from "./Compartment";
 
-const CompartmentsQuery = gql`query Compartments {
-    brainAreas {
-        id
-        name
-        structureId
-        depth
-        parentStructureId
-        structureIdPath
-        safeName
-        acronym
-        aliases
-        atlasId
-        graphId
-        graphOrder
-        hemisphereId
-        geometryFile
-        geometryColor
-        geometryEnable
-        updatedAt
-    }
-}`;
+export interface ICompartmentsProps {
+    compartments: IBrainArea[];
+}
 
 export interface ICompartmentNode {
     name: string;
@@ -36,42 +16,26 @@ export interface ICompartmentNode {
     compartment: IBrainArea;
 }
 
-interface ICompartmentsProps {
-    compartmentsQuery?: any;
-}
-
 interface ICompartmentsState {
     rootNode?: ICompartmentNode;
     selectedNode?: ICompartmentNode;
 }
 
-@graphql(CompartmentsQuery, {
-    name: "compartmentsQuery",
-    options: {
-        pollingInterval: 60000
-    }
-})
 export class Compartments extends React.Component<ICompartmentsProps, ICompartmentsState> {
     private compartments = new Map<number, ICompartmentNode>();
 
     public constructor(props: ICompartmentsProps) {
         super(props);
 
-        this.state = {
+        this.state = Object.assign({}, this.updateTreeState(props, {
             rootNode: null,
             selectedNode: null
-        }
+        }));
     }
 
-    public componentWillReceiveProps(props: ICompartmentsProps) {
-        const {loading, error} = props.compartmentsQuery;
-
-        if (loading || error) {
-            return;
-        }
-
-        if (this.state.rootNode == null) {
-            let sorted = props.compartmentsQuery.brainAreas.slice().sort((a: IBrainArea, b: IBrainArea) => {
+    private updateTreeState(props: ICompartmentsProps, state: ICompartmentsState): ICompartmentsState {
+        if (state.rootNode == null) {
+            let sorted = props.compartments.slice().sort((a: IBrainArea, b: IBrainArea) => {
                 return a.depth - b.depth;
             });
 
@@ -108,9 +72,9 @@ export class Compartments extends React.Component<ICompartmentsProps, ICompartme
                 }
             });
 
-            this.setState({rootNode: data, selectedNode: data});
+            return {rootNode: data, selectedNode: data};
         } else {
-            props.compartmentsQuery.brainAreas.map((c: IBrainArea) => {
+            props.compartments.map((c: IBrainArea) => {
                 const existing: ICompartmentNode = this.compartments.get(c.structureId);
 
                 if (existing && existing.compartment.updatedAt < c.updatedAt) {
@@ -119,6 +83,12 @@ export class Compartments extends React.Component<ICompartmentsProps, ICompartme
                 }
             });
         }
+
+        return {};
+    }
+
+    public componentWillReceiveProps(props: ICompartmentsProps) {
+        this.setState(this.updateTreeState(props, this.state));
     }
 
     public onSelect = (node: ICompartmentNode) => {
@@ -134,22 +104,8 @@ export class Compartments extends React.Component<ICompartmentsProps, ICompartme
     };
 
     public render() {
-        const {loading, error} = this.props.compartmentsQuery;
-
-        if (loading || this.state.rootNode === null) {
-            return (
-                <div>
-                    loading
-                </div>
-            );
-        }
-
-        if (error) {
-            return (
-                <div>
-                    {error.toString()}
-                </div>
-            );
+        if (this.state.rootNode == null) {
+            return null;
         }
 
         // TODO Using Table due to overloaded Grid css between semantic-ui-react and react-bootstrap

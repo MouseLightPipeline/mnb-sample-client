@@ -1,4 +1,23 @@
 import gql from "graphql-tag";
+import {IBrainArea} from "../models/brainArea";
+import {Query} from "react-apollo";
+import {IInjection} from "../models/injection";
+
+export const INJECTION_FIELDS_FRAGMENT = gql`fragment InjectionFields on Injection {
+    id
+    injectionVirus {
+        id
+        name
+    }
+    fluorophore {
+        id
+        name
+    }
+    brainArea {
+        id
+        name
+    }
+}`;
 
 export const SampleForInjectionQuery = gql`query SampleForInjectionQuery($id: String) {
     sample(id: $id) {
@@ -23,23 +42,26 @@ export const SampleForInjectionQuery = gql`query SampleForInjectionQuery($id: St
     }
 }`;
 
-export const InjectionsForSampleQuery = gql`query InjectionsForSample($input: InjectionQueryInput) {
+export const INJECTIONS_FOR_SAMPLE_QUERY = gql`query InjectionsForSample($input: InjectionQueryInput) {
     injections(input: $input) {
-        id
-        injectionVirus {
-            id
-            name
-        }
-        fluorophore {
-            id
-            name
-        }
-        brainArea {
-            id
-            name
-        }
+        ...InjectionFields
      }
-}`;
+}
+${INJECTION_FIELDS_FRAGMENT}
+`;
+
+type InjectionsForSampleVariables = {
+    input: {
+        sampleIds: string[]
+    }
+}
+
+type InjectionsForSampleQueryResponse = {
+    injections: IInjection[];
+}
+
+export class InjectionsForSampleQuery extends Query<InjectionsForSampleQueryResponse, InjectionsForSampleVariables> {
+}
 
 export const InjectionViruses = gql`query InjectionVirus {
     injectionViruses {

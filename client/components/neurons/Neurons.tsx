@@ -1,21 +1,15 @@
 import * as React from "react";
-import {Grid, Row, Col} from "react-bootstrap";
 
-
-import {NeuronsTable} from "./NeuronsTable";
-import {UserPreferences} from "../util/userPreferences";
-
-interface ICreateTracingProps {
-    haveLoadedBrainAreas: boolean;
-}
+// import {NeuronsTable} from "./NeuronsTable";
+import {UserPreferences} from "../../util/userPreferences";
 
 interface ICreateTracingState {
     offset?: number;
     limit?: number;
 }
 
-export class Neurons extends React.Component<ICreateTracingProps, ICreateTracingState> {
-    public constructor(props: ICreateTracingProps) {
+export class Neurons extends React.Component<{}, ICreateTracingState> {
+    public constructor(props: {}) {
         super(props);
 
         this.state = {
@@ -46,24 +40,19 @@ export class Neurons extends React.Component<ICreateTracingProps, ICreateTracing
 
             UserPreferences.Instance.neuronPageOffset = offset;
             UserPreferences.Instance.neuronPageLimit = limit;
-        }    }
+        }
+    }
 
     public render() {
-        if (this.props.haveLoadedBrainAreas) {
-            return (
-                <Grid fluid>
-                    <Row>
-                        <Col xs={12}>
+        return (
+            <h4>Neurons</h4>
+        );
+    }
+}
+
+/*
                             <NeuronsTable offset={this.state.offset}
                                           limit={this.state.limit}
                                           onUpdateOffsetForPage={page => this.onUpdateOffsetForPage(page)}
                                           onUpdateLimit={limit => this.onUpdateLimit(limit)}/>
-                        </Col>
-                    </Row>
-                </Grid>
-            );
-        } else {
-            return null;
-        }
-    }
-}
+                                          */

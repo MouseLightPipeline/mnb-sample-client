@@ -1,67 +1,49 @@
 import * as React from "react";
-import {Navbar, Nav, Glyphicon, NavItem, Modal, Button, Badge} from "react-bootstrap";
-import {ToastContainer} from "react-toastify";
-import {Link} from "react-router";
-import {graphql, InjectedGraphQLProps} from 'react-apollo';
+import {NavLink, Route, Switch} from "react-router-dom";
+import {Menu, Image, Message, Label, Icon} from "semantic-ui-react";
+import {ToastContainer, ToastPosition} from "react-toastify";
 
+import {Content} from "./Content";
+
+import {SYSTEM_MESSAGE_QUERY, SystemMessageQuery} from "../graphql/systemMessage";
+import {APP_QUERY, AppQuery} from "../graphql/app";
 import {IBrainArea} from "../models/brainArea";
-import {ImmutableQuery} from "../graphql/immutableTypes";
-import {isNullOrUndefined} from "util";
-import {SystemMessageQuery} from "../graphql/systemMessage";
-import {ReactElement} from "react";
+import {Samples} from "./samples/Samples";
+import {Neurons} from "./neurons/Neurons";
+import {Compartments} from "./compartments/Compartments";
 
-const logoImage = require("file-loader!../../assets/mouseLight_logo_web_white.png");
-
-const linkStyle = {
-    color: "white"
-};
+const logo = require("file-loader!../../assets/mouseLight_nb_color.svg");
 
 const toastStyleOverride = {
     minWidth: "600px",
     marginBottom: "40px"
 };
 
-interface ISystemMessageQuery {
-    systemMessage: string;
-}
+const Heading = () => (
+    <Menu inverted fluid stackable fixed="top">
+        <Menu.Item as={NavLink} exact to="/" name="/" key="/">
+            <Image size="small" src={logo}/>
+        </Menu.Item>
+        <Menu.Item as={NavLink} exact to="/samples" name="samples" key="samples">Samples</Menu.Item>
+        <Menu.Item as={NavLink} exact to="/neurons" name="neurons" key="neurons">Neurons</Menu.Item>
+        <Menu.Item as={NavLink} exact to="/compartments" name="compartments" key="compartments">Compartments</Menu.Item>
+        <Menu.Item position="right">
+            <SystemMessageQuery query={SYSTEM_MESSAGE_QUERY} pollInterval={5000}>
+                {({loading, error, data}) => {
+                    if (loading || error) {
+                        return null;
+                    }
 
-interface IHeadingProps extends InjectedGraphQLProps<ISystemMessageQuery> {
-    onSettingsClick(): void;
-}
+                    if (data.systemMessage) {
+                        return (<Label icon="mail" content={data.systemMessage}/>);
+                    }
 
-interface IHeadingState {
-}
-
-@graphql(SystemMessageQuery, {
-    options: {
-        pollInterval: 5000
-    }
-})
-class Heading extends React.Component<IHeadingProps, IHeadingState> {
-    public render() {
-        return (
-            <Navbar fluid fixedTop style={{marginBottom: 0}}>
-                <Navbar.Header>
-                    <Navbar.Brand>
-                        <Link to="/">
-                            <img src={logoImage}/>
-                        </Link>
-                    </Navbar.Brand>
-                </Navbar.Header>
-                <Navbar.Text><Link to="/samples" style={linkStyle}>Samples</Link></Navbar.Text>
-                <Navbar.Text><Link to="/neurons" style={linkStyle}>Neurons</Link></Navbar.Text>
-                <Navbar.Text><Link to="/compartments" style={linkStyle}>Compartments</Link></Navbar.Text>
-                <Navbar.Collapse>
-                    <Nav pullRight style={{marginRight: "15px"}}>
-                        <NavItem onSelect={() => this.props.onSettingsClick()}>
-                            <Glyphicon glyph="cog"/>
-                        </NavItem>
-                    </Nav>
-                    <Navbar.Text pullRight><Badge>{this.props.data.systemMessage}</Badge></Navbar.Text>
-                </Navbar.Collapse>
-            </Navbar>);
-    }
-}
+                    return null;
+                }}
+            </SystemMessageQuery>
+        </Menu.Item>
+    </Menu>
+);
 
 const Footer = () => (
     <div className="footer">
@@ -69,82 +51,60 @@ const Footer = () => (
     </div>
 );
 
-interface IAppDataProps {
-    brainAreas: IBrainArea[];
-}
-
-interface IAppProps extends InjectedGraphQLProps<IAppDataProps> {
-}
-
 interface IAppState {
     isSettingsOpen?: boolean;
-    shouldClearCreateContentsAfterUpload?: boolean;
-    haveLoadedBrainAreas?: boolean;
 }
 
-@graphql(ImmutableQuery, {
-    options: {}
-})
-export class App extends React.Component<IAppProps, IAppState> {
-    public constructor(props: IAppProps) {
+export class App extends React.Component<{}, IAppState> {
+    public constructor(props: {}) {
         super(props);
-
-        let shouldClearCreateContentsAfterUpload = true;
-
-        if (typeof(Storage) !== "undefined") {
-            shouldClearCreateContentsAfterUpload = localStorage.getItem("shouldClearCreateContentsAfterUpload") == "true";
-        }
-
-        let haveLoadedBrainAreas = false;
-
-        if (props.data && !props.data.loading) {
-            haveLoadedBrainAreas = makeBrainAreaMap(props.data.brainAreas);
-        }
 
         this.state = {
             isSettingsOpen: false,
-            shouldClearCreateContentsAfterUpload,
-            haveLoadedBrainAreas
-        }
-    }
-
-    public componentWillReceiveProps(nextProps: IAppProps) {
-        if (nextProps.data && !nextProps.data.loading) {
-            let haveLoadedBrainAreas = makeBrainAreaMap(nextProps.data.brainAreas);
-
-            if (haveLoadedBrainAreas !== this.state.haveLoadedBrainAreas) {
-                this.setState({haveLoadedBrainAreas});
-            }
-        }
-    }
-
-    private onSettingsClick() {
-        this.setState({isSettingsOpen: true});
-    }
-
-    private onSettingsClose() {
-        this.setState({isSettingsOpen: false});
-    }
-
-    private onChangeClearContents(shouldClear: boolean) {
-        this.setState({shouldClearCreateContentsAfterUpload: shouldClear});
-
-        if (typeof(Storage) !== "undefined") {
-            localStorage.setItem("shouldClearCreateContentsAfterUpload", shouldClear ? "true" : "false");
         }
     }
 
     public render() {
         return (
             <div>
-                <ToastContainer autoClose={6000} position="bottom-center" style={toastStyleOverride}/>
-                <SettingsDialog show={this.state.isSettingsOpen}
-                                shouldClearCreateContentsAfterUpload={this.state.shouldClearCreateContentsAfterUpload}
-                                onHide={() => this.onSettingsClose()}
-                                onChangeClearContents={(b: boolean) => this.onChangeClearContents(b)}/>
-                <Heading onSettingsClick={() => this.onSettingsClick()}/>
-                <div style={{marginTop: "50px", marginBottom: "40px"}}>
-                    {React.cloneElement(this.props.children as ReactElement<any>, { haveLoadedBrainAreas: this.state.haveLoadedBrainAreas })}
+                <ToastContainer autoClose={6000} position={"bottom-center" as ToastPosition}
+                                style={toastStyleOverride}/>
+                <Heading/>
+                <div style={{marginTop: "62px", marginBottom: "40px", padding: "20px"}}>
+                    <AppQuery query={APP_QUERY} pollInterval={10000}>
+                        {({loading, error, data}) => {
+                            if (error) {
+                                return (
+                                    <Message negative icon="exclamation triangle" header="Service not responding"
+                                             content="Initial data could not be loaded.  Verify the service is available and reload the page."/>
+                                );
+                            }
+
+                            if (loading) {
+                                return (
+                                    <Message icon>
+                                        <Icon name="circle notched" loading/>
+                                        <Message.Content>
+                                            <Message.Header content="Requesting content"/>
+                                            We are retrieving basic system data.
+                                        </Message.Content>
+                                    </Message>
+                                );
+                            }
+
+                            makeBrainAreaMap(data.brainAreas);
+
+                            return (
+                                <Switch>
+                                    <Route path="/" exact render={() => (<Content samples={data.samples.items}/>)}/>
+                                    <Route path="/samples" render={() => (<Samples samples={data.samples.items}/>)}/>
+                                    <Route path="/neurons" render={() => (<Neurons/>)}/>
+                                    <Route path="/compartments"
+                                           render={() => (<Compartments compartments={data.brainAreas}/>)}/>
+                                </Switch>
+                            );
+                        }}
+                    </AppQuery>
                 </div>
                 <Footer/>
             </div>
@@ -152,34 +112,6 @@ export class App extends React.Component<IAppProps, IAppState> {
     }
 }
 
-interface ISettingsDialogProps {
-    show: boolean
-    shouldClearCreateContentsAfterUpload: boolean;
-
-    onHide(): void;
-    onChangeClearContents(shouldClear: boolean): void;
-}
-
-interface ISettingsDialogState {
-}
-
-class SettingsDialog extends React.Component<ISettingsDialogProps, ISettingsDialogState> {
-    render() {
-        return (
-            <Modal show={this.props.show} onHide={this.props.onHide} aria-labelledby="contained-modal-title-sm">
-                <Modal.Header closeButton>
-                    <Modal.Title id="contained-modal-title-sm">Settings</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    There are no settings for this service.
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button bsSize="small" onClick={this.props.onHide}>Close</Button>
-                </Modal.Footer>
-            </Modal>
-        );
-    }
-}
 
 // Need a map of id -> area for fast lookup.  The current Select control does not make it easy/possible to carry the
 // actual BrainArea object around with the select.  See filterOption function for brain area Select control, primarily.
@@ -188,11 +120,18 @@ const BrainAreaMap = new Map<string, IBrainArea>();
 export let BrainAreas: IBrainArea[] = [];
 
 function makeBrainAreaMap(brainAreas: IBrainArea[]): boolean {
-    if (BrainAreaMap.size > 0 || isNullOrUndefined(brainAreas)) {
-        return BrainAreaMap.size > 0;
+    if (BrainAreaMap.size > 0) {
+        // Polled and updated
+        return true;
     }
 
-    BrainAreas = brainAreas.slice().sort((a, b) => a.name.localeCompare(b.name));
+    BrainAreas = brainAreas.slice().sort((a, b) => {
+        if (a.depth == b.depth) {
+            return a.name.localeCompare(b.name);
+        }
+
+        return a.depth - b.depth;
+    });
 
     brainAreas.map(b => BrainAreaMap.set(b.id, b));
 

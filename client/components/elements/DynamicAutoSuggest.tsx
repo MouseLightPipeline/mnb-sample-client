@@ -1,7 +1,7 @@
 import * as React from "react";
-import {FormGroup, InputGroup, Glyphicon, Button} from "react-bootstrap";
 import Autosuggest = require("react-autosuggest");
 import {isNullOrUndefined} from "util";
+import {Button} from "semantic-ui-react";
 
 export enum DynamicAutoSuggestMode {
     Static,
@@ -174,22 +174,14 @@ export class DynamicAutoSuggest<T extends any> extends React.Component<IObjectAu
                 return this.renderAutoSuggest();
             } else {
                 return (
-                    <FormGroup bsSize="small" style={style}>
-                        <InputGroup bsSize="sm">
-                            <InputGroup.Button>
-                                <Button onClick={() => this.onCancelEdit()}>
-                                    <Glyphicon glyph="remove"/>
-                                </Button>
-                            </InputGroup.Button>
+                    <Button.Group size="mini">
+                        <Button icon="cancel" onClick={() => this.onCancelEdit()}/>
+                        <Button as="div" style={{padding: 0}}>
                             {this.renderAutoSuggest(true)}
-                            <InputGroup.Button>
-                                <Button bsStyle="success" onClick={() => this.onAcceptEdit()}>
-                                    <Glyphicon glyph="ok"/>
-                                </Button>
-                            </InputGroup.Button>
-                        </InputGroup>
-                    </FormGroup>
-                );
+                        </Button>
+                        <Button icon="check" onClick={() => this.onAcceptEdit()}/>
+                    </Button.Group>
+                )
             }
         } else {
             return this.renderClickableValue();

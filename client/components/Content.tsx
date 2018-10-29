@@ -1,26 +1,16 @@
 import * as React from "react";
 
-import {Samples} from "./Samples";
-import {Neurons} from "./Neurons";
+import {Samples} from "./samples/Samples";
+import {Neurons} from "./neurons/Neurons";
+import {ISample} from "../models/sample";
 
 interface IContentProps {
-    haveLoadedBrainAreas: boolean;
+    samples: ISample[];
 }
 
-interface IContentState {
-}
-
-export class Content extends React.Component<IContentProps, IContentState> {
-    public constructor(props: IContentProps) {
-        super(props);
-    }
-
-    public render() {
-        return (
-            <div>
-                <Samples haveLoadedBrainAreas={this.props.haveLoadedBrainAreas}/>
-                <Neurons haveLoadedBrainAreas={this.props.haveLoadedBrainAreas}/>
-            </div>
-        );
-    }
-}
+export const Content = (props: IContentProps) => (
+    <div>
+        <Samples samples={props.samples}/>
+        <Neurons/>
+    </div>
+);

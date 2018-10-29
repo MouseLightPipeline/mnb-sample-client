@@ -1,40 +1,30 @@
 import * as React from "react";
-import {Table, Panel} from "react-bootstrap";
-import {graphql, InjectedGraphQLProps} from 'react-apollo';
 import {toast} from "react-toastify";
-import {GraphQLDataProps} from "react-apollo/lib/graphql";
+import {Button, Table, Header, Segment} from "semantic-ui-react";
 
-import {IQueryOutput} from "../util/graphQLTypes";
-import {ISample, ISampleInput} from "../models/sample";
+// import {IMouseStrain} from "../models/mouseStrain";
+// import {ManageTransforms} from "./dialogs/RegistrationTransform/ManageTransforms";
+// import {ManageInjections} from "./dialogs/Injection/ManageInjections";
+// import {toastCreateError, toastCreateSuccess} from "./components/Toasts";
+// import {PaginationHeader} from "./components/PaginationHeader";
+import {ISample} from "../../models/sample";
+import {IMouseStrain} from "../../models/mouseStrain";
 import {SampleRow} from "./SampleRow";
-import {IMouseStrain} from "../models/mouseStrain";
-import {ManageTransforms} from "./dialogs/RegistrationTransform/ManageTransforms";
-import {ManageInjections} from "./dialogs/Injection/ManageInjections";
-import {CreateSampleMutation, NeuronCountsForSamplesQuery, SamplesQuery} from "../graphql/sample";
-import {toastCreateError, toastCreateSuccess} from "./components/Toasts";
-import {PaginationHeader} from "./components/PaginationHeader";
-import {Button} from "semantic-ui-react";
+import {PaginationHeader} from "../elements/PaginationHeader";
 
-interface ISamplesGraphQLProps {
-    samples: IQueryOutput<ISample>;
-}
-
-interface INeuronsForSamplesQueryProps {
-    neuronCountsForSamples: any;
-}
-
-interface ISamplesProps extends InjectedGraphQLProps<ISamplesGraphQLProps> {
-    mouseStrains: IMouseStrain[];
+interface ISamplesProps {
+    samples: ISample[];
+    mouseStrainList: IMouseStrain[];
 
     offset: number;
     limit: number;
 
-    neuronCountsForSamplesQuery?: INeuronsForSamplesQueryProps & GraphQLDataProps;
+    // neuronCountsForSamplesQuery?: INeuronsForSamplesQueryProps & GraphQLDataProps;
 
     onUpdateOffsetForPage(page: number): void;
     onUpdateLimit(limit: number): void;
 
-    createSample?(sample: ISampleInput): any;
+    // createSample?(sample: ISampleInput): any;
 }
 
 interface ISamplesState {
@@ -44,6 +34,7 @@ interface ISamplesState {
     manageInjectionsSample?: ISample;
 }
 
+/*
 @graphql(SamplesQuery, {
     options: ({offset, limit}) => ({
         pollInterval: 5000,
@@ -73,6 +64,7 @@ interface ISamplesState {
         }
     })
 })
+*/
 export class SamplesTable extends React.Component<ISamplesProps, ISamplesState> {
     public constructor(props: ISamplesProps) {
         super(props);
@@ -86,6 +78,7 @@ export class SamplesTable extends React.Component<ISamplesProps, ISamplesState> 
     }
 
     private async onCreateSample() {
+        /*
         try {
             const result = await this.props.createSample({id: null});
 
@@ -97,6 +90,7 @@ export class SamplesTable extends React.Component<ISamplesProps, ISamplesState> 
         } catch (error) {
             toast.error(toastCreateError(error), {autoClose: false});
         }
+        */
     }
 
     private onRequestAddRegistrationTransform(forSample: ISample) {
@@ -114,6 +108,7 @@ export class SamplesTable extends React.Component<ISamplesProps, ISamplesState> 
     }
 
     private renderTransformsDialog() {
+        /*
         if (this.state.manageTransformsSample && this.state.isTransformDialogShown) {
             return (
                 <ManageTransforms sampleId={this.state.manageTransformsSample.id}
@@ -123,9 +118,12 @@ export class SamplesTable extends React.Component<ISamplesProps, ISamplesState> 
         } else {
             return null;
         }
+        */
+        return null as any;
     }
 
     private renderInjectionsDialog() {
+        /*
         if (this.state.manageInjectionsSample && this.state.isInjectionDialogShown) {
             return (
                 <ManageInjections sampleId={this.state.manageInjectionsSample.id}
@@ -135,6 +133,8 @@ export class SamplesTable extends React.Component<ISamplesProps, ISamplesState> 
         } else {
             return null;
         }
+        */
+        return null as any;
     }
 
     private renderPanelFooter(totalCount: number, activePage: number, pageCount: number) {
@@ -155,7 +155,7 @@ export class SamplesTable extends React.Component<ISamplesProps, ISamplesState> 
     private renderHeader() {
         return (
             <div>
-                <div style={{display: "inline-block"}}>
+                <div style={{display: "inline-block", verticalAlign: "middle"}}>
                     <h4>Samples</h4>
                 </div>
                 <div className="pull-right">
@@ -168,16 +168,15 @@ export class SamplesTable extends React.Component<ISamplesProps, ISamplesState> 
     }
 
     public render() {
-        const isDataAvailable = this.props.data && !this.props.data.loading;
+        const samples = this.props.samples.slice(this.props.offset, this.props.offset + this.props.limit);
 
-        const samples = isDataAvailable ? this.props.data.samples.items : [];
+        const totalCount = this.props.samples.length;
 
-        const totalCount = isDataAvailable ? this.props.data.samples.totalCount : -1;
+        const pageCount = Math.ceil(totalCount / this.props.limit);
 
-        const pageCount = isDataAvailable ? Math.ceil(totalCount / this.props.limit) : 1;
+        const activePage = (this.props.offset ? (Math.floor(this.props.offset / this.props.limit) + 1) : 1);
 
-        const activePage = isDataAvailable ? (this.props.offset ? (Math.floor(this.props.offset / this.props.limit) + 1) : 1) : 0;
-
+        /*
         let counts = this.props.neuronCountsForSamplesQuery && !this.props.neuronCountsForSamplesQuery.loading ? this.props.neuronCountsForSamplesQuery.neuronCountsForSamples.counts : [];
 
         counts = counts.reduce((prev: any, curr: any) => {
@@ -185,45 +184,55 @@ export class SamplesTable extends React.Component<ISamplesProps, ISamplesState> 
 
             return prev;
         }, {});
+*/
 
         const rows = samples.map(s => {
-            return <SampleRow key={`sl_${s.id}`} sample={s} mouseStrains={this.props.mouseStrains}
-                              neuronCount={counts[s.id]}
+            return <SampleRow key={`sl_${s.id}`} sample={s} mouseStrains={this.props.mouseStrainList}
+                              neuronCount={/*counts[s.id]*/0}
                               onRequestAddRegistrationTransform={(s) => this.onRequestAddRegistrationTransform(s)}
                               onRequestManageInjections={(s) => this.onRequestManageInjections(s)}/>
         });
 
         return (
-            <Panel bsStyle="default" header={this.renderHeader()}
-                   footer={this.renderPanelFooter(totalCount, activePage, pageCount)}>
-                <PaginationHeader pageCount={pageCount}
-                                  activePage={activePage}
-                                  limit={this.props.limit}
-                                  onUpdateLimitForPage={limit => this.props.onUpdateLimit(limit)}
-                                  onUpdateOffsetForPage={page => this.props.onUpdateOffsetForPage(page)}/>
-                <Table style={{marginBottom: "0px"}}>
-                    <thead>
-                    <tr>
-                        <th>Id</th>
-                        <th>Tag</th>
-                        <th>Animal Id</th>
-                        <th>Acq. Date</th>
-                        <th>Strain</th>
-                        <th>Registrations</th>
-                        <th>Injections</th>
-                        <th>Comment</th>
-                        <th>Visibility</th>
-                        <th>Neurons</th>
-                        <th>Created</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {rows}
-                    </tbody>
+            <div>
+                <Segment attached="top" secondary clearing style={{borderBottomWidth: 0}}>
+                    {this.renderHeader()}
+                </Segment>
+                <Segment attached secondary style={{borderBottomWidth: 0}}>
+                    <PaginationHeader pageCount={pageCount}
+                                      activePage={activePage}
+                                      limit={this.props.limit}
+                                      onUpdateLimitForPage={limit => this.props.onUpdateLimit(limit)}
+                                      onUpdateOffsetForPage={page => this.props.onUpdateOffsetForPage(page)}/>
+                </Segment>
+                <Table attached="bottom" compact="very">
+                    <Table.Body>
+                        <Table.Row>
+                            <Table.HeaderCell>Id</Table.HeaderCell>
+                            <Table.HeaderCell>Tag</Table.HeaderCell>
+                            <Table.HeaderCell>Animal Id</Table.HeaderCell>
+                            <Table.HeaderCell>Acq. Date</Table.HeaderCell>
+                            <Table.HeaderCell>Strain</Table.HeaderCell>
+                            <Table.HeaderCell>Registrations</Table.HeaderCell>
+                            <Table.HeaderCell>Injections</Table.HeaderCell>
+                            <Table.HeaderCell>Comment</Table.HeaderCell>
+                            <Table.HeaderCell>Visibility</Table.HeaderCell>
+                            <Table.HeaderCell>Neurons</Table.HeaderCell>
+                            <Table.HeaderCell>Created</Table.HeaderCell>
+                        </Table.Row>
+                        {rows}
+                    </Table.Body>
+                    <Table.Footer fullwidth="true">
+                        <Table.Row>
+                            <Table.HeaderCell colSpan={11}>
+                                {this.renderPanelFooter(totalCount, activePage, pageCount)}
+                            </Table.HeaderCell>
+                        </Table.Row>
+                    </Table.Footer>
                 </Table>
                 {this.renderTransformsDialog()}
                 {this.renderInjectionsDialog()}
-            </Panel>
+            </div>
         );
     }
 }
