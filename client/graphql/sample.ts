@@ -1,7 +1,8 @@
 import gql from "graphql-tag";
-import {IBrainArea} from "../models/brainArea";
 import {Mutation, MutationFn} from "react-apollo";
+
 import {ISample} from "../models/sample";
+import {TRANSFORM_FIELDS_FRAGMENT} from "./transform";
 
 export const SAMPLE_FIELDS_FRAGMENT = gql`fragment SampleFields on Sample {
     id
@@ -24,19 +25,16 @@ export const SAMPLE_FIELDS_FRAGMENT = gql`fragment SampleFields on Sample {
         }
     }
     activeRegistrationTransform {
-        id
-        location
-        name
+        ...TransformFields
     }
     registrationTransforms {
-        id
-        location
-        name
-        notes
+        ...TransformFields
     }
     createdAt
     updatedAt
-}`;
+}
+${TRANSFORM_FIELDS_FRAGMENT}
+`;
 
 ///
 /// Samples Query

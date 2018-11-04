@@ -1,19 +1,25 @@
 import gql from "graphql-tag";
 
+export const NEURON_BASE_FIELDS_FRAGMENT = gql`fragment NeuronBaseFields on Neuron {
+    id
+    idNumber
+    idString
+    tag
+    keywords
+    x
+    y
+    z
+    sharing
+    doi
+    createdAt
+    updatedAt
+}`;
+
 export const NeuronsQuery = gql`query NeuronsQuery($input: NeuronQueryInput) {
     neurons(input: $input) {
         totalCount
         items {
-            id
-            idNumber
-            idString
-            tag
-            keywords
-            x
-            y
-            z
-            sharing
-            doi
+            ...NeuronBaseFields
             brainArea {
                 id
                 name
@@ -30,11 +36,11 @@ export const NeuronsQuery = gql`query NeuronsQuery($input: NeuronQueryInput) {
                     sampleDate
                 }
             }
-            createdAt
-            updatedAt
         }
     }
-}`;
+}
+${NEURON_BASE_FIELDS_FRAGMENT}
+`;
 
 export const CreateNeuronMutation = gql`mutation CreateNeuron($neuron: NeuronInput) {
     createNeuron(neuron: $neuron) {

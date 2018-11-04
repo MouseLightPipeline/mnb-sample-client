@@ -1,24 +1,14 @@
 import {displayBrainArea, IBrainArea} from "./brainArea";
 import {IFluorophore} from "./fluorophore";
 import {IInjectionVirus} from "./injectionVirus";
-import {ISample} from "./sample";
+import {INeuron} from "./neuron";
 
 export interface IInjection {
     id: string;
     brainArea: IBrainArea;
     injectionVirus: IInjectionVirus;
     fluorophore: IFluorophore;
-    sample: ISample;
-}
-
-export interface IInjectionInput {
-    id: string;
-    brainAreaId?: string;
-    injectionVirusId?: string;
-    injectionVirusName?: string;
-    fluorophoreId?: string;
-    fluorophoreName?: string;
-    sampleId?: string;
+    neurons: INeuron[];
 }
 
 export function displayInjection(injection: IInjection, truncate: number = 0) {

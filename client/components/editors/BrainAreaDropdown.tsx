@@ -1,8 +1,8 @@
 import * as React from "react";
-import {Button, Container, Dropdown, DropdownItemProps, Icon, Segment, Table} from "semantic-ui-react";
+import {Button, Dropdown, DropdownItemProps, Table} from "semantic-ui-react";
+
 import {displayBrainArea, IBrainArea} from "../../models/brainArea";
 import {BrainAreas, lookupBrainArea} from "../App";
-import {FindVisibilityOption, ShareVisibility} from "../../util/ShareVisibility";
 
 interface IBrainAreaDropdownProps {
     brainArea: IBrainArea;
@@ -44,7 +44,6 @@ export class BrainAreaDropdown extends React.Component<IBrainAreaDropdownProps, 
         if (this.props.isEditOnly) {
             return (
                 <Dropdown fluid selection lazyLoad={true} clearable options={items}
-                          className="label"
                           search={brainAreaDeepSearch}
                           value={this.props.brainArea ? this.props.brainArea.id : null}
                           onChange={(e, {value}) => {
@@ -54,32 +53,28 @@ export class BrainAreaDropdown extends React.Component<IBrainAreaDropdownProps, 
         }
 
         return (
-            <Table fluid basic="very" verticalAlign="middle">
-                <Table.Body>
-                    <Table.Row>
-                        <Table.Cell collapsing>
-                            <Icon name="cancel" circular
-                                  style={{marginTop: "5px"}}
-                                  onClick={() => this.setState({
-                                      isInEditMode: false,
-                                      selectedBrainArea: this.props.brainArea
-                                  })}/>
-                        </Table.Cell>
-                        <Table.Cell>
+            <div>
+                <div>
+                    <Button.Group size="mini">
+                        <Button size="mini" icon="cancel" onClick={() => this.setState({
+                            isInEditMode: false,
+                            selectedBrainArea: this.props.brainArea
+                        })}/>
+                        <Button size="mini" as="div" style={{padding: 0}}>
                             <Dropdown fluid search selection placeholder="Select brain area..." options={items}
                                       value={this.state.selectedBrainArea ? this.state.selectedBrainArea.id : null}
                                       onChange={(e, {value}) => {
                                           this.setState({selectedBrainArea: lookupBrainArea(value as string)});
                                       }}/>
-                        </Table.Cell>
-                        <Table.Cell collapsing>
-                            <Icon name="check" circular color="green" style={{marginTop: "5px"}}
-                                  onClick={() => {
-                                      this.props.onBrainAreaChange(this.state.selectedBrainArea);
-                                      this.setState({isInEditMode: false})
-                                  }}/>
-                        </Table.Cell>
-                    </Table.Row>
+                        </Button>
+                        <Button size="mini" icon="check" color="teal" onClick={() => {
+                            this.props.onBrainAreaChange(this.state.selectedBrainArea);
+                            this.setState({isInEditMode: false})
+                        }}/>
+                    </Button.Group>
+
+                </div>
+                <div>
                     {this.props.inheritedBrainArea && this.state.selectedBrainArea !== null ? (
                         <Table.Row>
                             <Table.Cell colspan={3}>
@@ -93,8 +88,8 @@ export class BrainAreaDropdown extends React.Component<IBrainAreaDropdownProps, 
                             </Table.Cell>
                         </Table.Row>
                     ) : null}
-                </Table.Body>
-            </Table>
+                </div>
+            </div>
         );
     }
 }

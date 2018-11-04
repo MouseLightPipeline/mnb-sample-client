@@ -9,14 +9,6 @@ export interface IRegistrationTransform {
     updatedAt?: number;
 }
 
-export interface IRegistrationTransformInput {
-    id: string;
-    location?: string;
-    name?: string;
-    notes?: string;
-    sampleId?: string;
-}
-
 export function displayRegistrationTransform(transform: IRegistrationTransform) {
     if (!transform) {
         return "(none)";

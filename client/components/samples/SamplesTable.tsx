@@ -2,8 +2,8 @@ import * as React from "react";
 import {toast} from "react-toastify";
 import {Button, Table, Segment, Confirm} from "semantic-ui-react";
 
-// import {ManageTransforms} from "./dialogs/RegistrationTransform/ManageTransforms";
-// import {ManageInjections} from "./dialogs/Injection/ManageInjections";
+import {ManageTransforms} from "../transforms/ManageTransforms";
+import {ManageInjections} from "../injections/ManageInjections";
 import {toastCreateError, toastDeleteError} from "../elements/Toasts";
 import {displaySample, ISample} from "../../models/sample";
 import {IMouseStrain} from "../../models/mouseStrain";
@@ -53,6 +53,22 @@ export class SamplesTable extends React.Component<ISamplesProps, ISamplesState> 
         }
     }
 
+    public componentWillReceiveProps(props: ISamplesProps) {
+        if (this.state.manageTransformsSample) {
+            const s = props.samples.find(s => s.id === this.state.manageTransformsSample.id);
+            if (s) {
+                this.setState({manageTransformsSample: s});
+            }
+        }
+
+        if (this.state.manageInjectionsSample) {
+            const s = props.samples.find(s => s.id === this.state.manageInjectionsSample.id);
+            if (s) {
+                this.setState({manageInjectionsSample: s});
+            }
+        }
+    }
+
     private onUpdateOffsetForPage(page: number) {
         const offset = this.state.limit * (page - 1);
 
@@ -93,33 +109,27 @@ export class SamplesTable extends React.Component<ISamplesProps, ISamplesState> 
     }
 
     private renderTransformsDialog() {
-        /*
         if (this.state.manageTransformsSample && this.state.isTransformDialogShown) {
             return (
-                <ManageTransforms sampleId={this.state.manageTransformsSample.id}
+                <ManageTransforms sample={this.state.manageTransformsSample}
                                   show={this.state.isTransformDialogShown}
                                   onClose={() => this.setState({isTransformDialogShown: false})}/>
             );
         } else {
             return null;
         }
-        */
-        return null as any;
     }
 
     private renderInjectionsDialog() {
-        /*
         if (this.state.manageInjectionsSample && this.state.isInjectionDialogShown) {
             return (
-                <ManageInjections sampleId={this.state.manageInjectionsSample.id}
+                <ManageInjections sample={this.state.manageInjectionsSample}
                                   show={this.state.isInjectionDialogShown}
                                   onClose={() => this.setState({isInjectionDialogShown: false})}/>
             );
         } else {
             return null;
         }
-        */
-        return null as any;
     }
 
     private renderDeleteConfirmationModal() {
@@ -127,7 +137,8 @@ export class SamplesTable extends React.Component<ISamplesProps, ISamplesState> 
             return null;
         }
 
-        return <DeleteSampleMutation mutation={DELETE_SAMPLE_MUTATION} refetchQueries={["AppQuery"]} onError={(error) => toast.error(toastDeleteError(error), {autoClose: false})}>
+        return <DeleteSampleMutation mutation={DELETE_SAMPLE_MUTATION} refetchQueries={["AppQuery"]}
+                                     onError={(error) => toast.error(toastDeleteError(error), {autoClose: false})}>
             {(deleteSample) => (
                 <Confirm open={true} dimmer="blurring"
                          header="Delete Sample?"
@@ -141,21 +152,6 @@ export class SamplesTable extends React.Component<ISamplesProps, ISamplesState> 
         </DeleteSampleMutation>;
     }
 
-    private renderPanelFooter(totalCount: number, activePage: number, pageCount: number) {
-        const start = this.state.offset + 1;
-        const end = Math.min(this.state.offset + this.state.limit, totalCount);
-        return (
-            <div>
-                <span>
-                    {totalCount >= 0 ? (totalCount > 0 ? `Showing ${start} to ${end} of ${totalCount} samples` : "It's a clean slate - create the first sample!") : ""}
-                </span>
-                <span className="pull-right">
-                    {`Page ${activePage} of ${pageCount}`}
-                </span>
-            </div>
-        );
-    }
-
     public render() {
         const samples = this.props.samples.sort((a, b) => b.createdAt - a.createdAt).slice(this.state.offset, this.state.offset + this.state.limit);
 
@@ -164,6 +160,9 @@ export class SamplesTable extends React.Component<ISamplesProps, ISamplesState> 
         const pageCount = Math.ceil(totalCount / this.state.limit);
 
         const activePage = (this.state.offset ? (Math.floor(this.state.offset / this.state.limit) + 1) : 1);
+
+        const start = this.state.offset + 1;
+        const end = Math.min(this.state.offset + this.state.limit, totalCount);
 
         const rows = samples.map(s => {
             return <SampleRow key={`sl_${s.id}`} sample={s} mouseStrains={this.props.mouseStrains}
@@ -214,8 +213,11 @@ export class SamplesTable extends React.Component<ISamplesProps, ISamplesState> 
                     </Table.Body>
                     <Table.Footer fullwidth="true">
                         <Table.Row>
-                            <Table.HeaderCell colSpan={11}>
-                                {this.renderPanelFooter(totalCount, activePage, pageCount)}
+                            <Table.HeaderCell colSpan={5}>
+                                {totalCount >= 0 ? (totalCount > 0 ? `Showing ${start} to ${end} of ${totalCount} samples` : "It's a clean slate - create the first sample!") : ""}
+                            </Table.HeaderCell>
+                            <Table.HeaderCell colSpan={6} textAlign="right">
+                                {`Page ${activePage} of ${pageCount}`}
                             </Table.HeaderCell>
                         </Table.Row>
                     </Table.Footer>

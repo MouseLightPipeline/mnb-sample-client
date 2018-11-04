@@ -191,7 +191,6 @@ export class SampleRow extends React.Component<ISampleRowProps, ISampleRowState>
                             <div style={{display: "inline-block"}}>
                                 {moment(s.createdAt).format("YYYY-MM-DD")}<br/>
                             </div>
-
                         </Table.Cell>
 
                         <Table.Cell style={{minWidth: "120px"}}>
