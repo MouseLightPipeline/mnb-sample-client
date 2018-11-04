@@ -53,6 +53,7 @@ ${SAMPLE_FIELDS_FRAGMENT}
 
 ///
 /// Mutation Input
+///
 
 type SampleVariables = {
     id?: string;

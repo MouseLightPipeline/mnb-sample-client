@@ -4,7 +4,7 @@ import {toast} from "react-toastify";
 
 const moment = require("moment");
 
-import {ISample, ISampleInput} from "../../models/sample";
+import {ISample} from "../../models/sample";
 import {displayRegistrationTransform} from "../../models/registrationTransform";
 import {displayInjection, IInjection} from "../../models/injection";
 import {IMouseStrain} from "../../models/mouseStrain";
@@ -26,12 +26,6 @@ import {
 
 const ShareVisibilityOptions = SampleVisibilityOptions();
 
-function onSampleUpdated(data: UpdateSampleMutationData) {
-    if (!data.sample || data.error) {
-        toast.error(toastCreateError(data.error.message), {autoClose: false});
-    }
-}
-
 interface ISampleRowProps {
     mouseStrains: IMouseStrain[];
     sample: ISample;
@@ -39,24 +33,9 @@ interface ISampleRowProps {
     onRequestAddRegistrationTransform(forSample: ISample): void;
     onRequestManageInjections(forSample: ISample): void;
     onRequestDeleteSample(forSample: ISample): void;
-
-    updateSample?(sample: ISampleInput): any;
-    deleteSample?(sample: ISampleInput): any;
 }
 
-interface ISampleRowState {
-    isInUpdate?: boolean;
-}
-
-export class SampleRow extends React.Component<ISampleRowProps, ISampleRowState> {
-    public constructor(props: ISampleRowProps) {
-        super(props);
-
-        this.state = {
-            isInUpdate: false
-        }
-    }
-
+export class SampleRow extends React.Component<ISampleRowProps, {}> {
     private async onAcceptTagEdit(value: string, updateFn: UpdateSampleMutationFn) {
         if (value !== this.props.sample.tag) {
             await updateFn({variables: {sample: {id: this.props.sample.id, tag: value}}});
@@ -204,5 +183,11 @@ export class SampleRow extends React.Component<ISampleRowProps, ISampleRowState>
                 )}
             </UpdateSampleMutation>
         );
+    }
+}
+
+function onSampleUpdated(data: UpdateSampleMutationData) {
+    if (!data.sample || data.error) {
+        toast.error(toastCreateError(data.error.message), {autoClose: false});
     }
 }

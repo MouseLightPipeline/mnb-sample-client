@@ -20,7 +20,7 @@ export interface INeuron {
 }
 
 export interface INeuronInput {
-    id: string;
+    id?: string;
     idNumber?: number;
     idString?: string;
     tag?: string;

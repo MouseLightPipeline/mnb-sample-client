@@ -98,7 +98,7 @@ export class App extends React.Component<{}, IAppState> {
                                 <Switch>
                                     <Route path="/" exact render={() => (<Content samples={data.samples.items}/>)}/>
                                     <Route path="/samples" render={() => (<Samples samples={data.samples.items}/>)}/>
-                                    <Route path="/neurons" render={() => (<Neurons/>)}/>
+                                    <Route path="/neurons" render={() => (<Neurons samples={data.samples.items}/>)}/>
                                     <Route path="/compartments"
                                            render={() => (<Compartments compartments={data.brainAreas}/>)}/>
                                 </Switch>

@@ -76,17 +76,15 @@ export class BrainAreaDropdown extends React.Component<IBrainAreaDropdownProps, 
                 </div>
                 <div>
                     {this.props.inheritedBrainArea && this.state.selectedBrainArea !== null ? (
-                        <Table.Row>
-                            <Table.Cell colspan={3}>
-                                use injection:&nbsp;
-                                <a onClick={() => {
-                                    this.props.onBrainAreaChange(null);
-                                    this.setState({selectedBrainArea: null, isInEditMode: false})
-                                }}>
-                                    {`${displayBrainArea(this.props.inheritedBrainArea)}`}
-                                </a>
-                            </Table.Cell>
-                        </Table.Row>
+                        <div>
+                            use injection:&nbsp;
+                            <a onClick={() => {
+                                this.props.onBrainAreaChange(null);
+                                this.setState({selectedBrainArea: null, isInEditMode: false})
+                            }}>
+                                {`${displayBrainArea(this.props.inheritedBrainArea)}`}
+                            </a>
+                        </div>
                     ) : null}
                 </div>
             </div>

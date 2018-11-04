@@ -19,9 +19,9 @@ export class InjectionsForSampleDropdown extends React.Component<IInjectionForSa
             <InjectionsForSampleQuery query={INJECTIONS_FOR_SAMPLE_QUERY} pollInterval={5000}
                                       variables={{input: {sampleIds: this.props.sample ? [this.props.sample.id] : []}}}>
                 {({loading, error, data}) => {
-                    const items = data.injections.map(s => {
+                    const items = data.injections ? data.injections.map(s => {
                         return {value: s.id, text: displayInjection(s)}
-                    });
+                    }) : [];
 
                     return (
                         <Dropdown search fluid selection options={items}

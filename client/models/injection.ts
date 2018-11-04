@@ -2,6 +2,7 @@ import {displayBrainArea, IBrainArea} from "./brainArea";
 import {IFluorophore} from "./fluorophore";
 import {IInjectionVirus} from "./injectionVirus";
 import {INeuron} from "./neuron";
+import {ISample} from "./sample";
 
 export interface IInjection {
     id: string;
@@ -9,6 +10,7 @@ export interface IInjection {
     injectionVirus: IInjectionVirus;
     fluorophore: IFluorophore;
     neurons: INeuron[];
+    sample?: ISample;
 }
 
 export function displayInjection(injection: IInjection, truncate: number = 0) {

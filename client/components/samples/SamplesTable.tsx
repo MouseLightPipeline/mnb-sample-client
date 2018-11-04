@@ -17,12 +17,6 @@ import {
     DeleteSampleMutation
 } from "../../graphql/sample";
 
-function onSampleCreated(data: CreateSampleMutationData) {
-    if (!data.sample || data.error) {
-        toast.error(toastCreateError(data.error.message), {autoClose: false});
-    }
-}
-
 interface ISamplesProps {
     samples: ISample[];
     mouseStrains: IMouseStrain[];
@@ -224,5 +218,11 @@ export class SamplesTable extends React.Component<ISamplesProps, ISamplesState> 
                 </Table>
             </div>
         );
+    }
+}
+
+function onSampleCreated(data: CreateSampleMutationData) {
+    if (!data.sample || data.error) {
+        toast.error(toastCreateError(data.error.message), {autoClose: false});
     }
 }
