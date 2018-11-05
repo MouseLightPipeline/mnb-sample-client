@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Button, Dropdown, DropdownItemProps, Table} from "semantic-ui-react";
+import {Button, Dropdown, DropdownItemProps} from "semantic-ui-react";
 
 import {displayBrainArea, IBrainArea} from "../../models/brainArea";
 import {BrainAreas, lookupBrainArea} from "../App";

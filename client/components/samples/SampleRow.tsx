@@ -12,7 +12,7 @@ import {
     FindVisibilityOption,
     SampleVisibilityOptions,
     ShareVisibility
-} from "../../util/ShareVisibility";
+} from "../../models/ShareVisibility";
 import {MouseStrainAutoSuggest} from "../editors/MouseStrainAutoSuggest";
 import {DynamicEditField} from "../elements/DynamicEditField";
 import {DynamicDatePicker} from "../elements/DynamicDatePicker";

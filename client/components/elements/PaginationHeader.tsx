@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Grid, Input, Pagination, Table} from "semantic-ui-react";
+import {Input, Pagination, Table} from "semantic-ui-react";
 
 const Slider = require("rc-slider").default;
 
@@ -54,7 +54,7 @@ export class PaginationHeader extends React.Component<IPaginationHeaderProps, IP
     }
 
     public componentWillReceiveProps(props: IPaginationHeaderProps) {
-        if (props.activePage != this.props.activePage) {
+        if (props.activePage !== this.props.activePage) {
             const pageJumpText = props.activePage.toFixed(0);
 
             this.setState({pageJumpText, isValidPageJump: this.isValidJumpText(pageJumpText)});
@@ -68,7 +68,7 @@ export class PaginationHeader extends React.Component<IPaginationHeaderProps, IP
             const action = {
                 color: "blue",
                 content: "Go",
-                labelPosition: 'right',
+                labelPosition: "right",
                 icon: "chevron right",
                 size: "mini",
                 disabled: !this.state.isValidPageJump,

@@ -1,6 +1,6 @@
 import {IInjection} from "./injection";
 import {displayBrainArea, IBrainArea} from "./brainArea";
-import {isNullOrUndefined} from "util";
+import {isNullOrUndefined} from "../util/nodeUtil";
 
 export interface INeuron {
     id: string;
@@ -17,29 +17,6 @@ export interface INeuron {
     brainArea: IBrainArea;
     createdAt: number;
     updatedAt: number;
-}
-
-export interface INeuronInput {
-    id?: string;
-    idNumber?: number;
-    idString?: string;
-    tag?: string;
-    keywords?: string;
-    x?: number;
-    y?: number;
-    z?: number;
-    sharing?: number;
-    injectionId?: string;
-    brainAreaId?: string;
-}
-
-export interface IMutatedNeuron {
-    neuron: INeuron;
-    error: Error;
-}
-
-export interface IMutateNeuronData {
-    updateNeuron: IMutatedNeuron
 }
 
 export interface IParseSomaResult {

@@ -6,7 +6,7 @@ const NeuronPageOffset = "neuron.page.offset";
 const NeuronPageLimit = "neuron.page.limit";
 const LockedSampleId = "neuron.create.locked.sample";
 
-export class UserPreferences extends PreferencesManager{
+export class UserPreferences extends PreferencesManager {
     private static _instance: UserPreferences = null;
 
     public static get Instance(): UserPreferences {
@@ -48,6 +48,7 @@ export class UserPreferences extends PreferencesManager{
     public set neuronPageLimit(offset: number) {
         this.saveLocalValue(NeuronPageLimit, offset);
     }
+
     public get neuronCreateLockedSampleId(): string {
         return this.loadLocalValue(LockedSampleId, "");
     }

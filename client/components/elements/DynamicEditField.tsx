@@ -42,9 +42,6 @@ export class DynamicEditField extends React.Component<IDynamicEditFieldProps, ID
     private onEdit = () => {
         if (!this.props.canEditFunction || this.props.canEditFunction()) {
             this.setState({mode: DynamicEditFieldMode.Edit}, null);
-            // if (this.props.onEditModeChanged) {
-            //     this.props.onEditModeChanged(DynamicEditFieldMode.Edit);
-            // }
         } else {
             this.setState({showEditFail: true});
         }
@@ -52,9 +49,6 @@ export class DynamicEditField extends React.Component<IDynamicEditFieldProps, ID
 
     private onCancelEdit = () => {
         this.setState({value: this.props.initialValue, mode: DynamicEditFieldMode.Static}, null);
-        //if (this.props.onEditModeChanged) {
-        //    this.props.onEditModeChanged(DynamicEditFieldMode.Static);
-        //}
     };
 
     private onCanAcceptEdit() {
@@ -71,14 +65,10 @@ export class DynamicEditField extends React.Component<IDynamicEditFieldProps, ID
         }
 
         this.setState({mode: DynamicEditFieldMode.Static});
-
-        //if (this.props.onEditModeChanged) {
-        //    this.props.onEditModeChanged(DynamicEditFieldMode.Static);
-        //}
     };
 
     private onKeyPress = async (event: any) => {
-        if ((event.charCode || event.which) == 13) {
+        if ((event.charCode || event.which) === 13) {
             await this.onAcceptEdit();
         }
     };
@@ -122,7 +112,7 @@ export class DynamicEditField extends React.Component<IDynamicEditFieldProps, ID
     }
 
     public get staticValueDisplay() {
-        if (this.state.value == undefined || this.state.value == null || this.state.value.length === 0) {
+        if (this.state.value === undefined || this.state.value === null || this.state.value.length === 0) {
             return (<span style={{color: "#AAA"}}>{this.props.placeHolder}</span>)
         }
 

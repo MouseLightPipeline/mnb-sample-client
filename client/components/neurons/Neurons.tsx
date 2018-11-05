@@ -47,7 +47,7 @@ export class Neurons extends React.Component<INeuronsProps, INeuronsState> {
     private onUpdateOffsetForPage = (page: number) => {
         const offset = this.state.limit * (page - 1);
 
-        if (offset != this.state.offset) {
+        if (offset !== this.state.offset) {
             this.setState({offset});
 
             UserPreferences.Instance.neuronPageOffset = offset;
@@ -124,7 +124,7 @@ export class Neurons extends React.Component<INeuronsProps, INeuronsState> {
                         </Grid.Column>
 
                         <Grid.Column width={2} textAlign="right">
-                            <Button content="Add" icon="add" labelPosition="right" color="blue"
+                            <Button content="Add" icon="add" size="small" labelPosition="right" color="blue"
                                     disabled={this.state.injection === null}
                                     onClick={() => createNeuron({variables: {neuron: {injectionId: this.state.injection.id}}})}/>
                         </Grid.Column>

@@ -18,6 +18,7 @@ import {
     CreateInjectionMutationData,
     InjectionVariables
 } from "../../graphql/injection";
+import {isNullOrUndefined} from "../../util/nodeUtil";
 
 interface IAddInjectionProps {
     sample: ISample;
@@ -125,8 +126,4 @@ export class AddInjectionPanel extends React.Component<IAddInjectionProps, IAddI
             </div>
         );
     }
-}
-
-function isNullOrUndefined(obj: any) {
-    return obj == undefined || obj == null;
 }

@@ -14,22 +14,5 @@ type MouseStrainsQueryResponse = {
     mouseStrains: IMouseStrain[];
 }
 
-export class MouseStrainsQuery extends Query<MouseStrainsQueryResponse, {}>{}
-
-//
-// Create Mutation
-//
-
-export const CreateMouseStrainMutation = gql`mutation CreateMouseStrain($mouseStrain: MouseStrainInput) {
-    createMouseStrain(mouseStrain: $mouseStrain) {
-        mouseStrain {
-            id
-            name
-            updatedAt
-            createdAt
-        }
-        error {
-            message
-        }
-    }
-}`;
+export class MouseStrainsQuery extends Query<MouseStrainsQueryResponse, {}> {
+}

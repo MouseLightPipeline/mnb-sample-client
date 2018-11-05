@@ -9,4 +9,5 @@ type SystemMessageQueryResponse = {
     systemMessage: string;
 }
 
-export class SystemMessageQuery extends Query<SystemMessageQueryResponse, {}>{}
+export class SystemMessageQuery extends Query<SystemMessageQueryResponse, {}> {
+}

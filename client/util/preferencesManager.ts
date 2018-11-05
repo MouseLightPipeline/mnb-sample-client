@@ -54,7 +54,7 @@ export abstract class PreferencesManager {
         return this.HaveStorage ? this.readValue<T>(localStorage, key, defaultValue) : defaultValue;
     }
 
-    protected setDefaultLocalValue(key: string, value: PreferenceType,): void {
+    protected setDefaultLocalValue(key: string, value: PreferenceType): void {
         if (this.HaveStorage) {
             this.writeDefaultValue(localStorage, key, value);
         }
@@ -103,7 +103,7 @@ export abstract class PreferencesManager {
         if (typeof defaultValue === "string") {
             return storage.getItem(this._prefix + key) as T;
         } else if (typeof defaultValue === "boolean") {
-            return (storage.getItem(this._prefix + key) == true.toString()) as T;
+            return (storage.getItem(this._prefix + key) === true.toString()) as T;
         } else if (typeof defaultValue === "number") {
             return parseFloat(storage.getItem(this._prefix + key)) as T;
         } else {

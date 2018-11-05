@@ -22,29 +22,6 @@ export interface ISample {
     updatedAt: number;
 }
 
-
-export interface ISampleInput {
-    id: string;
-    idNumber?: number;
-    animalId?: string;
-    tag?: string;
-    comment?: string;
-    sampleDate?: number;
-    sharing?: number;
-    mouseStrainId?: string;
-    mouseStrainName?: string;
-    activeRegistrationTransformId?: string;
-}
-
-export interface IMutatedSample {
-    sample: ISample;
-    error: Error;
-}
-
-export interface IMutateSampleData {
-    updateSample: IMutatedSample
-}
-
 export function displaySample(sample: ISample) {
     if (!sample) {
         return "(none)";

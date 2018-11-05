@@ -56,7 +56,7 @@ class ManageInjectionsContent extends React.Component<IManageInjectionsContentPr
         }
         const panes = [
             {
-                menuItem: 'Add',
+                menuItem: "Add",
                 render: () => (
                     <Tab.Pane as="div">
                         <AddInjectionPanel sample={this.props.sample}
@@ -67,7 +67,7 @@ class ManageInjectionsContent extends React.Component<IManageInjectionsContentPr
                 )
             },
             {
-                menuItem: 'Manage',
+                menuItem: "Manage",
                 render: () => <Tab.Pane as="div">
                     <EditInjectionsPanel sample={this.props.sample}
                                          fluorophores={this.props.fluorophores}

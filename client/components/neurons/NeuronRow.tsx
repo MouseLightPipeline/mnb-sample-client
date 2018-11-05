@@ -3,7 +3,7 @@ import {Table, Label, Button, Dropdown} from "semantic-ui-react";
 import {toast} from "react-toastify";
 import * as moment from "moment";
 
-import {FindVisibilityOption, NeuronVisibilityOptions, ShareVisibility} from "../../util/ShareVisibility";
+import {FindVisibilityOption, NeuronVisibilityOptions, ShareVisibility} from "../../models/ShareVisibility";
 import {formatSomaLocation, INeuron, parseSomaLocation} from "../../models/neuron";
 import {displaySample} from "../../models/sample";
 import {lookupBrainArea} from "../App";

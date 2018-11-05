@@ -126,7 +126,7 @@ function makeBrainAreaMap(brainAreas: IBrainArea[]): boolean {
     }
 
     BrainAreas = brainAreas.slice().sort((a, b) => {
-        if (a.depth == b.depth) {
+        if (a.depth === b.depth) {
             return a.name.localeCompare(b.name);
         }
 

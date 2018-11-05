@@ -66,7 +66,7 @@ export class SamplesTable extends React.Component<ISamplesProps, ISamplesState> 
     private onUpdateOffsetForPage(page: number) {
         const offset = this.state.limit * (page - 1);
 
-        if (offset != this.state.offset) {
+        if (offset !== this.state.offset) {
             this.setState({offset});
 
             UserPreferences.Instance.samplePageOffset = offset;
@@ -171,13 +171,13 @@ export class SamplesTable extends React.Component<ISamplesProps, ISamplesState> 
                 {this.renderInjectionsDialog()}
                 {this.renderDeleteConfirmationModal()}
                 <Segment attached="top" secondary clearing style={{borderBottomWidth: 0}}>
-                    <h3 style={{display: "inline-block", verticalAlign: "middle"}}>Samples</h3>
+                    <h3 style={{display: "inline-block"}}>Samples</h3>
                     <CreateSampleMutation mutation={CREATE_SAMPLE_MUTATION} refetchQueries={["AppQuery"]}
                                           onCompleted={(data) => onSampleCreated(data.createSample)}
                                           onError={(error) => toast.error(toastCreateError(error), {autoClose: false})}>
                         {(createSample) => (
-                            <Button content="Add" icon="add" labelPosition="right" color="blue" floated="right"
-                                    onClick={() => createSample({variables: {sample: {}}})}/>
+                            <Button content="Add" icon="add" size="tiny" labelPosition="right" color="blue"
+                                    floated="right" onClick={() => createSample({variables: {sample: {}}})}/>
                         )}
                     </CreateSampleMutation>
                 </Segment>

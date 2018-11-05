@@ -34,7 +34,7 @@ export class Compartments extends React.Component<ICompartmentsProps, ICompartme
     }
 
     private updateTreeState(props: ICompartmentsProps, state: ICompartmentsState): ICompartmentsState {
-        if (state.rootNode == null) {
+        if (state.rootNode === null) {
             let sorted = props.compartments.slice().sort((a: IBrainArea, b: IBrainArea) => {
                 return a.depth - b.depth;
             });
@@ -104,7 +104,7 @@ export class Compartments extends React.Component<ICompartmentsProps, ICompartme
     };
 
     public render() {
-        if (this.state.rootNode == null) {
+        if (this.state.rootNode === null) {
             return null;
         }
 

@@ -29,7 +29,7 @@ export class ManageTransforms extends React.Component<IManageTransformsProps, IM
     public render() {
         const panes = [
             {
-                menuItem: 'Add',
+                menuItem: "Add",
                 render: () => (
                     <Tab.Pane as="div">
                         <AddTransformPanel sample={this.props.sample}
@@ -38,7 +38,7 @@ export class ManageTransforms extends React.Component<IManageTransformsProps, IM
                 )
             },
             {
-                menuItem: 'Manage',
+                menuItem: "Manage",
                 render: () => <Tab.Pane as="div">
                     <TransformTracingCountQuery query={TRANSFORM_TRACING_COUNT_QUERY} pollInterval={30000}
                                                 variables={{ids: this.props.sample.registrationTransforms.map(t => t.id)}}>

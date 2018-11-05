@@ -1,7 +1,5 @@
 import * as path from "path";
 
-import webpack = require("webpack");
-
 const src = path.join(__dirname, "client");
 const dist = path.join(__dirname, "dist",  "public");
 
@@ -34,5 +32,6 @@ module.exports = {
     resolve: {
         extensions: [".tsx", ".ts", ".js"]
     },
+
     devtool: "source-map"
 };

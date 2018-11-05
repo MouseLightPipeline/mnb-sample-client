@@ -88,8 +88,6 @@ export class DynamicDatePicker extends React.Component<IDynamicDatePickerProps, 
                        size: "mini",
                        onClick: this.onAcceptEdit
                    }}
-                //onKeyPress={this.onKeyPress}
-                //onChange={this.onValueChanged}
             />
         );
 

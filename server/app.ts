@@ -10,7 +10,7 @@ const debug = require("debug")("mnb:sample-client:app");
 
 import {ServiceOptions} from "./serviceOptions";
 
-passport.use(new DigestStrategy({qop: 'auth'},
+passport.use(new DigestStrategy({qop: "auth"},
     function (username: any, done: any) {
         if (username === ServiceOptions.authUser) {
             return done(null, {id: 1, name: username}, ServiceOptions.authPassword);
@@ -49,7 +49,7 @@ if (process.env.NODE_ENV !== "production") {
     if (ServiceOptions.authRequired) {
         app.use(passport.initialize());
 
-        app.get("/", passport.authenticate('digest', {session: false}), (request: any, response: any, next: any) => {
+        app.get("/", passport.authenticate("digest", {session: false}), (request: any, response: any, next: any) => {
             next();
         });
     }

@@ -8,9 +8,9 @@ module.exports = {
     ],
 
     output: {
-        filename: 'bundle.js',
+        filename: "bundle.js",
         path: dist,
-        publicPath: '/'
+        publicPath: "/"
     },
 
     mode: "development",
@@ -19,11 +19,11 @@ module.exports = {
         rules: [
             {
                 test: /\.tsx?$/,
-                loader: 'ts-loader',
+                loader: "ts-loader",
                 exclude: /node_modules/
             },
-            {test: /\.css$/, use: 'style-loader'},
-            {test: /\.css$/, use: 'css-loader'}
+            {test: /\.css$/, use: "style-loader"},
+            {test: /\.css$/, use: "css-loader"}
         ]
     },
 
@@ -31,5 +31,5 @@ module.exports = {
         extensions: [".tsx", ".ts", ".js"]
     },
 
-    devtool: 'inline-source-map'
+    devtool: "inline-source-map"
 };
