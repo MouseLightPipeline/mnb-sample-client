@@ -1,6 +1,6 @@
 import * as React from "react";
 import {toast} from "react-toastify";
-import {Button, Table, Segment, Confirm} from "semantic-ui-react";
+import {Button, Table, Segment, Confirm, Header} from "semantic-ui-react";
 
 import {ManageTransforms} from "../transforms/ManageTransforms";
 import {ManageInjections} from "../injections/ManageInjections";
@@ -170,52 +170,56 @@ export class SamplesTable extends React.Component<ISamplesProps, ISamplesState> 
                 {this.renderTransformsDialog()}
                 {this.renderInjectionsDialog()}
                 {this.renderDeleteConfirmationModal()}
-                <Segment attached="top" secondary clearing style={{borderBottomWidth: 0}}>
-                    <h3 style={{display: "inline-block"}}>Samples</h3>
-                    <CreateSampleMutation mutation={CREATE_SAMPLE_MUTATION} refetchQueries={["AppQuery"]}
-                                          onCompleted={(data) => onSampleCreated(data.createSample)}
-                                          onError={(error) => toast.error(toastCreateError(error), {autoClose: false})}>
-                        {(createSample) => (
-                            <Button content="Add" icon="add" size="tiny" labelPosition="right" color="blue"
-                                    floated="right" onClick={() => createSample({variables: {sample: {}}})}/>
-                        )}
-                    </CreateSampleMutation>
-                </Segment>
-                <Segment attached secondary style={{borderBottomWidth: 0}}>
-                    <PaginationHeader pageCount={pageCount}
-                                      activePage={activePage}
-                                      limit={this.state.limit}
-                                      onUpdateLimitForPage={limit => this.onUpdateLimit(limit)}
-                                      onUpdateOffsetForPage={page => this.onUpdateOffsetForPage(page)}/>
-                </Segment>
-                <Table attached="bottom" compact="very">
-                    <Table.Body>
-                        <Table.Row>
-                            <Table.HeaderCell>Id</Table.HeaderCell>
-                            <Table.HeaderCell>Tag</Table.HeaderCell>
-                            <Table.HeaderCell>Animal Id</Table.HeaderCell>
-                            <Table.HeaderCell>Acq. Date</Table.HeaderCell>
-                            <Table.HeaderCell>Strain</Table.HeaderCell>
-                            <Table.HeaderCell>Registrations</Table.HeaderCell>
-                            <Table.HeaderCell>Injections</Table.HeaderCell>
-                            <Table.HeaderCell>Comment</Table.HeaderCell>
-                            <Table.HeaderCell>Visibility</Table.HeaderCell>
-                            <Table.HeaderCell>Created</Table.HeaderCell>
-                            <Table.HeaderCell/>
-                        </Table.Row>
-                        {rows}
-                    </Table.Body>
-                    <Table.Footer fullwidth="true">
-                        <Table.Row>
-                            <Table.HeaderCell colSpan={5}>
-                                {totalCount >= 0 ? (totalCount > 0 ? `Showing ${start} to ${end} of ${totalCount} samples` : "It's a clean slate - create the first sample!") : ""}
-                            </Table.HeaderCell>
-                            <Table.HeaderCell colSpan={6} textAlign="right">
-                                {`Page ${activePage} of ${pageCount}`}
-                            </Table.HeaderCell>
-                        </Table.Row>
-                    </Table.Footer>
-                </Table>
+                <Segment.Group>
+                    <Segment secondary style={{display: "flex", alignItems: "center", justifyContent: "space-between"}}>
+                        <Header content="Samples" style={{margin: "0"}}/>
+                        <CreateSampleMutation mutation={CREATE_SAMPLE_MUTATION} refetchQueries={["AppQuery"]}
+                                              onCompleted={(data) => onSampleCreated(data.createSample)}
+                                              onError={(error) => toast.error(toastCreateError(error), {autoClose: false})}>
+                            {(createSample) => (
+                                <Button content="Add" icon="add" size="tiny" labelPosition="right" color="blue"
+                                        floated="right" onClick={() => createSample({variables: {sample: {}}})}/>
+                            )}
+                        </CreateSampleMutation>
+                    </Segment>
+                    <Segment>
+                        <PaginationHeader pageCount={pageCount}
+                                          activePage={activePage}
+                                          limit={this.state.limit}
+                                          onUpdateLimitForPage={limit => this.onUpdateLimit(limit)}
+                                          onUpdateOffsetForPage={page => this.onUpdateOffsetForPage(page)}/>
+                    </Segment>
+                    <Table attached="bottom" compact="very">
+                        <Table.Header>
+                            <Table.Row>
+                                <Table.HeaderCell>Id</Table.HeaderCell>
+                                <Table.HeaderCell>Tag</Table.HeaderCell>
+                                <Table.HeaderCell>Animal Id</Table.HeaderCell>
+                                <Table.HeaderCell>Acq. Date</Table.HeaderCell>
+                                <Table.HeaderCell>Strain</Table.HeaderCell>
+                                <Table.HeaderCell>Registrations</Table.HeaderCell>
+                                <Table.HeaderCell>Injections</Table.HeaderCell>
+                                <Table.HeaderCell>Comment</Table.HeaderCell>
+                                <Table.HeaderCell>Visibility</Table.HeaderCell>
+                                <Table.HeaderCell>Created</Table.HeaderCell>
+                                <Table.HeaderCell/>
+                            </Table.Row>
+                        </Table.Header>
+                        <Table.Body>
+                            {rows}
+                        </Table.Body>
+                        <Table.Footer fullwidth="true">
+                            <Table.Row>
+                                <Table.HeaderCell colSpan={5}>
+                                    {totalCount >= 0 ? (totalCount > 0 ? `Showing ${start} to ${end} of ${totalCount} samples` : "It's a clean slate - create the first sample!") : ""}
+                                </Table.HeaderCell>
+                                <Table.HeaderCell colSpan={6} textAlign="right">
+                                    {`Page ${activePage} of ${pageCount}`}
+                                </Table.HeaderCell>
+                            </Table.Row>
+                        </Table.Footer>
+                    </Table>
+                </Segment.Group>
             </div>
         );
     }

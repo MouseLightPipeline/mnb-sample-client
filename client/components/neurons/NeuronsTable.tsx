@@ -17,12 +17,12 @@ interface INeuronTableProps {
 }
 
 export const NeuronsTable = (props: INeuronTableProps) => (
-    <NeuronTracingCountQuery query={NEURON_TRACING_COUNT_QUERY} pollInterval={30000}
+    <NeuronTracingCountQuery query={NEURON_TRACING_COUNT_QUERY} pollInterval={30000} skip={props.neurons.length === 0}
                              variables={{ids: props.neurons.map(n => n.id)}}>
         {({loading, error, data}) => {
             const counts = new Map<string, number>();
 
-            if (data.tracingCountsForNeurons) {
+            if (!error && data && data.tracingCountsForNeurons) {
                 data.tracingCountsForNeurons.counts.map(c => counts.set(c.neuronId, c.count));
             }
 

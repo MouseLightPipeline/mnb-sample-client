@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Button, Dropdown, Segment, Grid, Confirm} from "semantic-ui-react";
+import {Button, Dropdown, Segment, Grid, Confirm, Table, Header} from "semantic-ui-react";
 import {toast} from "react-toastify";
 
 import {InjectionsForSampleDropdown} from "../editors/InjectionForSampleDropdown";
@@ -35,12 +35,38 @@ export class Neurons extends React.Component<INeuronsProps, INeuronsState> {
     public constructor(props: INeuronsProps) {
         super(props);
 
+        let sample: ISample = null;
+        let isSampleLocked = false;
+
+        if (UserPreferences.Instance.neuronCreateLockedSampleId.length > 0) {
+            sample = props.samples.find(s => s.id === UserPreferences.Instance.neuronCreateLockedSampleId) || null;
+            isSampleLocked = sample != null;
+        }
+
         this.state = {
             offset: UserPreferences.Instance.neuronPageOffset,
             limit: UserPreferences.Instance.neuronPageLimit,
-            sample: null,
+            sample,
             injection: null,
-            isSampleLocked: false
+            isSampleLocked
+        }
+    }
+
+    public componentWillReceiveProps(props: INeuronsProps) {
+        const lockedSampleId = UserPreferences.Instance.neuronCreateLockedSampleId;
+
+        let sample = this.state.sample;
+
+        if (lockedSampleId) {
+            sample = props.samples.find((s: ISample) => s.id === lockedSampleId);
+        } else if (this.state.sample) {
+            sample = props.samples.find((s: ISample) => s.id === sample.id);
+        }
+
+        if (sample) {
+            this.setState({sample: sample, isSampleLocked: lockedSampleId.length > 0});
+        } else {
+            this.setState({sample: null, isSampleLocked: false});
         }
     }
 
@@ -98,37 +124,40 @@ export class Neurons extends React.Component<INeuronsProps, INeuronsState> {
                                   onCompleted={(data) => onNeuronCreated(data.createNeuron)}
                                   onError={(error) => toast.error(toastCreateError(error), {autoClose: false})}>
                 {(createNeuron) => (
-                    <Grid fluid="true" columns={16} floated="right">
-                        <Grid.Column width={6}/>
-                        <Grid.Column width={4} textAlign="right">
-                            <Button as="div" fluid labelPosition="left">
-                                <Dropdown search fluid selection options={items}
-                                          className="label"
-                                          placeholder="Select sample..."
-                                          disabled={this.state.isSampleLocked || this.props.samples.length === 0}
-                                          value={this.state.sample ? this.state.sample.id : null}
-                                          onChange={(e, {value}) => this.onSampleChange(value as string)}
-                                          style={{fontWeight: "normal"}}/>
-                                <Button compact icon="lock" color={this.state.isSampleLocked ? "red" : null}
-                                        disabled={this.state.sample === null}
-                                        active={this.state.isSampleLocked}
-                                        onClick={() => this.onLockSample()}/>
-                            </Button>
-                        </Grid.Column>
+                    <Table style={{border: "none", background: "transparent", marginTop: 0, maxWidth: "820px", textAlign: "right"}}>
+                        <Table.Body>
+                            <Table.Row>
+                                <Table.Cell style={{padding: 0, width: "300px"}}>
+                                    <Button as="div" fluid labelPosition="left">
+                                        <Dropdown search fluid selection options={items}
+                                                  className="label"
+                                                  placeholder="Select sample..."
+                                                  disabled={this.state.isSampleLocked || this.props.samples.length === 0}
+                                                  value={this.state.sample ? this.state.sample.id : null}
+                                                  onChange={(e, {value}) => this.onSampleChange(value as string)}
+                                                  style={{fontWeight: "normal"}}/>
+                                        <Button compact icon="lock" color={this.state.isSampleLocked ? "red" : null}
+                                                disabled={this.state.sample === null}
+                                                active={this.state.isSampleLocked}
+                                                onClick={() => this.onLockSample()}/>
+                                    </Button>
+                                </Table.Cell>
 
-                        <Grid.Column width={4} textAlign="left">
-                            <InjectionsForSampleDropdown sample={this.state.sample}
-                                                         selectedInjection={this.state.injection}
-                                                         onInjectionChange={n => this.onInjectionChange(n)}
-                                                         disabled={this.state.sample === null}/>
-                        </Grid.Column>
+                                <Table.Cell style={{padding: 0, paddingLeft: "20px", width: "400px"}}>
+                                    <InjectionsForSampleDropdown sample={this.state.sample}
+                                                                 selectedInjection={this.state.injection}
+                                                                 onInjectionChange={n => this.onInjectionChange(n)}
+                                                                 disabled={this.state.sample === null}/>
+                                </Table.Cell>
 
-                        <Grid.Column width={2} textAlign="right">
-                            <Button content="Add" icon="add" size="small" labelPosition="right" color="blue"
-                                    disabled={this.state.injection === null}
-                                    onClick={() => createNeuron({variables: {neuron: {injectionId: this.state.injection.id}}})}/>
-                        </Grid.Column>
-                    </Grid>
+                                <Table.Cell style={{padding: 0}}>
+                                    <Button content="Add" icon="add" size="small" labelPosition="right" color="blue"
+                                            disabled={this.state.injection === null}
+                                            onClick={() => createNeuron({variables: {neuron: {injectionId: this.state.injection.id}}})}/>
+                                </Table.Cell>
+                            </Table.Row>
+                        </Table.Body>
+                    </Table>
                 )}
             </CreateNeuronMutation>
         );
@@ -168,19 +197,27 @@ export class Neurons extends React.Component<INeuronsProps, INeuronsState> {
                     return (
                         <div>
                             {this.renderDeleteConfirmationModal()}
-                            <Segment attached="top" secondary clearing style={{borderBottomWidth: 0}}>
-                                <h3 style={{display: "inline-block", verticalAlign: "middle"}}>Neurons</h3>
-                                {this.renderCreateNeuron()}
-                            </Segment>
-                            <Segment attached secondary style={{borderBottomWidth: 0}}>
-                                <PaginationHeader pageCount={pageCount} activePage={activePage} limit={this.state.limit}
-                                                  onUpdateLimitForPage={this.onUpdateLimit}
-                                                  onUpdateOffsetForPage={this.onUpdateOffsetForPage}/>
-                            </Segment>
-                            <NeuronsTable neurons={data.neurons ? data.neurons.items : []} offset={this.state.offset}
-                                          limit={this.state.limit} totalCount={totalCount} pageCount={pageCount}
-                                          activePage={activePage}
-                                          onDeleteNeuron={(n) => this.setState({requestedNeuronForDelete: n})}/>
+                            <Segment.Group>
+                                <Segment secondary style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "space-between"
+                                }}>
+                                    <Header content="Neurons" style={{margin: "0"}}/>
+                                    {this.renderCreateNeuron()}
+                                </Segment>
+                                <Segment>
+                                    <PaginationHeader pageCount={pageCount} activePage={activePage}
+                                                      limit={this.state.limit}
+                                                      onUpdateLimitForPage={this.onUpdateLimit}
+                                                      onUpdateOffsetForPage={this.onUpdateOffsetForPage}/>
+                                </Segment>
+                                <NeuronsTable neurons={data.neurons ? data.neurons.items : []}
+                                              offset={this.state.offset}
+                                              limit={this.state.limit} totalCount={totalCount} pageCount={pageCount}
+                                              activePage={activePage}
+                                              onDeleteNeuron={(n) => this.setState({requestedNeuronForDelete: n})}/>
+                            </Segment.Group>
                         </div>
                     );
                 }}

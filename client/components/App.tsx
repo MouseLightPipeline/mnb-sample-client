@@ -51,67 +51,50 @@ const Footer = () => (
     </Segment>
 );
 
-interface IAppState {
-    isSettingsOpen?: boolean;
-}
+export const App = () => (
+    <div>
+        <ToastContainer autoClose={6000} position={"bottom-center" as ToastPosition}
+                        style={toastStyleOverride}/>
+        <Heading/>
+        <div style={{marginTop: "62px", padding: "20px"}}>
+            <AppQuery query={APP_QUERY} pollInterval={30000}>
+                {({loading, error, data}) => {
+                    if (loading) {
+                        return (
+                            <Message icon>
+                                <Icon name="circle notched" loading/>
+                                <Message.Content>
+                                    <Message.Header content="Requesting content"/>
+                                    We are retrieving basic system data.
+                                </Message.Content>
+                            </Message>
+                        );
+                    }
 
-export class App extends React.Component<{}, IAppState> {
-    public constructor(props: {}) {
-        super(props);
+                    if (error) {
+                        return (
+                            <Message negative icon="exclamation triangle" header="Service not responding"
+                                     content="System data could not be loaded.  Will attempt again shortly."/>
+                        );
+                    }
 
-        this.state = {
-            isSettingsOpen: false,
-        }
-    }
+                    makeBrainAreaMap(data.brainAreas);
 
-    public render() {
-        return (
-            <div>
-                <ToastContainer autoClose={6000} position={"bottom-center" as ToastPosition}
-                                style={toastStyleOverride}/>
-                <Heading/>
-                <div style={{marginTop: "62px", padding: "20px"}}>
-                    <AppQuery query={APP_QUERY} pollInterval={30000}>
-                        {({loading, error, data}) => {
-                           if (loading) {
-                                return (
-                                    <Message icon>
-                                        <Icon name="circle notched" loading/>
-                                        <Message.Content>
-                                            <Message.Header content="Requesting content"/>
-                                            We are retrieving basic system data.
-                                        </Message.Content>
-                                    </Message>
-                                );
-                            }
-
-                            if (error) {
-                                return (
-                                    <Message negative icon="exclamation triangle" header="Service not responding"
-                                             content="System data could not be loaded.  Will attempt again shortly."/>
-                                );
-                            }
-
-                            makeBrainAreaMap(data.brainAreas);
-
-                            return (
-                                <Switch>
-                                    <Route path="/" exact render={() => (<Content samples={data.samples.items}/>)}/>
-                                    <Route path="/samples" render={() => (<Samples samples={data.samples.items}/>)}/>
-                                    <Route path="/neurons" render={() => (<Neurons samples={data.samples.items}/>)}/>
-                                    <Route path="/compartments"
-                                           render={() => (<Compartments compartments={data.brainAreas}/>)}/>
-                                </Switch>
-                            );
-                        }}
-                    </AppQuery>
-                </div>
-                <Footer/>
-            </div>
-        );
-    }
-}
-
+                    return (
+                        <Switch>
+                            <Route path="/" exact render={() => (<Content samples={data.samples.items}/>)}/>
+                            <Route path="/samples" render={() => (<Samples samples={data.samples.items}/>)}/>
+                            <Route path="/neurons" render={() => (<Neurons samples={data.samples.items}/>)}/>
+                            <Route path="/compartments"
+                                   render={() => (<Compartments compartments={data.brainAreas}/>)}/>
+                        </Switch>
+                    );
+                }}
+            </AppQuery>
+        </div>
+        <Footer/>
+    </div>
+);
 
 // Need a map of id -> area for fast lookup.  The current Select control does not make it easy/possible to carry the
 // actual BrainArea object around with the select.  See filterOption function for brain area Select control, primarily.

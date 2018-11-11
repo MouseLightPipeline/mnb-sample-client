@@ -130,8 +130,7 @@ export class NeuronRow extends React.Component<INeuronRowProps, {}> {
                         <Table.Cell style={{minWidth: "120px"}}>
                             {count !== undefined ? (count === 0 ?
                                 <Button icon="trash" color="red" size="mini" content="delete" labelPosition="left"
-                                        onClick={() => {
-                                        }}/> :
+                                        onClick={() => this.props.onDeleteNeuron(n)}/> :
                                 <Label>{count}<Label.Detail>tracings</Label.Detail></Label>) : "?"
                             }
                         </Table.Cell>
