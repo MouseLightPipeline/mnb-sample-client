@@ -81,11 +81,11 @@ export class NeuronRow extends React.Component<INeuronRowProps, {}> {
                                   onError={(error) => toast.error(toastUpdateError(error), {autoClose: false})}>
                 {(updateNeuron) => (
                     <Table.Row>
-                        <Table.Cell style={{maxWidth: "50px"}}>
+                        <Table.Cell style={{minWidth: "60px", maxWidth: "60px"}}>
                             <InputPopup value={n.idString} placeholder="(none)"
                                         onAccept={v => this.onAcceptIdStringEdit(v, updateNeuron)}/>
                         </Table.Cell>
-                        <Table.Cell style={{maxWidth: "50px"}}>
+                        <Table.Cell style={{minWidth: "60px", maxWidth: "60px"}}>
                             <InputPopup value={n.tag} placeholder="(none)"
                                         onAccept={v => this.onAcceptTagEdit(v, updateNeuron)}/>
                         </Table.Cell>
@@ -109,7 +109,7 @@ export class NeuronRow extends React.Component<INeuronRowProps, {}> {
                                       onChange={(e, {value}) => this.onAcceptVisibility(value as ShareVisibility, updateNeuron)}/>
                         </Table.Cell>
                         <Table.Cell style={{maxWidth: "120px"}}>
-                            {n.doi}
+                            {n.doi || "(none)"}
                         </Table.Cell>
                         <Table.Cell style={{width: "120px"}}>
                             {count !== undefined ? (count === 0 ?
