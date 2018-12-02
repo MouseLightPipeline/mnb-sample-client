@@ -342,7 +342,7 @@ export class SamplesReactTable extends React.Component<ISamplesProps, ISamplesSt
                                         {totalCount >= 0 ? (totalCount > 0 ? `Showing ${start} to ${end} of ${totalCount} samples` : "It's a clean slate - create the first sample!") : ""}
                                     </div>
                                     <div style={{order: 1}}>
-                                        <i>Click any value to edit. Expand to view additional properties.</i>
+                                        <i>Click a value to edit. Expand to view additional properties.</i>
                                     </div>
                                     <div style={{order: 2}}>
                                         {`Page ${activePage} of ${pageCount}`}

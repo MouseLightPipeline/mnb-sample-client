@@ -17,6 +17,7 @@ import {
     UpdateNeuronMutationData,
     UpdateNeuronMutationFn
 } from "../../graphql/neuron";
+import {InputPopup} from "../editors/InputPopup";
 
 interface INeuronRowProps {
     neuron: INeuron;
@@ -34,13 +35,6 @@ export class NeuronRow extends React.Component<INeuronRowProps, {}> {
     private async onAcceptIdStringEdit(value: string, updateFn: UpdateNeuronMutationFn) {
         if (value !== this.props.neuron.idString) {
             await updateFn({variables: {neuron: {id: this.props.neuron.id, idString: value}}});
-        }
-
-    }
-
-    private async onAcceptKeywordsEdit(value: string, updateFn: UpdateNeuronMutationFn) {
-        if (value !== this.props.neuron.keywords) {
-            await updateFn({variables: {neuron: {id: this.props.neuron.id, keywords: value}}});
         }
     }
 
@@ -87,15 +81,15 @@ export class NeuronRow extends React.Component<INeuronRowProps, {}> {
                                   onError={(error) => toast.error(toastUpdateError(error), {autoClose: false})}>
                 {(updateNeuron) => (
                     <Table.Row>
-                        <Table.Cell>
-                            <DynamicEditField initialValue={n.idString} placeHolder="(none)"
-                                              acceptFunction={v => this.onAcceptIdStringEdit(v, updateNeuron)}/>
+                        <Table.Cell style={{maxWidth: "50px"}}>
+                            <InputPopup value={n.idString} placeholder="(none)"
+                                        onAccept={v => this.onAcceptIdStringEdit(v, updateNeuron)}/>
                         </Table.Cell>
-                        <Table.Cell>
-                            <DynamicEditField initialValue={n.tag} placeHolder="(none)"
-                                              acceptFunction={v => this.onAcceptTagEdit(v, updateNeuron)}/>
+                        <Table.Cell style={{maxWidth: "50px"}}>
+                            <InputPopup value={n.tag} placeholder="(none)"
+                                        onAccept={v => this.onAcceptTagEdit(v, updateNeuron)}/>
                         </Table.Cell>
-                        <Table.Cell>
+                        <Table.Cell style={{maxWidth: "100px"}}>
                             {displaySample(n.injection.sample)}
                         </Table.Cell>
                         <Table.Cell>
@@ -104,28 +98,20 @@ export class NeuronRow extends React.Component<INeuronRowProps, {}> {
                                                onBrainAreaChange={(brainArea: IBrainArea) => this.onBrainAreaChange(brainArea, updateNeuron)}/>
 
                         </Table.Cell>
-                        <Table.Cell>
-                            <DynamicEditField initialValue={formatSomaLocation(n)} placeHolder="(undefined)"
-                                              acceptFunction={v => this.onAcceptSomaLocationEdit(v, updateNeuron)}
-                                              canAcceptFunction={v => !parseSomaLocation(v).error}
-                                              feedbackFunction={v => parseSomaLocation(v).error}/>
+                        <Table.Cell style={{maxWidth: "140px"}}>
+                            <InputPopup value={formatSomaLocation(n)} placeholder="(undefined)"
+                                        onAccept={v => this.onAcceptSomaLocationEdit(v, updateNeuron)}
+                                        isValidValueFcn={v => !parseSomaLocation(v).error}/>
                         </Table.Cell>
-                        <Table.Cell>
-                            <DynamicEditField initialValue={n.keywords} placeHolder="(none)"
-                                              acceptFunction={v => this.onAcceptKeywordsEdit(v, updateNeuron)}/>
-                        </Table.Cell>
-                        <Table.Cell>
+                        <Table.Cell style={{width: "110px"}}>
                             <Dropdown search fluid inline options={NeuronVisibilityOptions}
                                       value={FindVisibilityOption(n.sharing).value}
                                       onChange={(e, {value}) => this.onAcceptVisibility(value as ShareVisibility, updateNeuron)}/>
                         </Table.Cell>
-                        <Table.Cell>
+                        <Table.Cell style={{maxWidth: "120px"}}>
                             {n.doi}
                         </Table.Cell>
-                        <Table.Cell>
-                            {moment(n.createdAt).format("YYYY-MM-DD")}<br/>
-                        </Table.Cell>
-                        <Table.Cell style={{minWidth: "120px"}}>
+                        <Table.Cell style={{width: "120px"}}>
                             {count !== undefined ? (count === 0 ?
                                 <Button icon="trash" color="red" size="mini" content="delete" labelPosition="left"
                                         onClick={() => this.props.onDeleteNeuron(n)}/> :

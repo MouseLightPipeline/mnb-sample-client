@@ -124,7 +124,13 @@ export class Neurons extends React.Component<INeuronsProps, INeuronsState> {
                                   onCompleted={(data) => onNeuronCreated(data.createNeuron)}
                                   onError={(error) => toast.error(toastCreateError(error), {autoClose: false})}>
                 {(createNeuron) => (
-                    <Table style={{border: "none", background: "transparent", marginTop: 0, maxWidth: "820px", textAlign: "right"}}>
+                    <Table style={{
+                        border: "none",
+                        background: "transparent",
+                        marginTop: 0,
+                        maxWidth: "820px",
+                        textAlign: "right"
+                    }}>
                         <Table.Body>
                             <Table.Row>
                                 <Table.Cell style={{padding: 0, width: "300px"}}>
@@ -194,6 +200,9 @@ export class Neurons extends React.Component<INeuronsProps, INeuronsState> {
 
                     const activePage = this.state.offset ? (Math.floor(this.state.offset / this.state.limit) + 1) : 1;
 
+                    const start = this.state.offset + 1;
+                    const end = Math.min(this.state.offset + this.state.limit, totalCount);
+
                     return (
                         <div>
                             {this.renderDeleteConfirmationModal()}
@@ -212,11 +221,27 @@ export class Neurons extends React.Component<INeuronsProps, INeuronsState> {
                                                       onUpdateLimitForPage={this.onUpdateLimit}
                                                       onUpdateOffsetForPage={this.onUpdateOffsetForPage}/>
                                 </Segment>
-                                <NeuronsTable neurons={data.neurons ? data.neurons.items : []}
-                                              offset={this.state.offset}
-                                              limit={this.state.limit} totalCount={totalCount} pageCount={pageCount}
-                                              activePage={activePage}
-                                              onDeleteNeuron={(n) => this.setState({requestedNeuronForDelete: n})}/>
+                                <Segment style={{padding: 0}}>
+                                    <NeuronsTable neurons={data.neurons ? data.neurons.items : []}
+                                                  pageCount={pageCount}
+                                                  activePage={activePage}
+                                                  onDeleteNeuron={(n) => this.setState({requestedNeuronForDelete: n})}/>
+                                </Segment>
+                                <Segment secondary>
+                                    <Grid columns={3} fluid>
+                                        <Grid.Row>
+                                            <Grid.Column>
+                                                {totalCount >= 0 ? (totalCount > 0 ? `Showing ${start} to ${end} of ${totalCount} samples` : "It's a clean slate - create the first sample!") : ""}
+                                            </Grid.Column>
+                                            <Grid.Column style={{textAlign: "center"}}>
+                                                <i>Click a value to edit</i>
+                                            </Grid.Column>
+                                            <Grid.Column style={{textAlign: "right"}}>
+                                                {`Page ${activePage} of ${pageCount}`}
+                                            </Grid.Column>
+                                        </Grid.Row>
+                                    </Grid>
+                                </Segment>
                             </Segment.Group>
                         </div>
                     );
