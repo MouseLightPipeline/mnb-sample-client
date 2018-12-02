@@ -1,19 +1,13 @@
 import * as React from "react";
 import Autosuggest = require("react-autosuggest");
-import {Button, Label} from "semantic-ui-react";
-
-export enum DynamicAutoSuggestMode {
-    Static,
-    Edit
-}
+import {Button, Label, Popup} from "semantic-ui-react";
 
 export interface IObjectAutoSuggestProps<T> {
     items: T[];
+    header?: string;
     placeholder: string;
+    value: string;
     displayProperty: string;
-    initialValue: string;
-    isDeferredEditMode?: boolean;
-    isEditOnly?: boolean;
     placeHolder?: string;
 
     onChange?(value: string): void;
@@ -21,57 +15,32 @@ export interface IObjectAutoSuggestProps<T> {
 
 export interface IObjectAutoSuggestState<T> {
     suggestions: T[];
-    initialPropValue?: any;
     value?: string;
-    mode?: DynamicAutoSuggestMode;
+    isOpen?: boolean;
 }
 
-export class DynamicAutoSuggest<T extends any> extends React.Component<IObjectAutoSuggestProps<T>, IObjectAutoSuggestState<T>> {
+export class AutoSuggestPopup<T extends any> extends React.Component<IObjectAutoSuggestProps<T>, IObjectAutoSuggestState<T>> {
     constructor(props: any) {
         super(props);
 
         this.state = {
             suggestions: [],
-            initialPropValue: props.initialValue,
-            value: props.initialValue,
-            mode: DynamicAutoSuggestMode.Static
+            value: props.initialValue
         };
     }
 
-    private get isInEditMode() {
-        return (this.props.isEditOnly) || this.state.mode === DynamicAutoSuggestMode.Edit;
-    }
-
-    private get isDeferredEditMode() {
-        return !(this.props.isDeferredEditMode === undefined || this.props.isDeferredEditMode === null) && this.props.isDeferredEditMode;
-    }
-
-    private onRequestEditMode() {
-        this.setState({mode: DynamicAutoSuggestMode.Edit});
-    }
-
     private onAcceptEdit() {
-        this.setState({mode: DynamicAutoSuggestMode.Static});
-
         if (this.props.onChange) {
             this.props.onChange(this.state.value);
         }
-    }
 
-    private onCancelEdit() {
-        this.setState({mode: DynamicAutoSuggestMode.Static, value: this.props.initialValue});
+        this.setState({isOpen: false});
     }
 
     private onAutoSuggestInputChange(obj: any) {
         this.setState({
             value: obj.newValue
         });
-
-        if (this.isInEditMode && !this.isDeferredEditMode) {
-            if (this.props.onChange) {
-                this.props.onChange(obj.newValue);
-            }
-        }
     };
 
     private getSuggestions(value: string): T[] {
@@ -89,44 +58,21 @@ export class DynamicAutoSuggest<T extends any> extends React.Component<IObjectAu
     }
 
     public componentWillReceiveProps(props: IObjectAutoSuggestProps<T>) {
-        this.setState({
-            initialPropValue: props.initialValue
-        });
-
-        if (this.state.mode === DynamicAutoSuggestMode.Static) {
-            this.setState({
-                value: props.initialValue
-            });
+        if (!this.state.isOpen) {
+            this.setState({value: this.props.value});
         }
     }
 
-    private renderClickableValue() {
-        return (
-            <a onClick={() => this.onRequestEditMode()}>
-                {this.renderValue(this.state.value)}
-            </a>
-        )
-    }
-
-    protected renderValue(value: string) {
-        if (!value) {
-            return (<span style={{color: "#AAA"}}>{this.props.placeHolder || "(none)"}</span>)
-        }
-
-        return value;
-    }
-
-    private renderAutoSuggest(isInputGroup: boolean = false) {
+    private renderAutoSuggest() {
         const inputProps = {
             placeholder: this.props.placeholder,
             value: this.state.value || "",
             onChange: (event: any, obj: any) => this.onAutoSuggestInputChange(obj)
         };
 
-        const theme = isInputGroup ? inputGroupTheme : standardTheme;
 
         const props = {
-            theme: theme,
+            theme: inputGroupTheme,
             suggestions: this.state.suggestions,
             onSuggestionsFetchRequested: (obj: any) => this.onSuggestionsFetchRequested(obj),
             onSuggestionsClearRequested: () => this.onSuggestionsClearRequested(),
@@ -168,30 +114,23 @@ export class DynamicAutoSuggest<T extends any> extends React.Component<IObjectAu
 
 
     public render() {
-        if (this.isInEditMode) {
-            if (!this.isDeferredEditMode) {
-                return this.renderAutoSuggest();
-            } else {
-                return (
-                    <Button as="div" size="mini" labelPosition="left" fluid style={{display: "flex"}}>
-                        <Label as="div" basic pointing="right" style={{padding: 0, flexGrow: 1}}>
-                            <Button as="div" size="mini" labelPosition="right" fluid style={{display: "flex"}}>
-                                <Button size="mini" icon="cancel" onClick={() => this.onCancelEdit()}/>
-                                <Label as="div" basic pointing="left"
-                                       style={{display: "flex", padding: 0, flexGrow: 1, borderWidth: 0}}>
-                                    <div style={{flexGrow: 1}}>
-                                        {this.renderAutoSuggest(true)}
-                                    </div>
-                                </Label>
-                            </Button>
-                        </Label>
-                        <Button size="mini" icon="check" color="teal" onClick={() => this.onAcceptEdit()}/>
-                    </Button>
-                );
-            }
-        } else {
-            return this.renderClickableValue();
-        }
+        return (
+            <Popup open={this.state.isOpen} onOpen={() => this.setState({isOpen: true})}
+                   onClose={() => this.setState({isOpen: false})} on="click" flowing
+                   header={this.props.header || ""}
+                   trigger={<span>{this.props.value || "(none)"}</span>}
+                   content={
+
+                       <Button as="div" labelPosition="left" fluid style={{display: "flex"}}>
+                           <Label as="div" basic pointing="right"
+                                  style={{display: "flex", padding: 0, flexGrow: 1}}>
+                               <div style={{flexGrow: 1}}>
+                                   {this.renderAutoSuggest()}
+                               </div>
+                           </Label>
+                           <Button icon="check" color="teal" onClick={() => this.onAcceptEdit()}/>
+                       </Button>}/>
+        );
     }
 }
 

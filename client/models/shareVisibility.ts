@@ -34,13 +34,17 @@ const ShareVisibilityOptions: IShareVisibilityOption[] = [
     }
 ];
 
-export function NeuronVisibilityOptions(): IShareVisibilityOption[] {
+function FilterNeuronVisibilityOptions(): IShareVisibilityOption[] {
     return ShareVisibilityOptions;
 }
 
-export function SampleVisibilityOptions(): IShareVisibilityOption[] {
+export const NeuronVisibilityOptions = FilterNeuronVisibilityOptions();
+
+function FilterSampleVisibilityOptions(): IShareVisibilityOption[] {
     return ShareVisibilityOptions.filter(s => s.key !== ShareVisibility.Inherited);
 }
+
+export const SampleVisibilityOptions = FilterSampleVisibilityOptions();
 
 export function FindVisibilityOption(id: number): IShareVisibilityOption {
     switch (id) {

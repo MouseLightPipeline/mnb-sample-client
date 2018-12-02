@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Input} from "semantic-ui-react";
+import {Button, Input, Label} from "semantic-ui-react";
 
 export enum DynamicEditFieldMode {
     Static,
@@ -121,6 +121,7 @@ export class DynamicEditField extends React.Component<IDynamicEditFieldProps, ID
 
     public render() {
         if (this.state.mode === DynamicEditFieldMode.Edit) {
+            /*
             return (
                 <Input size="mini" fluid type="text" placeholder={this.props.placeHolder}
                        value={this.format(this.state.value)}
@@ -134,7 +135,27 @@ export class DynamicEditField extends React.Component<IDynamicEditFieldProps, ID
                        }}
                        onKeyPress={this.onKeyPress}
                        onChange={this.onValueChanged}/>
-            );
+            );*/
+            return (
+                <Button as="div" size="mini" labelPosition="left" fluid style={{display: "flex"}}>
+                    <Label as="div" basic pointing="right" style={{padding: 0, flexGrow: 1}}>
+                        <Button as="div" size="mini" labelPosition="right" fluid style={{display: "flex"}}>
+                            <Button icon="cancel" onClick={() => this.onCancelEdit()}/>
+                            <Label as="div" basic pointing="left"
+                                   style={{display: "flex", padding: 0, flexGrow: 1, borderWidth: 0}}>
+                                <div style={{flexGrow: 1}}>
+                                    <Input fluid type="text" placeholder={this.props.placeHolder}
+                                           className="edit-input"
+                                           value={this.format(this.state.value)}
+                                           onKeyPress={this.onKeyPress}
+                                           onChange={this.onValueChanged}/>
+                                </div>
+                            </Label>
+                        </Button>
+                    </Label>
+                    <Button size="mini" icon="check" color="teal" onClick={() => this.onAcceptEdit()}/>
+                </Button>
+            )
         } else {
             return (
                 <a onClick={() => this.onEdit()}>{this.staticValueDisplay}</a>

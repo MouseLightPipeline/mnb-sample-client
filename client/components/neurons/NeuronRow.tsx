@@ -3,7 +3,7 @@ import {Table, Label, Button, Dropdown} from "semantic-ui-react";
 import {toast} from "react-toastify";
 import * as moment from "moment";
 
-import {FindVisibilityOption, NeuronVisibilityOptions, ShareVisibility} from "../../models/ShareVisibility";
+import {FindVisibilityOption, NeuronVisibilityOptions, ShareVisibility} from "../../models/shareVisibility";
 import {formatSomaLocation, INeuron, parseSomaLocation} from "../../models/neuron";
 import {displaySample} from "../../models/sample";
 import {lookupBrainArea} from "../App";
@@ -17,8 +17,6 @@ import {
     UpdateNeuronMutationData,
     UpdateNeuronMutationFn
 } from "../../graphql/neuron";
-
-const ShareVisibilityOptions = NeuronVisibilityOptions();
 
 interface INeuronRowProps {
     neuron: INeuron;
@@ -117,7 +115,7 @@ export class NeuronRow extends React.Component<INeuronRowProps, {}> {
                                               acceptFunction={v => this.onAcceptKeywordsEdit(v, updateNeuron)}/>
                         </Table.Cell>
                         <Table.Cell>
-                            <Dropdown search fluid inline options={ShareVisibilityOptions}
+                            <Dropdown search fluid inline options={NeuronVisibilityOptions}
                                       value={FindVisibilityOption(n.sharing).value}
                                       onChange={(e, {value}) => this.onAcceptVisibility(value as ShareVisibility, updateNeuron)}/>
                         </Table.Cell>

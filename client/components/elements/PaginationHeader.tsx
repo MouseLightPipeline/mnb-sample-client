@@ -69,7 +69,7 @@ export class PaginationHeader extends React.Component<IPaginationHeaderProps, IP
 
             return (
                 <Input size="mini" action={action} error={!this.state.isValidPageJump} type="text" placehoder="Page..."
-                       value={this.state.pageJumpText}
+                       value={this.state.pageJumpText} className="pagejump"
                        onKeyPress={(e: Event) => this.onKeyPress(e)}
                        onChange={(e, {value}) => this.onPageTextChanged(value)}/>
             );
@@ -94,28 +94,53 @@ export class PaginationHeader extends React.Component<IPaginationHeaderProps, IP
 
     public render() {
         return (
-            <Table style={{border: "none", background: "transparent"}}>
-                <Table.Body>
-                    <Table.Row>
-                        <Table.Cell style={{width: "33%", paddingTop: 0}}>
-                            <Slider min={10} max={50} step={5} value={this.state.limit} style={{maxWidth: "300px"}}
-                                    marks={{10: "10", 20: "20", 30: "30", 40: "40", 50: "50"}}
-                                    onChange={(value: number) => this.setState({limit: value})}
-                                    onAfterChange={(value: number) => this.props.onUpdateLimitForPage(value)}/>
-                        </Table.Cell>
+            <div style={{display: "flex", background: "transparent", justifyContent: "space-between"}}>
+                <div style={{order: 0, paddingTop: 0, width: "250px"}}>
+                    <Slider min={10} max={50} step={5} value={this.state.limit}
+                            marks={{10: "10", 20: "20", 30: "30", 40: "40", 50: "50"}}
+                            onChange={(value: number) => this.setState({limit: value})}
+                            onAfterChange={(value: number) => this.props.onUpdateLimitForPage(value)}/>
+                </div>
 
-                        <Table.Cell style={{width: "34%"}} textAlign="center">
-                            {this.renderPagination()}
-                        </Table.Cell>
+                <div style={{order: 1, flexGrow: 1, textAlign: "center"}}>
+                    {this.renderPagination()}
+                </div>
 
-                        <Table.Cell style={{width: "33%", paddingRight: "1px"}} textAlign="right">
-                            {this.renderPageJump()}
-                        </Table.Cell>
-                    </Table.Row>
-                </Table.Body>
-            </Table>
+                <div style={{order: 2, paddingRight: "1px", width: "250px", textAlign: "right"}}>
+                    <div>
+                        {this.renderPageJump()}
+                    </div>
+                </div>
+            </div>
         );
     }
+
+    /*
+        public render() {
+            return (
+                <Table style={{border: "none", background: "transparent"}}>
+                    <Table.Body>
+                        <Table.Row>
+                            <Table.Cell style={{width: "33%", paddingTop: 0}}>
+                                <Slider min={10} max={50} step={5} value={this.state.limit} style={{maxWidth: "300px"}}
+                                        marks={{10: "10", 20: "20", 30: "30", 40: "40", 50: "50"}}
+                                        onChange={(value: number) => this.setState({limit: value})}
+                                        onAfterChange={(value: number) => this.props.onUpdateLimitForPage(value)}/>
+                            </Table.Cell>
+
+                            <Table.Cell style={{width: "34%"}} textAlign="center">
+                                {this.renderPagination()}
+                            </Table.Cell>
+
+                            <Table.Cell style={{width: "33%", paddingRight: "1px"}} textAlign="right">
+                                {this.renderPageJump()}
+                            </Table.Cell>
+                        </Table.Row>
+                    </Table.Body>
+                </Table>
+            );
+        }
+        */
 }
 
 function isValidJumpText(value: string, pageCount: number): boolean {

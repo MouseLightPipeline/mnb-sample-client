@@ -1,8 +1,8 @@
 import * as React from "react";
 
 import {ISample} from "../../models/sample";
-import {SamplesTable} from "./SamplesTable";
 import {MOUSE_STRAINS_QUERY, MouseStrainsQuery} from "../../graphql/mouseStrain";
+import {SamplesReactTable} from "./SamplesReactTable";
 
 interface ISamplesProps {
     samples: ISample[];
@@ -16,9 +16,10 @@ export const Samples = (props: ISamplesProps) => (
             }
 
             return (
-                <SamplesTable samples={props.samples} mouseStrains={data.mouseStrains || null}/>
+                <div>
+                    <SamplesReactTable samples={props.samples} mouseStrains={data.mouseStrains || null}/>
+                </div>
             );
         }}
     </MouseStrainsQuery>
-
 );
