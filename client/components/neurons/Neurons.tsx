@@ -231,7 +231,7 @@ export class Neurons extends React.Component<INeuronsProps, INeuronsState> {
                                     <Grid columns={3} fluid>
                                         <Grid.Row>
                                             <Grid.Column>
-                                                {totalCount >= 0 ? (totalCount > 0 ? `Showing ${start} to ${end} of ${totalCount} samples` : "It's a clean slate - create the first sample!") : ""}
+                                                {totalCount >= 0 ? (totalCount > 0 ? `Showing ${start} to ${end} of ${totalCount} neurons` : "It's a clean slate - create the first neurons!") : ""}
                                             </Grid.Column>
                                             <Grid.Column style={{textAlign: "center"}}>
                                                 <i>Click a value to edit</i>
