@@ -120,7 +120,7 @@ const UpdateCompartmentAliasesButton = (props: IUpdateCompartmentAliasesButtonPr
                                onError={(error) => toast.error(toastUpdateError(error), {autoClose: false})}>
         {(updateBrainArea) => {
             return (
-                <Button icon="cloud upload" color="green" content="Update"
+                <Button icon="check" labelPosition="right" color="green" content="Update"
                         disabled={props.aliases === props.srcAliases}
                         onClick={() => updateBrainArea({
                             variables: {

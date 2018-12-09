@@ -40,7 +40,7 @@ export class CompartmentsQuery extends Query<CompartmentsQueryResponse, {}> {
 }
 
 ///
-/// Update Brain Area (aliases)
+/// Update Compartments (aliases)
 ///
 
 export const UPDATE_COMPARTMENT_MUTATION = gql`mutation UpdateBrainArea($brainArea: BrainAreaInput) {
@@ -75,4 +75,20 @@ type UpdateCompartmentMutationResponse = {
 }
 
 export class UpdateCompartmentMutation extends Mutation<UpdateCompartmentMutationResponse, UpdateCompartmentVariables> {
+}
+
+///
+/// Sync Compartments
+///
+
+export const SYNC_COMPARTMENTS_MUTATION = gql`mutation SyncCompartments {
+    syncCompartments
+}`;
+
+
+type SyncCompartmentsMutationResponse = {
+    syncCompartments: string;
+}
+
+export class SyncCompartmentsMutation extends Mutation<SyncCompartmentsMutationResponse, {}> {
 }

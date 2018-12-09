@@ -1,13 +1,12 @@
 import * as React from "react";
-import {Container, List, Table} from "semantic-ui-react";
+import {Button, Header, List, Segment, Table} from "semantic-ui-react";
 
 import {IBrainArea} from "../../models/brainArea";
 import {CompartmentNode} from "./CompartmentNode";
 import {Compartment} from "./Compartment";
-
-export interface ICompartmentsProps {
-    compartments: IBrainArea[];
-}
+import {toast} from "react-toastify";
+import {toastCreateError, toastSyncError, toastSyncSuccess} from "../elements/Toasts";
+import {SYNC_COMPARTMENTS_MUTATION, SyncCompartmentsMutation} from "../../graphql/compartment";
 
 export interface ICompartmentNode {
     name: string;
@@ -16,9 +15,14 @@ export interface ICompartmentNode {
     compartment: IBrainArea;
 }
 
+export interface ICompartmentsProps {
+    compartments: IBrainArea[];
+}
+
 interface ICompartmentsState {
     rootNode?: ICompartmentNode;
     selectedNode?: ICompartmentNode;
+    isSyncInProgress?: boolean;
 }
 
 export class Compartments extends React.Component<ICompartmentsProps, ICompartmentsState> {
@@ -29,7 +33,8 @@ export class Compartments extends React.Component<ICompartmentsProps, ICompartme
 
         this.state = Object.assign({}, this.updateTreeState(props, {
             rootNode: null,
-            selectedNode: null
+            selectedNode: null,
+            isSyncInProgress: false
         }));
     }
 
@@ -91,17 +96,28 @@ export class Compartments extends React.Component<ICompartmentsProps, ICompartme
         this.setState(this.updateTreeState(props, this.state));
     }
 
-    public onSelect = (node: ICompartmentNode) => {
+    private onSelect = (node: ICompartmentNode) => {
         this.setState({selectedNode: node});
     };
 
-    public onToggle = (node: ICompartmentNode) => {
+    private onToggle = (node: ICompartmentNode) => {
         if (node.children) {
             node.toggled = !node.toggled;
         }
 
         this.setState({selectedNode: node});
     };
+
+
+    private onSyncCompartments(response: string) {
+        if (response) {
+            toast.error(toastSyncError(response), {autoClose: false})
+        } else {
+            toast.success(toastSyncSuccess(), {autoClose: 5000})
+        }
+
+        this.setState({isSyncInProgress: false});
+    }
 
     public render() {
         if (this.state.rootNode === null) {
@@ -110,26 +126,53 @@ export class Compartments extends React.Component<ICompartmentsProps, ICompartme
 
         // TODO Using Table due to overloaded Grid css between semantic-ui-react and react-bootstrap
         return (
-            <Container fluid>
-                <Table basic="very">
-                    <Table.Body>
-                        <Table.Row>
-                            <Table.Cell width={8} verticalAlign="top">
-                                <List>
-                                    <CompartmentNode compartmentNode={this.state.rootNode}
-                                                     selectedNode={this.state.selectedNode}
-                                                     onToggle={(node) => this.onToggle(node)}
-                                                     onSelect={(node) => this.onSelect(node)}/>
-                                </List>
-                            </Table.Cell>
-                            <Table.Cell width={8} verticalAlign="top">
-                                <Compartment
-                                    compartment={this.state.selectedNode ? this.state.selectedNode.compartment : null}/>
-                            </Table.Cell>
-                        </Table.Row>
-                    </Table.Body>
-                </Table>
-            </Container>
+            <Segment.Group fluid>
+                <Segment secondary
+                         style={{
+                             display: "flex",
+                             alignItems: "center",
+                             justifyContent: "space-between"
+                         }}>
+                    <Header content="Compartments" style={{margin: "0"}}/>
+                    <SyncCompartmentsMutation mutation={SYNC_COMPARTMENTS_MUTATION}
+                                              refetchQueries={["AppQuery"]}
+                                              onCompleted={(data) => this.onSyncCompartments(data.syncCompartments)}
+                                              onError={(error) => {
+                                                  this.setState({isSyncInProgress: false});
+                                                  toast.error(toastCreateError(error), {autoClose: false})
+                                              }}>
+                        {(syncCompartments) => (
+                            <Button content="Push to Browser" icon="cloud upload" size="tiny" color="blue"
+                                    floated="right" disabled={this.state.isSyncInProgress}
+                                    loading={this.state.isSyncInProgress}
+                                    onClick={() => {
+                                        this.setState({isSyncInProgress: true});
+                                        syncCompartments();
+                                    }}/>
+                        )}
+                    </SyncCompartmentsMutation>
+                </Segment>
+                <Segment>
+                    <Table basic="very">
+                        <Table.Body>
+                            <Table.Row>
+                                <Table.Cell width={8} verticalAlign="top">
+                                    <List>
+                                        <CompartmentNode compartmentNode={this.state.rootNode}
+                                                         selectedNode={this.state.selectedNode}
+                                                         onToggle={(node) => this.onToggle(node)}
+                                                         onSelect={(node) => this.onSelect(node)}/>
+                                    </List>
+                                </Table.Cell>
+                                <Table.Cell width={8} verticalAlign="top">
+                                    <Compartment
+                                        compartment={this.state.selectedNode ? this.state.selectedNode.compartment : null}/>
+                                </Table.Cell>
+                            </Table.Row>
+                        </Table.Body>
+                    </Table>
+                </Segment>
+            </Segment.Group>
         );
     }
 }

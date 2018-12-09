@@ -27,3 +27,15 @@ export const toastDeleteSuccess = () => {
 export const toastDeleteError = (error: Error) => {
     return (<div><h3>Delete failed</h3>{error ? error.message : "(no additional details available)"}</div>);
 };
+
+export const toastSyncSuccess = () => {
+    return (<div><h3>Sync successful</h3></div>);
+};
+
+export const toastSyncError = (error: Error | string) => {
+    if (typeof error === "string") {
+        return (<div><h3>Sync failed</h3>{error || "(no additional details available)"}</div>);
+    } else {
+        return (<div><h3>Sync failed</h3>{error ? error.message : "(no additional details available)"}</div>);
+    }
+};
