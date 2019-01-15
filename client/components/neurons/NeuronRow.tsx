@@ -111,11 +111,10 @@ export class NeuronRow extends React.Component<INeuronRowProps, {}> {
                         <Table.Cell style={{maxWidth: "120px"}}>
                             {n.doi || "(none)"}
                         </Table.Cell>
-                        <Table.Cell style={{width: "120px"}}>
-                            {count !== undefined ? (count === 0 ?
-                                <Button icon="trash" color="red" size="mini" content="delete" labelPosition="left"
-                                        onClick={() => this.props.onDeleteNeuron(n)}/> :
-                                <Label>{count}<Label.Detail>tracings</Label.Detail></Label>) : "?"
+                        <Table.Cell style={{width: "130px"}}>
+                            {count !== undefined ? (
+                                <Button icon="trash" color="red" size="mini" content={`${count} tracings`} labelPosition="left"
+                                        onClick={() => this.props.onDeleteNeuron(n)}/>) : "?"
                             }
                         </Table.Cell>
                     </Table.Row>
