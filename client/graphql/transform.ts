@@ -106,14 +106,10 @@ export class CreateTransformMutation extends Mutation<CreateTransformMutationRes
 /// Update Transform Mutation
 ///
 
-export const UPDATE_TRANSFORM_MUTATION = gql`mutation UpdateRegistrationMutation($registrationTransform: RegistrationTransformInput) {
+export const UPDATE_TRANSFORM_MUTATION = gql`mutation updateRegistrationTransform($registrationTransform: RegistrationTransformInput) {
     updateRegistrationTransform(registrationTransform: $registrationTransform) {
         registrationTransform {
-            id
-            location
-            name
-            notes
-            updatedAt
+            ...TransformFields
         }
         error {
             message

@@ -228,7 +228,7 @@ export class Neurons extends React.Component<INeuronsProps, INeuronsState> {
                                                   onDeleteNeuron={(n) => this.setState({requestedNeuronForDelete: n})}/>
                                 </Segment>
                                 <Segment secondary>
-                                    <Grid columns={3} fluid>
+                                    <Grid columns={3} fluid="true">
                                         <Grid.Row>
                                             <Grid.Column>
                                                 {totalCount >= 0 ? (totalCount > 0 ? `Showing ${start} to ${end} of ${totalCount} neurons` : "It's a clean slate - create the first neurons!") : ""}
