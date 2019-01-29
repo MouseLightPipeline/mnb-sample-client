@@ -12,7 +12,6 @@ import "react-toastify/dist/ReactToastify.min.css";
 import "rc-slider/assets/index.css";
 import "../assets/style.css";
 
-
 const rootEl = document.getElementById("root");
 
 ReactDOM.render(
