@@ -13,9 +13,13 @@ export const NEURON_BASE_FIELDS_FRAGMENT = gql`fragment NeuronBaseFields on Neur
     z
     sharing
     doi
+    brainAreaId
     createdAt
     updatedAt
 }`;
+
+// brainAreaId is used to determine whether the brain area is inherited or not.  brainAreas{} is the resolved brain are
+// (specified or inherited).
 
 const NEURON_RELATIONSHIP_FIELDS_FRAGMENT = gql`fragment NeuronRelationshipFields on Neuron {
     brainArea {
