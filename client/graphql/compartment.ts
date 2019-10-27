@@ -12,7 +12,7 @@ export const COMPARTMENT_FIELDS_FRAGMENT = gql`fragment CompartmentFields on Bra
     structureIdPath
     safeName
     acronym
-    aliases
+    aliasList
     atlasId
     graphId
     graphOrder
@@ -47,7 +47,7 @@ export const UPDATE_COMPARTMENT_MUTATION = gql`mutation UpdateBrainArea($brainAr
     updateBrainArea(brainArea: $brainArea) {
         brainArea {
             id
-            aliases
+            aliasList
             updatedAt
         }
         error {
@@ -59,7 +59,7 @@ export const UPDATE_COMPARTMENT_MUTATION = gql`mutation UpdateBrainArea($brainAr
 type UpdateCompartmentVariables = {
     brainArea: {
         id: string;
-        aliases: string[];
+        aliasList: string[];
     }
 }
 

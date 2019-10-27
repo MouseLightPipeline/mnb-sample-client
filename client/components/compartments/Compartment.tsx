@@ -20,7 +20,7 @@ export class Compartment extends React.Component<ICompartmentProps, ICompartment
     public constructor(props: ICompartmentProps) {
         super(props);
 
-        const simpleString = props.compartment.aliases.join(", ");
+        const simpleString = props.compartment.aliasList.join(", ");
 
         this.state = {
             srcAliases: simpleString,
@@ -35,7 +35,7 @@ export class Compartment extends React.Component<ICompartmentProps, ICompartment
 
     public componentWillReceiveProps(props: ICompartmentProps) {
         if (this.props.compartment !== null && this.props.compartment !== props.compartment) {
-            const simpleString = props.compartment.aliases.join(", ");
+            const simpleString = props.compartment.aliasList.join(", ");
 
             this.setState({
                 srcAliases: simpleString,
@@ -88,8 +88,8 @@ export class Compartment extends React.Component<ICompartmentProps, ICompartment
                             <List.Header>
                                 Current Aliases
                             </List.Header>
-                            {this.props.compartment.aliases.length > 0 ?
-                                <List.List as={"ul"}>{this.props.compartment.aliases.map((a, idx) => <List.Item as="li"
+                            {this.props.compartment.aliasList.length > 0 ?
+                                <List.List as={"ul"}>{this.props.compartment.aliasList.map((a, idx) => <List.Item as="li"
                                                                                                                 value="•"
                                                                                                                 style={{marginTop: "4px"}}
                                                                                                                 key={idx}>{a}</List.Item>)}</List.List> :
@@ -126,7 +126,7 @@ const UpdateCompartmentAliasesButton = (props: IUpdateCompartmentAliasesButtonPr
                             variables: {
                                 brainArea: {
                                     id: props.compartmentId,
-                                    aliases: props.aliases.length > 0 ? props.aliases.split(",").map(a => a.trim()).filter(a => a.length > 0) : null
+                                    aliasList: props.aliases.length > 0 ? props.aliases.split(",").map(a => a.trim()).filter(a => a.length > 0) : null
                                 }
                             }
                         })}>
