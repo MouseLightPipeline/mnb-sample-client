@@ -159,9 +159,7 @@ export type UpdateInjectionMutationFn = MutationFn<UpdateInjectionMutationRespon
 
 export const DELETE_INJECTION_MUTATION = gql`mutation DeleteInjection($injectionInput: InjectionInput) {
     deleteInjection(injectionInput: $injectionInput) {
-        injection {
-            id
-        }
+        id
         error {
             message
         }
@@ -175,9 +173,7 @@ type DeleteInjectionVariables = {
 }
 
 type DeleteInjectionMutationData = {
-    injection: {
-        id: string
-    };
+    iid: string,
     error: {
         message: string;
     }

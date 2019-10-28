@@ -147,9 +147,7 @@ export type UpdateSampleMutationFn = MutationFn<UpdateSampleMutationResponse, Up
 
 export const DELETE_SAMPLE_MUTATION = gql`mutation DeleteSample($sample: SampleInput) {
     deleteSample(sample: $sample) {
-        sample {
-            id
-        }
+        id
         error {
             message
         }
@@ -163,9 +161,7 @@ type DeleteSampleVariables = {
 }
 
 type DeleteSampleMutationData = {
-    sample: {
-        id: string
-    };
+    id: string,
     error: {
         message: string;
     }

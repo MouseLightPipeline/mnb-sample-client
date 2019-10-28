@@ -230,9 +230,7 @@ type DeleteNeuronVariables = {
 }
 
 type DeleteNeuronMutationData = {
-    neuron: {
-        id: string
-    };
+    id: string,
     error: {
         message: string;
     }
