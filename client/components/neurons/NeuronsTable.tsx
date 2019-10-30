@@ -20,7 +20,7 @@ export const NeuronsTable = (props: INeuronTableProps) => (
             const counts = new Map<string, number>();
 
             if (!error && data && data.tracingCountsForNeurons) {
-                data.tracingCountsForNeurons.counts.map(c => counts.set(c.neuronId, c.count));
+                data.tracingCountsForNeurons.counts.map(c => counts.set(c.id, c.count));
             }
 
             const rows = props.neurons.map(n => {

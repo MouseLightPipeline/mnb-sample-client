@@ -84,12 +84,10 @@ export class NeuronsQuery extends Query<NeuronsQueryResponse, NeuronsQueryVariab
 export const NEURON_TRACING_COUNT_QUERY = gql`query TracingForNeuronsCount($ids: [String!]) {
     tracingCountsForNeurons(ids: $ids) {
         counts {
-            neuronId
+            id
             count
         }
-        error {
-            message
-        }
+        error
     }
 }`;
 
@@ -98,15 +96,13 @@ export type NeuronTracingCountVariables = {
 }
 
 export type NeuronTracingCount = {
-    neuronId: string;
+    id: string;
     count: number;
 }
 
 type NeuronTracingCountQueryData = {
     counts: NeuronTracingCount[];
-    error: {
-        message: string;
-    }
+    error: string;
 }
 
 type NeuronTracingCountResponse = {

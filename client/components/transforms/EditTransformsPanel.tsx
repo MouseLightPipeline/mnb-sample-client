@@ -93,7 +93,7 @@ export class EditTransformsPanel extends React.Component<IEditTransformsProps, I
     private renderTransforms(transforms: IRegistrationTransform[]) {
         const tracingCounts = new Map<string, number>();
 
-        this.props.transformCounts.map(c => tracingCounts.set(c.transformId, c.count));
+        this.props.transformCounts.map(c => tracingCounts.set(c.id, c.count));
 
         const activeSampleId = this.props.sample.activeRegistrationTransform ? this.props.sample.activeRegistrationTransform.id : "";
 

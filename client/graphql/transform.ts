@@ -22,12 +22,10 @@ export const TRANSFORM_FIELDS_FRAGMENT = gql`fragment TransformFields on Registr
 export const TRANSFORM_TRACING_COUNT_QUERY = gql`query TracingCountQuery($ids: [String!]) {
     tracingCountsForRegistrations(ids: $ids) {
         counts {
-            transformId
+            id
             count
         }
-        error {
-            message
-        }
+        error
     }
 }`;
 
@@ -36,15 +34,13 @@ export type TransformTracingCountVariables = {
 }
 
 export type TransformTracingCount = {
-    transformId: string;
+    id: string;
     count: number;
 }
 
 type TransformTracingCountQueryData = {
     counts: TransformTracingCount[];
-    error: {
-        message: string;
-    }
+    error: string;
 }
 
 type TransformTracingCountResponse = {
