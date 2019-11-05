@@ -134,8 +134,8 @@ export class AddTransformPanel extends React.Component<IAddTransformProps, IAddR
 }
 
 function onTransformCreated(data: CreateTransformMutationData) {
-    if (!data.registrationTransform || data.error) {
-        toast.error(toastCreateError(data.error.message), {autoClose: false});
+    if (!data.source || data.error) {
+        toast.error(toastCreateError(data.error), {autoClose: false});
     } else {
         toast.success(toastCreateSuccess());
     }

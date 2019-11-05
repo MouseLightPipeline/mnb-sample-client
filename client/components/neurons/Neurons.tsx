@@ -183,7 +183,7 @@ export class Neurons extends React.Component<INeuronsProps, INeuronsState> {
                          confirmButton="Delete"
                          onCancel={() => this.setState({requestedNeuronForDelete: null})}
                          onConfirm={() => {
-                             deleteNeuron({variables: {neuron: {id: this.state.requestedNeuronForDelete.id}}});
+                             deleteNeuron({variables: {id: this.state.requestedNeuronForDelete.id}});
                              this.setState({requestedNeuronForDelete: null});
                          }}/>)}
         </DeleteNeuronMutation>;
@@ -252,7 +252,7 @@ export class Neurons extends React.Component<INeuronsProps, INeuronsState> {
 }
 
 function onNeuronCreated(data: CreateNeuronMutationData) {
-    if (!data.neuron || data.error) {
-        toast.error(toastCreateError(data.error.message), {autoClose: false});
+    if (!data.source || data.error) {
+        toast.error(toastCreateError(data.error), {autoClose: false});
     }
 }

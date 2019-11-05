@@ -136,13 +136,11 @@ type NeuronVariables = {
 
 export const CREATE_NEURON_MUTATION = gql`mutation CreateNeuron($neuron: NeuronInput) {
     createNeuron(neuron: $neuron) {
-        neuron {
+        source {
             ...NeuronBaseFields
             ...NeuronRelationshipFields
         }
-        error {
-            message
-        }
+        error
     }
 }
 ${NEURON_BASE_FIELDS_FRAGMENT}
@@ -154,10 +152,8 @@ type CreateNeuronVariables = {
 }
 
 export type CreateNeuronMutationData = {
-    neuron: INeuron;
-    error: {
-        message: string;
-    };
+    source: INeuron;
+    error: string;
 }
 
 type CreateNeuronMutationResponse = {
@@ -173,13 +169,11 @@ export class CreateNeuronMutation extends Mutation<CreateNeuronMutationResponse,
 
 export const UPDATE_NEURON_MUTATION = gql`mutation UpdateNeuron($neuron: NeuronInput) {
     updateNeuron(neuron: $neuron) {
-        neuron {
+        source {
             ...NeuronBaseFields
             ...NeuronRelationshipFields
         }
-        error {
-            message
-        }
+        error
     }
 }
 ${NEURON_BASE_FIELDS_FRAGMENT}
@@ -191,10 +185,8 @@ type UpdateNeuronVariables = {
 }
 
 export type UpdateNeuronMutationData = {
-    neuron: INeuron;
-    error: {
-        message: string;
-    }
+    source: INeuron;
+    error: string;
 }
 
 type UpdateNeuronMutationResponse = {
@@ -210,26 +202,20 @@ export type UpdateNeuronMutationFn = MutationFn<UpdateNeuronMutationResponse, Up
 /// Delete Neuron Mutation
 ///
 
-export const DELETE_NEURON_MUTATION = gql`mutation DeleteNeuron($neuron: NeuronInput) {
-    deleteNeuron(neuron: $neuron) {
+export const DELETE_NEURON_MUTATION = gql`mutation DeleteNeuron($id: String!) {
+    deleteNeuron(id: $id) {
         id
-        error {
-            message
-        }
+        error
     }
 }`;
 
 type DeleteNeuronVariables = {
-    neuron: {
-        id: string;
-    }
+    id: string;
 }
 
 type DeleteNeuronMutationData = {
     id: string,
-    error: {
-        message: string;
-    }
+    error: string;
 }
 
 type DeleteNeuronMutationResponse = {

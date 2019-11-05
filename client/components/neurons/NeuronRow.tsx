@@ -125,7 +125,7 @@ export class NeuronRow extends React.Component<INeuronRowProps, {}> {
 }
 
 function onNeuronUpdated(data: UpdateNeuronMutationData) {
-    if (!data.neuron || data.error) {
-        toast.error(toastCreateError(data.error.message), {autoClose: false});
+    if (!data.source || data.error) {
+        toast.error(toastCreateError(data.error), {autoClose: false});
     }
 }

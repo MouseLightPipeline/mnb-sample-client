@@ -3,8 +3,13 @@ import {List, Form, Button} from "semantic-ui-react";
 import {toast} from "react-toastify";
 
 import {IBrainArea} from "../../models/brainArea";
-import {toastUpdateError, toastUpdateSuccess} from "../elements/Toasts";
-import {UPDATE_COMPARTMENT_MUTATION, UpdateCompartmentMutation} from "../../graphql/compartment";
+import {toastCreateError, toastUpdateError, toastUpdateSuccess} from "../elements/Toasts";
+import {
+    UPDATE_COMPARTMENT_MUTATION,
+    UpdateCompartmentMutation,
+    UpdateCompartmentMutationData
+} from "../../graphql/compartment";
+import {UpdateSampleMutationData} from "../../graphql/sample";
 
 interface ICompartmentProps {
     compartment: IBrainArea;
@@ -89,10 +94,11 @@ export class Compartment extends React.Component<ICompartmentProps, ICompartment
                                 Current Aliases
                             </List.Header>
                             {this.props.compartment.aliasList.length > 0 ?
-                                <List.List as={"ul"}>{this.props.compartment.aliasList.map((a, idx) => <List.Item as="li"
-                                                                                                                value="•"
-                                                                                                                style={{marginTop: "4px"}}
-                                                                                                                key={idx}>{a}</List.Item>)}</List.List> :
+                                <List.List as={"ul"}>{this.props.compartment.aliasList.map((a, idx) => <List.Item
+                                    as="li"
+                                    value="•"
+                                    style={{marginTop: "4px"}}
+                                    key={idx}>{a}</List.Item>)}</List.List> :
                                 <List.Description>(none)</List.Description>}
                         </List.Content>
                     </List.Item>
@@ -116,7 +122,7 @@ interface IUpdateCompartmentAliasesButtonProps {
 
 const UpdateCompartmentAliasesButton = (props: IUpdateCompartmentAliasesButtonProps) => (
     <UpdateCompartmentMutation mutation={UPDATE_COMPARTMENT_MUTATION}
-                               onCompleted={() => toast.success(toastUpdateSuccess(), {autoClose: 3000})}
+                               onCompleted={(data) => onCompartmentUpdated(data.updateBrainArea)}
                                onError={(error) => toast.error(toastUpdateError(error), {autoClose: false})}>
         {(updateBrainArea) => {
             return (
@@ -135,3 +141,12 @@ const UpdateCompartmentAliasesButton = (props: IUpdateCompartmentAliasesButtonPr
         }}
     </UpdateCompartmentMutation>
 );
+
+
+function onCompartmentUpdated(data: UpdateCompartmentMutationData) {
+    if (!data.source || data.error) {
+        toast.error(toastCreateError(data.error), {autoClose: false});
+    } else {
+        toast.success(toastUpdateSuccess(), {autoClose: 3000});
+    }
+}

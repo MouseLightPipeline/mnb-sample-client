@@ -75,12 +75,10 @@ type SampleVariables = {
 
 export const CREATE_SAMPLE_MUTATION = gql`mutation CreateSample($sample: SampleInput) {
     createSample(sample: $sample) {
-        sample {
+        source {
            ...SampleFields
         }
-        error {
-            message
-        }
+        error 
     }
 }
 ${SAMPLE_FIELDS_FRAGMENT}
@@ -91,10 +89,8 @@ type CreateSampleVariables = {
 }
 
 export type CreateSampleMutationData = {
-    sample: ISample;
-    error: {
-        message: string;
-    };
+    source: ISample;
+    error: string;
 }
 
 type CreateSampleMutationResponse = {
@@ -110,12 +106,10 @@ export class CreateSampleMutation extends Mutation<CreateSampleMutationResponse,
 
 export const UPDATE_SAMPLE_MUTATION = gql`mutation UpdateSample($sample: SampleInput) {
     updateSample(sample: $sample) {
-        sample {
+        source {
             ...SampleFields
         }
-        error {
-            message
-        }
+        error
     }
 }
 ${SAMPLE_FIELDS_FRAGMENT}
@@ -126,10 +120,8 @@ type UpdateSampleVariables = {
 }
 
 export type UpdateSampleMutationData = {
-    sample: ISample;
-    error: {
-        message: string;
-    }
+    source: ISample;
+    error: string;
 }
 
 type UpdateSampleMutationResponse = {
@@ -145,26 +137,20 @@ export type UpdateSampleMutationFn = MutationFn<UpdateSampleMutationResponse, Up
 /// Delete Sample Mutation
 ///
 
-export const DELETE_SAMPLE_MUTATION = gql`mutation DeleteSample($sample: SampleInput) {
-    deleteSample(sample: $sample) {
+export const DELETE_SAMPLE_MUTATION = gql`mutation DeleteSample($id: String!) {
+    deleteSample(id: $id) {
         id
-        error {
-            message
-        }
+        error
     }
 }`;
 
 type DeleteSampleVariables = {
-    sample: {
-        id: string;
-    }
+    id: string;
 }
 
 type DeleteSampleMutationData = {
     id: string,
-    error: {
-        message: string;
-    }
+    error: string;
 }
 
 type DeleteSampleMutationResponse = {

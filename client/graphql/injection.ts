@@ -86,12 +86,10 @@ export type InjectionVariables = {
 
 export const CREATE_INJECTION_MUTATION = gql`mutation CreateInjection($injectionInput: InjectionInput) {
     createInjection(injectionInput: $injectionInput) {
-        injection {
+        source {
             ...InjectionFields
         }
-        error {
-            message
-        }
+        error
     }
 }
 ${INJECTION_FIELDS_FRAGMENT}
@@ -102,10 +100,8 @@ type CreateInjectionVariables = {
 }
 
 export type CreateInjectionMutationData = {
-    injection: IInjection;
-    error: {
-        message: string;
-    };
+    source: IInjection;
+    error: string;
 }
 
 type CreateInjectionMutationResponse = {
@@ -121,12 +117,10 @@ export class CreateInjectionMutation extends Mutation<CreateInjectionMutationRes
 
 export const UPDATE_INJECTION_MUTATION = gql`mutation UpdateInjection($injectionInput: InjectionInput) {
     updateInjection(injectionInput: $injectionInput) {
-        injection {
+        source {
             ...InjectionFields
         }
-        error {
-            message
-        }
+        error
     }
 }
 ${INJECTION_FIELDS_FRAGMENT}
@@ -137,10 +131,8 @@ type UpdateInjectionVariables = {
 }
 
 export type UpdateInjectionMutationData = {
-    injection: IInjection;
-    error: {
-        message: string;
-    }
+    source: IInjection;
+    error: string;
 }
 
 type UpdateInjectionMutationResponse = {
@@ -157,26 +149,20 @@ export type UpdateInjectionMutationFn = MutationFn<UpdateInjectionMutationRespon
 /// Delete Injection Mutation
 ///
 
-export const DELETE_INJECTION_MUTATION = gql`mutation DeleteInjection($injectionInput: InjectionInput) {
-    deleteInjection(injectionInput: $injectionInput) {
+export const DELETE_INJECTION_MUTATION = gql`mutation DeleteInjection($id: String!) {
+    deleteInjection(id: $id) {
         id
-        error {
-            message
-        }
+        error
     }
 }`;
 
 type DeleteInjectionVariables = {
-    injectionInput: {
-        id: string;
-    }
+    id: string;
 }
 
 type DeleteInjectionMutationData = {
-    iid: string,
-    error: {
-        message: string;
-    }
+    id: string,
+    error: string;
 }
 
 type DeleteInjectionMutationResponse = {

@@ -76,8 +76,8 @@ export class AddInjectionPanel extends React.Component<IAddInjectionProps, IAddI
     }
 
     public onInjectionCreated(data: CreateInjectionMutationData) {
-        if (!data.injection || data.error) {
-            toast.error(toastCreateError(data.error.message), {autoClose: false});
+        if (!data.source || data.error) {
+            toast.error(toastCreateError(data.error), {autoClose: false});
         } else {
             this.props.refetch();
             toast.success(toastCreateSuccess());

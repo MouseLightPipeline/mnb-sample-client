@@ -68,12 +68,10 @@ export type TransformVariables = {
 
 export const CREATE_TRANSFORM_MUTATION = gql`mutation CreateTransform($registrationTransform: RegistrationTransformInput, $makeActive: Boolean) {
     createRegistrationTransform(registrationTransform: $registrationTransform, makeActive: $makeActive) {
-        registrationTransform {
+        source {
             ...TransformFields
         }
-        error {
-            message
-        }
+        error 
     }
 }
 ${TRANSFORM_FIELDS_FRAGMENT}
@@ -85,10 +83,8 @@ type CreateTransformVariables = {
 }
 
 export type CreateTransformMutationData = {
-    registrationTransform: IRegistrationTransform;
-    error: {
-        message: string;
-    };
+    source: IRegistrationTransform;
+    error: string;
 }
 
 type CreateTransformMutationResponse = {
@@ -104,12 +100,10 @@ export class CreateTransformMutation extends Mutation<CreateTransformMutationRes
 
 export const UPDATE_TRANSFORM_MUTATION = gql`mutation updateRegistrationTransform($registrationTransform: RegistrationTransformInput) {
     updateRegistrationTransform(registrationTransform: $registrationTransform) {
-        registrationTransform {
+        source {
             ...TransformFields
         }
-        error {
-            message
-        }
+        error
     }
 }
 ${TRANSFORM_FIELDS_FRAGMENT}
@@ -120,10 +114,8 @@ type UpdateTransformVariables = {
 }
 
 export type UpdateTransformMutationData = {
-    registrationTransform: IRegistrationTransform;
-    error: {
-        message: string;
-    }
+    source: IRegistrationTransform;
+    error: string;
 }
 
 type UpdateTransformMutationResponse = {
@@ -139,14 +131,10 @@ export type UpdateTransformMutationFn = MutationFn<UpdateTransformMutationRespon
 /// Delete Transform Mutation
 ///
 
-export const DELETE_TRANSFORM_MUTATION = gql`mutation DeleteRegistrationTransform($registrationTransform: RegistrationTransformInput) {
-    deleteRegistrationTransform(registrationTransform: $registrationTransform) {
-        registrationTransform {
-            id
-        }
-        error {
-            message
-        }
+export const DELETE_TRANSFORM_MUTATION = gql`mutation DeleteRegistrationTransform($id: String!) {
+    deleteRegistrationTransform(id: $id) {
+        id
+        error
     }
 }`;
 
@@ -157,12 +145,8 @@ type DeleteTransformVariables = {
 }
 
 type DeleteTransformMutationData = {
-    registrationTransform: {
-        id: string
-    };
-    error: {
-        message: string;
-    }
+    id: string
+    error: string;
 }
 
 type DeleteTransformMutationResponse = {

@@ -27,8 +27,8 @@ import {
 } from "../../graphql/injection";
 
 function onInjectionUpdated(data: UpdateInjectionMutationData) {
-    if (!data.injection || data.error) {
-        toast.error(toastCreateError(data.error.message), {autoClose: false});
+    if (!data.source || data.error) {
+        toast.error(toastCreateError(data.error), {autoClose: false});
     }
 }
 
@@ -96,7 +96,7 @@ export class EditInjectionsPanel extends React.Component<IEditInjectionsPanelPro
                              content={`Are you sure you want to delete the injection for ${this.state.injectionToDelete.brainArea.name}?`}
                              confirmButton="Delete" onCancel={() => this.onClearDeleteConfirmation()}
                              onConfirm={() => {
-                                 deleteInjection({variables: {injectionInput: {id: this.state.injectionToDelete.id}}})
+                                 deleteInjection({variables: {id: this.state.injectionToDelete.id}})
                              }}/>
                 )}
             </DeleteInjectionMutation>

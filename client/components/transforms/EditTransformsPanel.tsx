@@ -240,14 +240,14 @@ async function onAcceptNotesEdit(transform: IRegistrationTransform, value: strin
 }
 
 function onTransformUpdated(data: UpdateTransformMutationData) {
-    if (!data.registrationTransform || data.error) {
-        toast.error(toastCreateError(data.error.message), {autoClose: false});
+    if (!data.source || data.error) {
+        toast.error(toastCreateError(data.error), {autoClose: false});
     }
 }
 
 function onSampleUpdated(data: UpdateSampleMutationData) {
-    if (!data.sample || data.error) {
-        toast.error(toastCreateError(data.error.message), {autoClose: false});
+    if (!data.source || data.error) {
+        toast.error(toastCreateError(data.error), {autoClose: false});
     } else {
 
     }

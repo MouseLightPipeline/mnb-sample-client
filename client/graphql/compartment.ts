@@ -50,9 +50,7 @@ export const UPDATE_COMPARTMENT_MUTATION = gql`mutation UpdateBrainArea($brainAr
             aliasList
             updatedAt
         }
-        error {
-            message
-        }
+        error
     }
 }`;
 
@@ -63,11 +61,9 @@ type UpdateCompartmentVariables = {
     }
 }
 
-type UpdateCompartmentMutationData = {
-    brainArea: IBrainArea;
-    error: {
-        message: string;
-    }
+export type UpdateCompartmentMutationData = {
+    source: IBrainArea;
+    error: string;
 }
 
 type UpdateCompartmentMutationResponse = {

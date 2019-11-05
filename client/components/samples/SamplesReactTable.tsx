@@ -150,7 +150,7 @@ export class SamplesReactTable extends React.Component<ISamplesProps, ISamplesSt
                          confirmButton="Delete"
                          onCancel={() => this.setState({requestedSampleForDelete: null})}
                          onConfirm={() => {
-                             deleteSample({variables: {sample: {id: this.state.requestedSampleForDelete.id}}});
+                             deleteSample({variables: {id: this.state.requestedSampleForDelete.id}});
                              this.setState({requestedSampleForDelete: null});
                          }}/>)}
         </DeleteSampleMutation>;
@@ -396,13 +396,13 @@ export class SamplesReactTable extends React.Component<ISamplesProps, ISamplesSt
 }
 
 function onSampleCreated(data: CreateSampleMutationData) {
-    if (!data.sample || data.error) {
-        toast.error(toastCreateError(data.error.message), {autoClose: false});
+    if (!data.source || data.error) {
+        toast.error(toastCreateError(data.error), {autoClose: false});
     }
 }
 
 function onSampleUpdated(data: UpdateSampleMutationData) {
-    if (!data.sample || data.error) {
-        toast.error(toastCreateError(data.error.message), {autoClose: false});
+    if (!data.source || data.error) {
+        toast.error(toastCreateError(data.error), {autoClose: false});
     }
 }
