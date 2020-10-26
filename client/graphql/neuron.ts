@@ -1,6 +1,7 @@
 import gql from "graphql-tag";
 import {Mutation, MutationFn, Query} from "react-apollo";
 import {INeuron} from "../models/neuron";
+import {ConsensusStatus} from "../models/consensusStatus";
 
 export const NEURON_BASE_FIELDS_FRAGMENT = gql`fragment NeuronBaseFields on Neuron {
     id
@@ -13,6 +14,7 @@ export const NEURON_BASE_FIELDS_FRAGMENT = gql`fragment NeuronBaseFields on Neur
     z
     sharing
     doi
+    consensus
     brainAreaId
     createdAt
     updatedAt
@@ -126,6 +128,7 @@ type NeuronVariables = {
     y?: number;
     z?: number;
     sharing?: number;
+    consensus?: ConsensusStatus;
     injectionId?: string;
     brainAreaId?: string;
 }

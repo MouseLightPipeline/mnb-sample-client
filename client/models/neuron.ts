@@ -1,6 +1,7 @@
 import {IInjection} from "./injection";
 import {displayBrainArea, IBrainArea} from "./brainArea";
 import {isNullOrUndefined} from "../util/nodeUtil";
+import {ConsensusStatus} from "./consensusStatus";
 
 export interface INeuron {
     id: string;
@@ -13,6 +14,7 @@ export interface INeuron {
     z: number;
     sharing: number;
     doi: string;
+    consensus: ConsensusStatus;
     injection: IInjection;
     brainArea: IBrainArea;
     createdAt: number;

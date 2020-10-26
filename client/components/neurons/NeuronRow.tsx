@@ -18,6 +18,7 @@ import {
     UpdateNeuronMutationFn
 } from "../../graphql/neuron";
 import {InputPopup} from "../editors/InputPopup";
+import {ConsensusStatus, ConsensusStatusOptions, FindConsensusStatusOption} from "../../models/consensusStatus";
 
 interface INeuronRowProps {
     neuron: INeuron;
@@ -41,6 +42,12 @@ export class NeuronRow extends React.Component<INeuronRowProps, {}> {
     private async onAcceptVisibility(value: ShareVisibility, updateFn: UpdateNeuronMutationFn) {
         if (value !== this.props.neuron.sharing) {
             await updateFn({variables: {neuron: {id: this.props.neuron.id, sharing: value}}});
+        }
+    }
+
+    private async onAcceptConsensusStatus(value: ConsensusStatus, updateFn: UpdateNeuronMutationFn) {
+        if (value !== this.props.neuron.consensus) {
+            await updateFn({variables: {neuron: {id: this.props.neuron.id, consensus: value}}});
         }
     }
 
@@ -107,6 +114,11 @@ export class NeuronRow extends React.Component<INeuronRowProps, {}> {
                             <Dropdown search fluid inline options={NeuronVisibilityOptions}
                                       value={FindVisibilityOption(n.sharing).value}
                                       onChange={(e, {value}) => this.onAcceptVisibility(value as ShareVisibility, updateNeuron)}/>
+                        </Table.Cell>
+                        <Table.Cell style={{width: "110px"}}>
+                            <Dropdown search fluid inline options={ConsensusStatusOptions}
+                                      value={FindConsensusStatusOption(n.consensus).value}
+                                      onChange={(e, {value}) => this.onAcceptConsensusStatus(value as ConsensusStatus, updateNeuron)}/>
                         </Table.Cell>
                         <Table.Cell style={{maxWidth: "120px"}}>
                             {n.doi || "(none)"}

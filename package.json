@@ -8,7 +8,7 @@
   "dockerRepository": "mouselightdatabrowser",
   "dockerImageName": "sample-client",
   "scripts": {
-    "debug": "DEBUG=mnb* node $NODE_DEBUG_OPTION server/app.js",
+    "debug": "node server/app.js",
     "express": "DEBUG=mnb* node $NODE_DEBUG_OPTION dist/app.js",
     "docker-build": "gulp docker-build",
     "docker-release": "gulp release"
