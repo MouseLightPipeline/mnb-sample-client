@@ -1,6 +1,7 @@
-export interface IMouseStrain {
+import {INamedModel} from "./namedModel";
+
+export interface IMouseStrain extends INamedModel {
     id: string;
-    name: string;
     createdAt?: number;
     updatedAt?: number;
 }

@@ -98,7 +98,7 @@ export class AddInjectionPanel extends React.Component<IAddInjectionProps, IAddI
                     </Form.Field>
                     <Form.Field>
                         <label>Virus</label>
-                        <VirusAutoSuggest items={this.props.injectionViruses} displayProperty="name"
+                        <VirusAutoSuggest items={this.props.injectionViruses}
                                           placeholder="select or name a new virus"
                                           initialValue={this.state.injection.injectionVirusName}
                                           isDeferredEditMode={false}
@@ -107,7 +107,7 @@ export class AddInjectionPanel extends React.Component<IAddInjectionProps, IAddI
                     </Form.Field>
                     <Form.Field>
                         <label>Fluorophore</label>
-                        <FluorophoreAutoSuggest items={this.props.fluorophores} displayProperty="name"
+                        <FluorophoreAutoSuggest items={this.props.fluorophores}
                                                 placeholder="select or name a new fluorophore"
                                                 initialValue={this.state.injection.fluorophoreName}
                                                 isDeferredEditMode={false}

@@ -115,14 +115,14 @@ export class EditInjectionsPanel extends React.Component<IEditInjectionsPanelPro
                                                    onBrainAreaChange={(brainArea: IBrainArea) => onAcceptBrainArea(t, brainArea, updateInjection)}/>
                             </Table.Cell>
                             <Table.Cell>
-                                <VirusAutoSuggest items={this.props.injectionViruses} displayProperty="name"
+                                <VirusAutoSuggest items={this.props.injectionViruses}
                                                   placeholder="select or name a new virus"
                                                   initialValue={t.injectionVirus.name}
                                                   isDeferredEditMode={true}
                                                   onChange={(v: string) => onVirusChanged(t, v, updateInjection)}/>
                             </Table.Cell>
                             <Table.Cell>
-                                <FluorophoreAutoSuggest items={this.props.fluorophores} displayProperty="name"
+                                <FluorophoreAutoSuggest items={this.props.fluorophores}
                                                         placeholder="select or name a new fluorophore"
                                                         initialValue={t.fluorophore.name}
                                                         isDeferredEditMode={true}

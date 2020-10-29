@@ -238,7 +238,7 @@ export class SamplesReactTable extends React.Component<ISamplesProps, ISamplesSt
                         accessor: "mouseStrain",
                         width: 120,
                         Cell: (row: any) => (
-                            <AutoSuggestPopup<IMouseStrain> items={this.props.mouseStrains} displayProperty="name"
+                            <AutoSuggestPopup<IMouseStrain> items={this.props.mouseStrains}
                                                             header={`Sample ${row.original.idNumber} Mouse Strain`}
                                                             placeholder="select or name a mouse strain"
                                                             value={row.value ? row.value.name : ""}

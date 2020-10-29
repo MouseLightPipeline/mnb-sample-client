@@ -1,4 +1,5 @@
-export interface IInjectionVirus {
+import {INamedModel} from "./namedModel";
+
+export interface IInjectionVirus extends INamedModel {
     id: string;
-    name: string;
 }

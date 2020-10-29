@@ -1,16 +1,16 @@
 import * as React from "react";
 import Autosuggest = require("react-autosuggest");
 import {Button, Label} from "semantic-ui-react";
+import {INamedModel} from "../../models/namedModel";
 
 export enum DynamicAutoSuggestMode {
     Static,
     Edit
 }
 
-export interface IObjectAutoSuggestProps<T> {
+export interface IObjectAutoSuggestProps<T extends INamedModel> {
     items: T[];
     placeholder: string;
-    displayProperty: string;
     initialValue: string;
     isDeferredEditMode?: boolean;
     isEditOnly?: boolean;
@@ -19,14 +19,14 @@ export interface IObjectAutoSuggestProps<T> {
     onChange?(value: string): void;
 }
 
-export interface IObjectAutoSuggestState<T> {
+export interface IObjectAutoSuggestState<T extends INamedModel> {
     suggestions: T[];
     initialPropValue?: any;
     value?: string;
     mode?: DynamicAutoSuggestMode;
 }
 
-export class DynamicAutoSuggest<T extends any> extends React.Component<IObjectAutoSuggestProps<T>, IObjectAutoSuggestState<T>> {
+export class DynamicAutoSuggest<T extends INamedModel> extends React.Component<IObjectAutoSuggestProps<T>, IObjectAutoSuggestState<T>> {
     constructor(props: any) {
         super(props);
 
@@ -83,7 +83,7 @@ export class DynamicAutoSuggest<T extends any> extends React.Component<IObjectAu
         const inputLength = inputValue.length;
 
         return inputLength === 0 ? [] : this.props.items.filter(item => {
-                return item[this.props.displayProperty].toLowerCase().indexOf(inputValue) > -1;
+                return item.name.toLowerCase().indexOf(inputValue) > -1;
             }
         );
     }
@@ -142,7 +142,7 @@ export class DynamicAutoSuggest<T extends any> extends React.Component<IObjectAu
     private renderSuggestion(suggestion: T) {
         return (
             <div>
-                {suggestion[this.props.displayProperty]}
+                {suggestion?.name}
             </div>
         );
     }
@@ -163,7 +163,7 @@ export class DynamicAutoSuggest<T extends any> extends React.Component<IObjectAu
     }
 
     private getSuggestionValue(suggestion: T) {
-        return suggestion ? suggestion[this.props.displayProperty] : "";
+        return suggestion?.name ?? "";
     }
 
 

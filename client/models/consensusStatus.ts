@@ -1,10 +1,10 @@
 export enum ConsensusStatus {
-    None,
+    Full,
+    Partial,
+    Single,
     Pending,
-    Limited,
-    Full
+    None
 }
-
 export interface IConsensusStatusOption {
     key: ConsensusStatus;
     value: ConsensusStatus;
@@ -13,27 +13,29 @@ export interface IConsensusStatusOption {
 
 export const ConsensusStatusOptions: IConsensusStatusOption[] = [
     {
-        key: ConsensusStatus.None,
-        value: ConsensusStatus.None,
-        text: "No"
-    },
-    {
         key: ConsensusStatus.Full,
         value: ConsensusStatus.Full,
-        text: "Yes"
+        text: "Full"
+    },
+    {
+        key: ConsensusStatus.Single,
+        value: ConsensusStatus.Single,
+        text: "Single"
     }
 ];
 
 export function FindConsensusStatusOption(id: number): IConsensusStatusOption {
     switch (id) {
+        case ConsensusStatus.Full:
+            return ConsensusStatusOptions[0];
+        case ConsensusStatus.Partial:
+            return ConsensusStatusOptions[0];
+        case ConsensusStatus.Single:
+            return ConsensusStatusOptions[1];
+        case ConsensusStatus.Pending:
+            return ConsensusStatusOptions[0];
         case ConsensusStatus.None:
             return ConsensusStatusOptions[0];
-        case ConsensusStatus.Pending:
-            return ConsensusStatusOptions[2];
-        case ConsensusStatus.Limited:
-            return ConsensusStatusOptions[3];
-        case ConsensusStatus.Full:
-            return ConsensusStatusOptions[1];
     }
 
     return ConsensusStatusOptions[0];

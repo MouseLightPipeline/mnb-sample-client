@@ -1,25 +1,25 @@
 import * as React from "react";
 import Autosuggest = require("react-autosuggest");
 import {Button, Label, Popup} from "semantic-ui-react";
+import {INamedModel} from "../../models/namedModel";
 
-export interface IObjectAutoSuggestProps<T> {
+export interface IObjectAutoSuggestProps<T extends INamedModel> {
     items: T[];
     header?: string;
     placeholder: string;
     value: string;
-    displayProperty: string;
     placeHolder?: string;
 
     onChange?(value: string): void;
 }
 
-export interface IObjectAutoSuggestState<T> {
+export interface IObjectAutoSuggestState<T extends INamedModel> {
     suggestions: T[];
     value?: string;
     isOpen?: boolean;
 }
 
-export class AutoSuggestPopup<T extends any> extends React.Component<IObjectAutoSuggestProps<T>, IObjectAutoSuggestState<T>> {
+export class AutoSuggestPopup<T extends INamedModel> extends React.Component<IObjectAutoSuggestProps<T>, IObjectAutoSuggestState<T>> {
     constructor(props: any) {
         super(props);
 
@@ -52,7 +52,7 @@ export class AutoSuggestPopup<T extends any> extends React.Component<IObjectAuto
         const inputLength = inputValue.length;
 
         return inputLength === 0 ? [] : this.props.items.filter(item => {
-                return item[this.props.displayProperty].toLowerCase().indexOf(inputValue) > -1;
+                return item.name.toLowerCase().indexOf(inputValue) > -1;
             }
         );
     }
@@ -88,7 +88,7 @@ export class AutoSuggestPopup<T extends any> extends React.Component<IObjectAuto
     private renderSuggestion(suggestion: T) {
         return (
             <div>
-                {suggestion[this.props.displayProperty]}
+                {suggestion?.name}
             </div>
         );
     }
@@ -109,7 +109,7 @@ export class AutoSuggestPopup<T extends any> extends React.Component<IObjectAuto
     }
 
     private getSuggestionValue(suggestion: T) {
-        return suggestion ? suggestion[this.props.displayProperty] : "";
+        return suggestion?.name ?? "";
     }
 
 
