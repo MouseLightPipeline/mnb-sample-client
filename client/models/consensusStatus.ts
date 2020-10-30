@@ -5,6 +5,7 @@ export enum ConsensusStatus {
     Pending,
     None
 }
+
 export interface IConsensusStatusOption {
     key: ConsensusStatus;
     value: ConsensusStatus;
