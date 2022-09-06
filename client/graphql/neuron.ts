@@ -3,22 +3,6 @@ import {Mutation, MutationFn, Query} from "react-apollo";
 import {INeuron} from "../models/neuron";
 import {ConsensusStatus} from "../models/consensusStatus";
 
-export const NEURON_BASE_FIELDS_FRAGMENT = gql`fragment NeuronBaseFields on Neuron {
-    id
-    idNumber
-    idString
-    tag
-    keywords
-    x
-    y
-    z
-    sharing
-    doi
-    consensus
-    brainAreaId
-    createdAt
-    updatedAt
-}`;
 
 // brainAreaId is used to determine whether the brain area is inherited or not.  brainAreas{} is the resolved brain are
 // (specified or inherited).
@@ -40,6 +24,24 @@ const NEURON_RELATIONSHIP_FIELDS_FRAGMENT = gql`fragment NeuronRelationshipField
             sampleDate
         }
     }
+}`;
+
+export const NEURON_BASE_FIELDS_FRAGMENT = gql`fragment NeuronBaseFields on Neuron {
+    id
+    idNumber
+    idString
+    tag
+    keywords
+    x
+    y
+    z
+    sharing
+    doi
+    consensus
+    annotationMetadata
+    brainAreaId
+    createdAt
+    updatedAt
 }`;
 
 ///
@@ -226,4 +228,33 @@ type DeleteNeuronMutationResponse = {
 }
 
 export class DeleteNeuronMutation extends Mutation<DeleteNeuronMutationResponse, DeleteNeuronVariables> {
+}
+
+//
+// Upload Neuron Annotation Metadata Mutation
+//
+
+export const UPLOAD_NEURON_ANNOTATION_METADATA_MUTATION = gql`
+    mutation uploadAnnotationMetadata($neuronId: String, $file: Upload) {
+        uploadAnnotationMetadata(neuronId: $neuronId,file: $file) {
+            annotationMetadata
+            error
+        }
+    }`;
+
+type UploadAnnotationMetadataVariables = {
+    neuronId: string;
+    file: File
+}
+
+export type UploadAnnotationMetadataMutationData = {
+    annotationMetadata: string
+    error: string
+}
+
+export type UploadAnnotationMetadataResponse = {
+    uploadAnnotationMetadata: UploadAnnotationMetadataMutationData;
+}
+
+export class UploadNeuronAnnotationMetadataMutation extends Mutation<UploadAnnotationMetadataResponse, UploadAnnotationMetadataVariables> {
 }

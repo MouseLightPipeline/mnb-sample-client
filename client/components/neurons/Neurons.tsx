@@ -17,6 +17,7 @@ import {displaySample, ISample} from "../../models/sample";
 import {IInjection} from "../../models/injection";
 import {NeuronsTable} from "./NeuronsTable";
 import {displayNeuron, INeuron} from "../../models/neuron";
+import {ManageAnnotation} from "./ManageAnnotation";
 
 interface INeuronsProps {
     samples: ISample[];
@@ -29,6 +30,7 @@ interface INeuronsState {
     isSampleLocked?: boolean;
     injection: IInjection;
     requestedNeuronForDelete?: INeuron;
+    requestedNeuronForAnnotations?: INeuron;
 }
 
 export class Neurons extends React.Component<INeuronsProps, INeuronsState> {
@@ -169,6 +171,17 @@ export class Neurons extends React.Component<INeuronsProps, INeuronsState> {
         );
     }
 
+    private renderManageAnnotationsModel(refetch: () => void) {
+        if (!this.state.requestedNeuronForAnnotations) {
+            return null;
+        }
+
+        return <ManageAnnotation show={true} neuron={this.state.requestedNeuronForAnnotations} onClose={() => {
+            this.setState({requestedNeuronForAnnotations: null});
+            refetch();
+        }}/>
+    }
+
     private renderDeleteConfirmationModal() {
         if (!this.state.requestedNeuronForDelete) {
             return null;
@@ -182,8 +195,8 @@ export class Neurons extends React.Component<INeuronsProps, INeuronsState> {
                          content={`Are you sure you want to delete the neuron ${displayNeuron(this.state.requestedNeuronForDelete)}?`}
                          confirmButton="Delete"
                          onCancel={() => this.setState({requestedNeuronForDelete: null})}
-                         onConfirm={() => {
-                             deleteNeuron({variables: {id: this.state.requestedNeuronForDelete.id}});
+                         onConfirm={async () => {
+                             await deleteNeuron({variables: {id: this.state.requestedNeuronForDelete.id}});
                              this.setState({requestedNeuronForDelete: null});
                          }}/>)}
         </DeleteNeuronMutation>;
@@ -193,7 +206,7 @@ export class Neurons extends React.Component<INeuronsProps, INeuronsState> {
         return (
             <NeuronsQuery query={NEURONS_QUERY} pollInterval={10000}
                           variables={{input: {offset: this.state.offset, limit: this.state.limit, sortOrder: "DESC"}}}>
-                {({loading, error, data}) => {
+                {({loading, error, data, refetch}) => {
                     const totalCount = data.neurons ? data.neurons.totalCount : 0;
 
                     const pageCount = Math.ceil(totalCount / this.state.limit);
@@ -206,6 +219,7 @@ export class Neurons extends React.Component<INeuronsProps, INeuronsState> {
                     return (
                         <div>
                             {this.renderDeleteConfirmationModal()}
+                            {this.renderManageAnnotationsModel(refetch)}
                             <Segment.Group>
                                 <Segment secondary style={{
                                     display: "flex",
@@ -225,7 +239,8 @@ export class Neurons extends React.Component<INeuronsProps, INeuronsState> {
                                     <NeuronsTable neurons={data.neurons ? data.neurons.items : []}
                                                   pageCount={pageCount}
                                                   activePage={activePage}
-                                                  onDeleteNeuron={(n) => this.setState({requestedNeuronForDelete: n})}/>
+                                                  onDeleteNeuron={(n) => this.setState({requestedNeuronForDelete: n})}
+                                                  onManageNeuronAnnotations={(n) => this.setState({requestedNeuronForAnnotations: n})}/>
                                 </Segment>
                                 <Segment secondary>
                                     <Grid columns={3}>

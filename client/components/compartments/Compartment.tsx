@@ -9,7 +9,6 @@ import {
     UpdateCompartmentMutation,
     UpdateCompartmentMutationData
 } from "../../graphql/compartment";
-import {UpdateSampleMutationData} from "../../graphql/sample";
 
 interface ICompartmentProps {
     compartment: IBrainArea;

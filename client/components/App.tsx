@@ -100,6 +100,8 @@ export const App = () => (
 // actual BrainArea object around with the select.  See filterOption function for brain area Select control, primarily.
 const BrainAreaMap = new Map<string, IBrainArea>();
 
+const AllenIdBrainAreaMap = new Map<number, IBrainArea>();
+
 export let BrainAreas: IBrainArea[] = [];
 
 function makeBrainAreaMap(brainAreas: IBrainArea[]): boolean {
@@ -118,9 +120,16 @@ function makeBrainAreaMap(brainAreas: IBrainArea[]): boolean {
 
     brainAreas.map(b => BrainAreaMap.set(b.id, b));
 
+    brainAreas.map(b => AllenIdBrainAreaMap.set(b.structureId, b));
+
     return true;
 }
 
 export function lookupBrainArea(id: string): IBrainArea {
     return BrainAreaMap.get(id);
 }
+
+export function lookupBrainAreaByAllenId(id: number): IBrainArea {
+    return AllenIdBrainAreaMap.get(id);
+}
+

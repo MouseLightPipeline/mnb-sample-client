@@ -15,6 +15,7 @@ export interface INeuron {
     sharing: number;
     doi: string;
     consensus: ConsensusStatus;
+    annotationMetadata?: string;
     injection: IInjection;
     brainArea: IBrainArea;
     createdAt: number;
@@ -26,6 +27,18 @@ export interface IParseSomaResult {
     y: number;
     z: number;
     error: string;
+}
+
+export interface IManualAnnotations {
+    somaCompartmentId: number;
+}
+
+export interface IAnnotationMetadata {
+    manualAnnotations: IManualAnnotations;
+}
+
+export interface IParsedAnnotationMetadata {
+    somaCompartmentId: number;
 }
 
 export function displayNeuron(neuron: INeuron): string {
@@ -94,4 +107,32 @@ export function parseSomaLocation(location: string): IParseSomaResult {
     }
 
     return somaParse;
+}
+
+export function parseNeuronAnnotationMetadata(neuron: INeuron): IParsedAnnotationMetadata {
+    if (neuron?.annotationMetadata) {
+        const data: IAnnotationMetadata = JSON.parse(neuron.annotationMetadata);
+
+        if (data.manualAnnotations?.somaCompartmentId) {
+            return {
+                somaCompartmentId: data.manualAnnotations.somaCompartmentId
+            };
+        }
+    }
+
+    return null;
+}
+
+export function parseAnnotationMetadata(data: string): IParsedAnnotationMetadata {
+    if (data && data.length > 0) {
+        const metadata: IAnnotationMetadata = JSON.parse(data);
+
+        if (metadata.manualAnnotations?.somaCompartmentId) {
+            return {
+                somaCompartmentId: metadata.manualAnnotations.somaCompartmentId
+            };
+        }
+    }
+
+    return null;
 }

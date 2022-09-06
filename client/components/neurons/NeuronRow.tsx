@@ -1,7 +1,6 @@
 import * as React from "react";
-import {Table, Label, Button, Dropdown} from "semantic-ui-react";
+import {Table, Button, Dropdown} from "semantic-ui-react";
 import {toast} from "react-toastify";
-import * as moment from "moment";
 
 import {FindVisibilityOption, NeuronVisibilityOptions, ShareVisibility} from "../../models/shareVisibility";
 import {formatSomaLocation, INeuron, parseSomaLocation} from "../../models/neuron";
@@ -9,7 +8,6 @@ import {displaySample} from "../../models/sample";
 import {lookupBrainArea} from "../App";
 import {IBrainArea} from "../../models/brainArea";
 import {toastCreateError, toastUpdateError} from "../elements/Toasts";
-import {DynamicEditField} from "../elements/DynamicEditField";
 import {BrainAreaDropdown} from "../editors/BrainAreaDropdown";
 import {
     UPDATE_NEURON_MUTATION,
@@ -23,7 +21,9 @@ import {ConsensusStatus, ConsensusStatusOptions, FindConsensusStatusOption} from
 interface INeuronRowProps {
     neuron: INeuron;
     tracingCount: number;
+
     onDeleteNeuron(neuron: INeuron): void;
+    onManageNeuronAnnotations(neuron: INeuron): void;
 }
 
 export class NeuronRow extends React.Component<INeuronRowProps, {}> {
@@ -122,6 +122,11 @@ export class NeuronRow extends React.Component<INeuronRowProps, {}> {
                         </Table.Cell>
                         <Table.Cell style={{maxWidth: "120px"}}>
                             {n.doi || "(none)"}
+                        </Table.Cell>
+                        <Table.Cell style={{textAlign: "center"}}>
+                            <a onClick={() => this.props.onManageNeuronAnnotations(n)}>
+                                {n.annotationMetadata && n.annotationMetadata.length > 0 ? "Update" : "Add"}
+                            </a>
                         </Table.Cell>
                         <Table.Cell style={{width: "130px"}}>
                             {count !== undefined ? (

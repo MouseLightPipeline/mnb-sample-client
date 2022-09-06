@@ -11,6 +11,7 @@ interface INeuronTableProps {
     pageCount: number;
 
     onDeleteNeuron(neuron: INeuron): void;
+    onManageNeuronAnnotations(neuron: INeuron): void;
 }
 
 export const NeuronsTable = (props: INeuronTableProps) => (
@@ -24,7 +25,7 @@ export const NeuronsTable = (props: INeuronTableProps) => (
             }
 
             const rows = props.neurons.map(n => {
-                return <NeuronRow key={n.id} neuron={n} tracingCount={counts.get(n.id)} onDeleteNeuron={props.onDeleteNeuron}/>
+                return <NeuronRow key={n.id} neuron={n} tracingCount={counts.get(n.id)} onDeleteNeuron={props.onDeleteNeuron} onManageNeuronAnnotations={props.onManageNeuronAnnotations}/>
             });
 
             return (
@@ -39,7 +40,8 @@ export const NeuronsTable = (props: INeuronTableProps) => (
                             <Table.HeaderCell>Visibility</Table.HeaderCell>
                             <Table.HeaderCell>Consensus</Table.HeaderCell>
                             <Table.HeaderCell>DOI</Table.HeaderCell>
-                            <Table.HeaderCell/>
+                            <Table.HeaderCell>Annotations</Table.HeaderCell>
+                            <Table.HeaderCell>Tracings</Table.HeaderCell>
                         </Table.Row>
                     </Table.Header>
                     <Table.Body>
