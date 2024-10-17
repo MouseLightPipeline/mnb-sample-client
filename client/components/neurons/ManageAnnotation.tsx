@@ -3,9 +3,15 @@ import {useState} from "react";
 import Dropzone = require("react-dropzone");
 import {toast} from "react-toastify";
 import {ApolloError} from "apollo-client";
-import {Button, Divider, Grid, Modal, Segment} from "semantic-ui-react";
+import {Button, Divider, Grid, List, ListContent, ListDescription, ListHeader, ListItem, Modal, Segment} from "semantic-ui-react";
 import {TextAlignProperty} from "csstype";
-import {displayNeuron, INeuron, IParsedAnnotationMetadata, parseAnnotationMetadata, parseNeuronAnnotationMetadata} from "../../models/neuron";
+import {
+    displayNeuron,
+    IManualAnnotations,
+    INeuron,
+    parseAnnotationMetadata,
+    parseNeuronAnnotationMetadata
+} from "../../models/neuron";
 import {
     UPLOAD_NEURON_ANNOTATION_METADATA_MUTATION, UploadAnnotationMetadataMutationData,
     UploadAnnotationMetadataResponse,
@@ -84,33 +90,16 @@ export const ManageAnnotation = (props: IManageAnnotationProps) => {
         }
     }
 
-    const annotationData: IParsedAnnotationMetadata = parseNeuronAnnotationMetadata(props.neuron);
+    const annotationData: IManualAnnotations = parseNeuronAnnotationMetadata(props.neuron);
 
-    let annotationDataContent = (<div>{"(none)"}</div>);
-
-    if (annotationData?.somaCompartmentId) {
-        const brainArea = lookupBrainAreaByAllenId(annotationData?.somaCompartmentId);
-
-        annotationDataContent = (<div>
-            <b>Soma Compartment Id:</b> {brainArea.name} ({annotationData?.somaCompartmentId})
-        </div>);
-    }
+    let annotationDataContent = createAnnotationContent(annotationData) ?? (<div>{"(none)"}</div>);
 
     let previewContent = (<div>{"Click or drag & drop to select an annotation metadata file"}</div>)
 
     if (state.fileContents.length > 0) {
-        const previewAnnotationData: IParsedAnnotationMetadata = parseAnnotationMetadata(state.fileContents);
+        const previewAnnotationData: IManualAnnotations = parseAnnotationMetadata(state.fileContents);
 
-        try {
-            const brainArea = lookupBrainAreaByAllenId(previewAnnotationData.somaCompartmentId);
-
-            previewContent = (<div>
-                <h4>Preview</h4>
-                <b>Soma Compartment Id:</b> {brainArea.name} ({previewAnnotationData.somaCompartmentId})
-            </div>);
-        } catch {
-            previewContent = (<div>{"Could not parse annotation metadata file"}</div>)
-        }
+        previewContent = createAnnotationContent(previewAnnotationData) ?? (<div>{"Could not parse annotation metadata file"}</div>)
     }
 
     return (
@@ -157,6 +146,70 @@ export const ManageAnnotation = (props: IManageAnnotationProps) => {
         </Modal>
     )
 };
+
+const createAnnotationContent = (annotationData: IManualAnnotations) => {
+    try {
+        let children: any[] = [];
+
+        children.push(["Soma Compartment (OLD FORMAT)", createCompartmentEntry([annotationData?.somaCompartmentId])]);
+        children.push(["Curated Soma Compartment", createCompartmentEntry([annotationData?.curatedCompartmentId])]);
+        children.push(["Legacy Soma Compartments", createCompartmentEntry(annotationData?.legacyCompartmentIds)]);
+
+        if (annotationData?.procrustesAxon) {
+            children.push(["Procrustes Axon", annotationData?.procrustesAxon])
+        }
+        if (annotationData?.procrustesDend) {
+            children.push(["Procrustes Dendrite", annotationData?.procrustesDend])
+        }
+
+        children = children.filter(c => c != null && c[1] != null)
+
+        if (children.length > 0) {
+            return (
+                <List relaxed="very">
+                    {children.map(c => {
+                        return (
+                            <ListItem>
+                                <ListContent>
+                                    <ListHeader>{c[0]}</ListHeader>
+                                    <ListDescription>
+                                        {c[1]}
+                                    </ListDescription>
+                                </ListContent>
+                            </ListItem>
+                        )
+                    })}
+                </List>
+            )
+        }
+
+        return null;
+    } catch {
+        return null;
+    }
+}
+
+const createCompartmentEntry = (ids: number[]) => {
+    if (ids == undefined || ids.length == 0) {
+        return null;
+    }
+
+    const brainAreas = ids.map(id => {
+        const brainArea = lookupBrainAreaByAllenId(id);
+
+        if (brainArea) {
+            return `${brainArea.name} (${id})`
+        }
+
+        return null;
+    }).filter(b => b != null)
+
+    if (brainAreas.length == 0) {
+        return null;
+    }
+
+    return brainAreas.join(", ");
+}
 
 const uploadSuccessContent = (output: UploadAnnotationMetadataMutationData) => {
     return (

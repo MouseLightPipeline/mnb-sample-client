@@ -30,15 +30,15 @@ export interface IParseSomaResult {
 }
 
 export interface IManualAnnotations {
-    somaCompartmentId: number;
+    somaCompartmentId?: number;
+    curatedCompartmentId?: number;
+    legacyCompartmentIds?: number[];
+    procrustesAxon?: number;
+    procrustesDend?: number;
 }
 
 export interface IAnnotationMetadata {
     manualAnnotations: IManualAnnotations;
-}
-
-export interface IParsedAnnotationMetadata {
-    somaCompartmentId: number;
 }
 
 export function displayNeuron(neuron: INeuron): string {
@@ -109,29 +109,21 @@ export function parseSomaLocation(location: string): IParseSomaResult {
     return somaParse;
 }
 
-export function parseNeuronAnnotationMetadata(neuron: INeuron): IParsedAnnotationMetadata {
+export function parseNeuronAnnotationMetadata(neuron: INeuron): IManualAnnotations {
     if (neuron?.annotationMetadata) {
         const data: IAnnotationMetadata = JSON.parse(neuron.annotationMetadata);
 
-        if (data.manualAnnotations?.somaCompartmentId) {
-            return {
-                somaCompartmentId: data.manualAnnotations.somaCompartmentId
-            };
-        }
+        return data?.manualAnnotations;
     }
 
     return null;
 }
 
-export function parseAnnotationMetadata(data: string): IParsedAnnotationMetadata {
+export function parseAnnotationMetadata(data: string): IManualAnnotations {
     if (data && data.length > 0) {
         const metadata: IAnnotationMetadata = JSON.parse(data);
 
-        if (metadata.manualAnnotations?.somaCompartmentId) {
-            return {
-                somaCompartmentId: metadata.manualAnnotations.somaCompartmentId
-            };
-        }
+        return metadata?.manualAnnotations;
     }
 
     return null;
