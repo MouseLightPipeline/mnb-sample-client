@@ -29,7 +29,7 @@ export interface IParseSomaResult {
     error: string;
 }
 
-export interface IManualAnnotations {
+export type ManualAnnotations = {
     somaCompartmentId?: number;
     curatedCompartmentId?: number;
     legacyCompartmentIds?: number[];
@@ -37,8 +37,13 @@ export interface IManualAnnotations {
     procrustesDend?: number;
 }
 
-export interface IAnnotationMetadata {
-    manualAnnotations: IManualAnnotations;
+export type ExternalReferences = {
+    hortaCloud?: string;
+}
+
+export type AnnotationMetadata = {
+    manualAnnotations?: ManualAnnotations;
+    externalReferences?: ExternalReferences;
 }
 
 export function displayNeuron(neuron: INeuron): string {
@@ -109,21 +114,21 @@ export function parseSomaLocation(location: string): IParseSomaResult {
     return somaParse;
 }
 
-export function parseNeuronAnnotationMetadata(neuron: INeuron): IManualAnnotations {
+export function parseNeuronAnnotationMetadata(neuron: INeuron): AnnotationMetadata {
     if (neuron?.annotationMetadata) {
-        const data: IAnnotationMetadata = JSON.parse(neuron.annotationMetadata);
+        const metadata: AnnotationMetadata = JSON.parse(neuron.annotationMetadata);
 
-        return data?.manualAnnotations;
+        return metadata;
     }
 
     return null;
 }
 
-export function parseAnnotationMetadata(data: string): IManualAnnotations {
+export function parseAnnotationMetadata(data: string): AnnotationMetadata {
     if (data && data.length > 0) {
-        const metadata: IAnnotationMetadata = JSON.parse(data);
+        const metadata: AnnotationMetadata = JSON.parse(data);
 
-        return metadata?.manualAnnotations;
+        return metadata;
     }
 
     return null;

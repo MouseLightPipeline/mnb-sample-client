@@ -7,10 +7,10 @@ import {Button, Divider, Grid, List, ListContent, ListDescription, ListHeader, L
 import {TextAlignProperty} from "csstype";
 import {
     displayNeuron,
-    IManualAnnotations,
+    ManualAnnotations,
     INeuron,
     parseAnnotationMetadata,
-    parseNeuronAnnotationMetadata
+    parseNeuronAnnotationMetadata, AnnotationMetadata
 } from "../../models/neuron";
 import {
     UPLOAD_NEURON_ANNOTATION_METADATA_MUTATION, UploadAnnotationMetadataMutationData,
@@ -90,14 +90,14 @@ export const ManageAnnotation = (props: IManageAnnotationProps) => {
         }
     }
 
-    const annotationData: IManualAnnotations = parseNeuronAnnotationMetadata(props.neuron);
+    const annotationData: AnnotationMetadata = parseNeuronAnnotationMetadata(props.neuron);
 
     let annotationDataContent = createAnnotationContent(annotationData) ?? (<div>{"(none)"}</div>);
 
     let previewContent = (<div>{"Click or drag & drop to select an annotation metadata file"}</div>)
 
     if (state.fileContents.length > 0) {
-        const previewAnnotationData: IManualAnnotations = parseAnnotationMetadata(state.fileContents);
+        const previewAnnotationData: AnnotationMetadata = parseAnnotationMetadata(state.fileContents);
 
         previewContent = createAnnotationContent(previewAnnotationData) ?? (<div>{"Could not parse annotation metadata file"}</div>)
     }
@@ -147,20 +147,31 @@ export const ManageAnnotation = (props: IManageAnnotationProps) => {
     )
 };
 
-const createAnnotationContent = (annotationData: IManualAnnotations) => {
+const createAnnotationContent = (annotationData: AnnotationMetadata) => {
     try {
         let children: any[] = [];
 
-        children.push(["Soma Compartment (OLD FORMAT)", createCompartmentEntry([annotationData?.somaCompartmentId])]);
-        children.push(["Curated Soma Compartment", createCompartmentEntry([annotationData?.curatedCompartmentId])]);
-        children.push(["Legacy Soma Compartments", createCompartmentEntry(annotationData?.legacyCompartmentIds)]);
+        const manualAnnotations = annotationData?.manualAnnotations;
 
-        if (annotationData?.procrustesAxon) {
-            children.push(["Procrustes Axon", annotationData?.procrustesAxon])
+        if (manualAnnotations) {
+            children.push(["Soma Compartment (OLD FORMAT)", createCompartmentEntry([manualAnnotations?.somaCompartmentId])]);
+            children.push(["Curated Soma Compartment", createCompartmentEntry([manualAnnotations?.curatedCompartmentId])]);
+            children.push(["Legacy Soma Compartments", createCompartmentEntry(manualAnnotations?.legacyCompartmentIds)]);
+
+            if (manualAnnotations?.procrustesAxon) {
+                children.push(["Procrustes Axon", manualAnnotations?.procrustesAxon])
+            }
+
+            if (manualAnnotations?.procrustesDend) {
+                children.push(["Procrustes Dendrite", manualAnnotations?.procrustesDend])
+            }
         }
-        if (annotationData?.procrustesDend) {
-            children.push(["Procrustes Dendrite", annotationData?.procrustesDend])
+
+        if (annotationData?.externalReferences?.hortaCloud) {
+            children.push(["Horta Deep Link", annotationData?.externalReferences?.hortaCloud])
         }
+
+
 
         children = children.filter(c => c != null && c[1] != null)
 
